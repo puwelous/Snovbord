@@ -1,0 +1,6 @@
+*/logs/log-*.php
+*/logs/!index.html
+*/cache/*
+*/cache/!index.html
+*/cache/!.htaccess
+application/logs/log/log-*.php
