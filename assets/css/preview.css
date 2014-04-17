@@ -1,0 +1,29 @@
+.content_unextended{
+    width: 100%;
+    height: 85%;
+    text-align: center;
+    float: left;
+}
+
+.preview_left{
+    width: 16%;
+    height: 80%;
+    margin-top: 7%;
+    margin-left: 3%;
+    float: left;
+}
+
+.preview_center{
+    
+    width: 44%;    
+    height: 85%;    
+    margin-top: 3%;
+    margin-left: 3%;    
+    float: left;
+    
+    /*border: red 1px solid;*/
+}
+
+.preview_right{
+    
+}

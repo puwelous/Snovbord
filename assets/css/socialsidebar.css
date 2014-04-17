@@ -1,0 +1,13 @@
+/** social buttons **/
+#social_buttons_wrapper {
+
+    position: fixed;
+    float: left;
+    right: 0;
+    top: 30%;
+    width: 50px;
+    height: 250px;
+    background : lightgrey;
+    border: 2px solid #939393;
+    z-index: 10000;
+}

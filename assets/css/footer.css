@@ -1,0 +1,151 @@
+#footer {
+
+    position: absolute;
+
+    height: 50px;
+    width: 100%;
+    bottom: 0;
+
+    clear: both;
+
+}
+
+#footer.f_inactive {
+
+/*    background-color: #ffffff;*/
+background-color: transparent;
+    /*border: solid blue 1px;*/
+}
+
+#footer.f_active {
+
+    background-color: #e9e9e9;
+    /*border: solid green 1px;*/
+}
+
+/* column container */
+.colmask {
+    position:relative;	/* This fixes the IE7 overflow hidden bug */
+    clear:both;
+    float:left;
+    width:100%;			/* width of whole page */
+    overflow:hidden;		/* This chops off any overhanging divs */
+}
+/* common column settings */
+.colright,
+.colmid,
+.colleft {
+    float:left;
+    width:100%;			/* width of page */
+    position:relative;
+}
+
+.col1,
+.col2,
+.col3 {
+    /*height:100%;*/
+    float:left;
+    position:relative;
+    /*padding:0 0 1em 0;*/
+    /* no left and right padding on columns, we just make them narrower instead 
+                                    only padding top and bottom is included here, make it whatever value you need */
+    height: 50px;
+    overflow:hidden;
+}
+
+.threecol .colmid {
+    right:33%;			 /*width of the right column */
+}
+.threecol .colleft {
+    right:33%;			 /*width of the middle column*/ 
+}
+
+.threecol .col1 {
+    width:29%;			/* width of center column content (column width minus padding on either side) */
+    left: 102%;			 /*100% plus left padding of center column */
+    /*border: solid blue 1px;*/
+}
+.threecol .col2 {
+    width:33%;			/* Width of left column content (column width minus padding on either side) */
+    left:38%;			/* width of (right column) plus (center column left and right padding) plus (left column left padding) */
+    /*border: solid purple 1px;*/
+}
+.threecol .col3 {
+    width:33%;			/* Width of right column content (column width minus padding on either side) */
+    left:69%;			 /*Please make note of the brackets here:
+                                    (100% - left column width) plus (center column left and right padding) plus (left column left and right padding) plus (right column left padding) */
+    /*border: solid brown 1px;*/
+}
+
+.footer_l {
+    position: relative;
+    width: 100%;
+    clear:both;
+    float: left;
+
+}
+
+.footer_l.active, .text_wrapper_middle_part.active {
+    display: block;
+
+}
+
+.footer_l.inactive, .text_wrapper_middle_part.inactive {
+    display: none;
+
+}
+
+.footer_l li {
+    list-style: none;
+
+
+}
+
+.footer_l li a {
+
+    position: relative;
+
+    top:18px;
+/*    margin-left: 1px;*/
+    margin-right: 5px; 
+    text-decoration: none;
+    float: left;
+
+    font-size: 0.75em;
+}
+
+#footer .text_wrapper_middle_part {
+    position: relative;
+    width: 60%;
+    left: 21%;
+    top: 18px;
+}
+
+#footer_switcher_wrapper {
+    display: block;
+    position: relative;
+    
+    height: 25px;
+    width: 25px;
+
+    margin-right: 10px;
+    top: 18px;
+    float: right;
+}
+
+#footer_switcher_wrapper:hover {
+    cursor: pointer;
+}
+
+#footer_switcher {
+    width: 15px;
+    height: 15px;
+}
+
+#footer_switcher.active {
+    background:url('./images/pp_footer_switcher.png') 0px 0px;
+}
+
+#footer_switcher.inactive {
+    background:url('./images/pp_footer_switcher.png') -15px 0px;
+}

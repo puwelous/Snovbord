@@ -1,0 +1,66 @@
+/** banner **/
+#sliding_banner {
+	position: relative;
+	height: 400px;
+	/*top: 50px;*/
+	/* 50px from top because of menu height */
+	margin: 0px auto 0px auto;
+	
+	background-color: lightgrey;
+	border: solid darkgrey 2px;
+}
+
+#main_screen_title {
+	position: relative;
+	/*display: table;*/
+	height: 200px;
+	width: 100%;
+	margin: auto;
+	text-align: center;
+	background-color: #ffffff;
+	
+	//border: solid darkgrey 2px;
+}
+
+#main_screen_title #catchy_title {
+	/*position: relative;
+	display: table-cell;
+	vertical-align: middle;
+	margin: 0px auto 0px auto;
+	
+	/*display: inline-block;*/
+	font-size: 2em;
+	position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 40%;
+    height: 30%;
+    margin: auto;
+}
+
+#container_video {
+	position: relative;
+	display: table;	
+	width: 100%;
+	height: 250px;
+	margin-bottom: 40px;
+	text-align: center;
+	
+	
+	//border: solid purple 3px;
+}
+
+#container_video .video_item{
+	position: relative;
+	display: table-cell;
+	vertical-align: middle;
+	padding:15px;
+	border: dotted black 3px;
+}
+
+#container_video span{
+	position: relative;
+	border: solid fuchsia 2px;
+}

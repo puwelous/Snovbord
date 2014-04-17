@@ -1,0 +1,131 @@
+#creator_wrapper {
+
+    position: relative;
+    width: 100%;
+    height: 600px;
+
+    padding: 20px auto;
+}
+
+#components_bar {
+
+    position: relative;
+    width: 250px;
+    height: 100%;
+    display: inline-block;
+    vertical-align: top;
+    margin : 0px 20px;
+
+    background : lightgrey;
+    border : solid darkgray 1px;
+
+    /* For IE 7 - uncomment if necessary but rather put into HTML code
+          zoom: 1;
+          display: inline;*/
+}
+
+#customization_view {
+
+    position: relative;
+    width: 600px;
+    height:500px;
+    display: inline-block;
+    vertical-align: top;
+    margin : 0px 0px;
+
+    min-width: 100px;
+    background : lightgrey;
+    border : solid darkgray 1px;
+
+    /* For IE 7 - uncomment if necessary but rather put into HTML code
+          zoom: 1;
+          display: inline;*/  
+}
+
+#controls_wrapper {
+
+    position:absolute;
+    bottom: 5%;
+    left: 30%;
+
+    border : solid darkgray 1px;
+}
+
+#controls_wrapper div {
+
+    display: inline;
+}
+
+div.hr {
+    width:100%;
+    height:1px;
+    background-color:darkgrey;
+    margin: 0px auto;
+}
+
+#components_bar .components_bar_section {
+    position: relative;
+    margin: 10px auto;
+}
+
+/*** icons styling ***/
+#component_icons_wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    padding: 10px 10px;
+}
+
+div.icon {
+    margin: 2px;
+    border: 2px solid darkgrey;
+    height: auto;
+    width: auto;
+    float: left;
+    text-align: center;
+}
+
+/*
+div.icon a img {
+        display: inline;
+        margin: 0px;
+        width: 50px;
+        height: 50px;
+}
+*/
+
+div.icon img {
+    display: inline;
+    margin: 0px;
+    width: 50px;
+    height: 50px;
+}
+
+#ucreate_center{
+
+    width: 245px;    
+    height: 355px;    
+    margin-top: 3%;
+    margin-left: 3%;    
+    float: left;
+    
+    text-align: initial;
+    
+    border: red 1px solid;
+}
+
+#ucreate_right{
+    width: 545px;    
+    height: 80%;  
+    margin-top: 3%;
+    margin-left: 3%;
+    float: left;
+    border: red 1px solid;
+
+}
+
+.ucreate_image{
+    position: absolute;
+
+}
