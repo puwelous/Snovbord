@@ -2,7 +2,7 @@
 
 class Product_definition_model extends MY_Model {
 
-    public $_table = 'pp_product_definition';
+    public $_table = 'sb_product_definition';
     public $primary_key = 'pd_id';
 
     public $product_name;

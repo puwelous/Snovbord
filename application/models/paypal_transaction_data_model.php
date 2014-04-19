@@ -2,7 +2,7 @@
 
 class Paypal_transaction_data_model extends MY_Model {
 
-    public $_table = 'pp_paypal_transaction_data';
+    public $_table = 'sb_paypal_transaction_data';
     public $primary_key = 'ptd_order_id';
     
     public $orderId;

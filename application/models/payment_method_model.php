@@ -2,7 +2,7 @@
 
 class Payment_method_model extends MY_Model {
 
-    public $_table = 'pp_payment_method';
+    public $_table = 'sb_payment_method';
     public $primary_key = 'pm_id';
     
     public $name;

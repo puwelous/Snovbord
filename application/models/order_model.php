@@ -2,7 +2,7 @@
 
 class Order_model extends MY_Model {
 
-    public $_table = 'pp_order';
+    public $_table = 'sb_order';
     public $primary_key = 'o_id';
 
     public $cart;

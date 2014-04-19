@@ -10,6 +10,8 @@ class MY_Controller extends CI_Controller {
     const ADMIN_TEMPLATE_PATH = 'templates/admin';
     const SHOPPING_CART_EMPTY_TEMPLATE_PATH = 'templates/shopping_cart_empty';
     const SHOPPING_CART_NONEMPTY_TEMPLATE_PATH = 'templates/shopping_cart_nonempty';
+    
+    const USER_TYPE_PROVIDER_ID = 2;
 
     public function __construct() {
         parent::__construct();
@@ -64,13 +66,28 @@ class MY_Controller extends CI_Controller {
         }
 
         // session ok, check if it's admin
-        if ($this->session->userdata('user_is_admin') != NULL && $this->session->userdata('user_is_admin') == 1) {
+        if ($this->session->userdata('user_type') != NULL && $this->session->userdata('user_type') == 2) {
 
             return TRUE;
         }
 
         return FALSE;
     }
+    
+    protected function authentify_provider() {
+
+        if (!$this->authentify()) {
+            return FALSE;
+        }
+
+        // session ok, check if it's admin
+        if ($this->session->userdata('user_type') != NULL && $this->session->userdata('user_type') == self::USER_TYPE_PROVIDER_ID ) {
+
+            return TRUE;
+        }
+
+        return FALSE;
+    }    
 
     protected function set_title(&$template_data, $title = "PowPorn") {
         $template_data['title'] = $title;

@@ -2,7 +2,7 @@
 
 class Order_address_model extends MY_Model {
 
-    public $_table = 'pp_order_address';
+    public $_table = 'sb_order_address';
     public $primary_key = 'oa_id';
     public $name;
     public $address;

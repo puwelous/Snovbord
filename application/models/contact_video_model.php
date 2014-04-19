@@ -2,7 +2,7 @@
 
 class Contact_video_model extends MY_Model {
 
-    public $_table = 'pp_contact_video';
+    public $_table = 'sb_contact_video';
     public $primary_key = 'cv_id';
 
     public $url;

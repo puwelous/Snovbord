@@ -2,7 +2,7 @@
 
 class Cart_model extends MY_Model {
 
-    public $_table = 'pp_cart';
+    public $_table = 'sb_cart';
     public $primary_key = 'c_id';
     public $sum;
     public $status;
@@ -82,9 +82,9 @@ class Cart_model extends MY_Model {
 
     public function get_open_cart_by_owner_id($owner_id, $asObject = TRUE) {
         if ($asObject) {
-            $row = $this->cart_model->as_object()->get_by(array('u_ordering_person_id' => $owner_id, 'c_status' => 'OPEN'));
+            $row = $this->cart_model->as_object()->get_by(array('crt_ordering_person_id' => $owner_id, 'crt_status' => 'OPEN'));
         } else {
-            $row = $this->cart_model->as_array()->get_by(array('u_ordering_person_id' => $owner_id, 'c_status' => 'OPEN'));
+            $row = $this->cart_model->as_array()->get_by(array('crt_ordering_person_id' => $owner_id, 'crt_status' => 'OPEN'));
         }
         return $row;
     }

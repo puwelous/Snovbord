@@ -208,7 +208,7 @@
                     <?php echo anchor('ucreate', 'u create', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
                 </li>
                 <li>
-                    <?php echo anchor('finalproducts', 'final products', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
+                    <?php echo anchor('finalproducts', 'products', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
                 </li>
             </ul>
             <ul class="menu_r">

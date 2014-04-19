@@ -25,8 +25,8 @@ class C_user extends MY_Controller {
         $this->form_validation->set_rules('tf_email_address', 'Your Email', 'trim|required|valid_email|max_length[64]|callback_email_check');
         $this->form_validation->set_rules('tf_password_base', 'Password', 'trim|required|min_length[4]|max_length[32]');
         $this->form_validation->set_rules('tf_password_confirm', 'Password Confirmation', 'trim|required|matches[tf_password_base]|max_length[32]');
-        $this->form_validation->set_rules('tf_delivery_addres', 'Delivery address', 'trim|max_length[256]|xss_clean');
-        $this->form_validation->set_rules('tf_address', 'Address', 'trim|required|max_length[256]|xss_clean');
+        $this->form_validation->set_rules('tf_phone_number', 'Phone number', 'trim|max_length[32]|xss_clean');
+        $this->form_validation->set_rules('tf_street', 'Street', 'trim|required|max_length[128]|xss_clean');
         $this->form_validation->set_rules('tf_city', 'City', 'trim|required|max_length[64]|xss_clean');
         $this->form_validation->set_rules('tf_zip', 'ZIP', 'trim|required|max_length[16]|xss_clean');
         $this->form_validation->set_rules('tf_country', 'Country', 'trim|required|max_length[64]|xss_clean');
@@ -37,7 +37,7 @@ class C_user extends MY_Controller {
             $template_data = array();
 
             $this->set_title($template_data, 'Registration');
-            $this->load_header_templates( $template_data );
+            $this->load_header_templates($template_data);
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_registration');
@@ -45,55 +45,96 @@ class C_user extends MY_Controller {
         } else {
 
             $nick = $this->input->post('tf_nick');
+            $emailAddress = $this->input->post('tf_email_address');
+
             $firstname = $this->input->post('tf_first_name');
             $lastname = $this->input->post('tf_last_name');
-            $emailAddress = $this->input->post('tf_email_address');
-            $password = $this->input->post('tf_password_base');
+
+            $phoneNumber = $this->input->post('tf_phone_number');
+
             $gender = $this->input->post('tf_gender');
-            $address = $this->input->post('tf_address');
-            $deliveryAddress = $this->input->post('tf_delivery_addres');
+            $password = $this->input->post('tf_password_base');
+
+            $street = $this->input->post('tf_street');
             $city = $this->input->post('tf_city');
             $zip = $this->input->post('tf_zip');
             $country = $this->input->post('tf_country');
-            $isAdmin = FALSE;
+//            $isAdmin = FALSE;
+            // save address first
+            $address_instance = new Address_model();
+            $address_instance->instantiate($street, $city, $zip, $country);
 
-            $user_instance = new User_model();
-            $user_instance->setAll($nick, $firstname, $lastname, $emailAddress, $password, $gender, $address, $deliveryAddress, $city, $zip, $country, $isAdmin);
 
-            log_message('debug', 'Saving user into database as: \n' . print_r($user_instance, TRUE));
+            $this->db->trans_begin(); {
+                // save address
+                $address_insert_result = $address_instance->save();
 
-            $this->user_model->add_user($user_instance);
+                if (is_null($address_insert_result) || $address_insert_result == NULL || empty($address_insert_result)) {
+                    log_message('debug', 'Creation of address failed!. Redirect!');
+                    log_message('debug', 'Rolling the transaction back!');
+                    $this->db->trans_rollback();
+                    redirect('/c_registration/index', 'refresh');
+                    return;
+                }
 
-            log_message('debug', 'After user save. Setting user_data');
+                $userType = $this->user_type_model->get_by_user_type_name('customer'); // customer
+                log_message('debug', 'Saving user as a user type: ' . print_r($userType, true));
 
-            $loaded_user_info_result = $this->user_model->get_by_email_or_nick_and_password($emailAddress, $password);
+                $user_instance = new User_model();
+                $user_instance->instantiate(
+                        $nick, $emailAddress, $firstname, $lastname, $phoneNumber, $gender, $password, $address_insert_result, $userType);
 
-            // setting session user data to cookies
-            $new_session_data = array(
-                'user_id' => $loaded_user_info_result->u_id,
-                'user_nick' => $loaded_user_info_result->u_nick,
-                'user_email' => $loaded_user_info_result->u_email_address,
-                'logged_in' => TRUE,
-            );
+                $user_insert_result = $user_instance->save();
 
-            $this->session->set_userdata($new_session_data);
+                if (is_null($user_insert_result) || $user_insert_result == NULL || empty($user_insert_result)) {
+                    log_message('debug', 'Creation of user failed!. Redirect!');
+                    log_message('debug', 'Rolling the transaction back!');
+                    $this->db->trans_rollback();
+                    redirect('/c_registration/index', 'refresh');
+                    return;
+                }
 
-            // sending registration email
-            $this->email->subject(  $this->config->item('powporn_sending_email_reg_subject')    );
-            $this->email->from(     $this->config->item('powporn_sending_email_sender')    );
-            $this->email->to(       $loaded_user_info_result->u_email_address               );
-            
-            // generate message body according to the user info
-            $this->email->message(
-                    create_registration_email_body_accor_user($user_instance)
-                    );
+                log_message('debug', 'Saving user into database as: \n' . print_r($user_instance, TRUE) . ' success!');
 
-            // send it!
-            $this->email->send();
+                $loaded_user_info_result = $this->user_model->get_by_email_or_nick_and_password($emailAddress, $password);
 
-            log_message('debug', $this->email->print_debugger());
+                // setting session user data to cookies
+                $new_session_data = array(
+                    'user_id' => $loaded_user_info_result->getUserId(),
+                    'user_nick' => $loaded_user_info_result->getNick(),
+                    'user_email' => $loaded_user_info_result->getEmailAddress(),
+                    'logged_in' => TRUE,
+                );
 
-            redirect('/c_welcome/index', 'refresh');
+                $this->session->set_userdata($new_session_data);
+
+                // sending registration email
+                $this->email->subject($this->config->item('powporn_sending_email_reg_subject'));
+                $this->email->from($this->config->item('powporn_sending_email_sender'));
+                $this->email->to($loaded_user_info_result->getEmailAddress());
+
+                // generate message body according to the user info
+                $this->email->message(
+                        create_registration_email_body_accor_user($user_instance)
+                );
+
+                // send it!
+                //TODO: turn off now, localhost!
+                //$this->email->send();
+
+                log_message('debug', $this->email->print_debugger());
+            }
+            if ($this->db->trans_status() === FALSE) {
+                log_message('debug', 'Transaction status is FALSE! Rolling the transaction back!');
+                $this->db->trans_rollback();
+                redirect('/c_registration/index', 'refresh');
+                return;
+            } else {
+                log_message('debug', '... commiting transaction ...!');
+                $this->db->trans_commit();
+
+                redirect('/c_welcome/index', 'refresh');
+            }
         }
     }
 
@@ -103,7 +144,7 @@ class C_user extends MY_Controller {
             'user_id' => '',
             'user_nick' => '',
             'user_email' => '',
-            'user_is_admin' => 0,
+            'user_type' => null,
             'logged_in' => 0,
         );
 
@@ -120,7 +161,7 @@ class C_user extends MY_Controller {
 
             //validation
             $this->form_validation->set_rules('login_nick_or_email', 'Nick or email', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('login_password', 'Password', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('login_password', 'Password', 'trim|required');
             $this->form_validation->set_message('required', 'Please fill in the fields');
 
             if ($this->form_validation->run() == FALSE) {
@@ -137,13 +178,12 @@ class C_user extends MY_Controller {
                     echo '0';
                     return;
                 };
-// log_message('debug', 'XX' . print_r($loaded_user_info_result->u_is_admin, TRUE));
-// log_message('debug', 'XX' . ($loaded_user_info_result->u_is_admin) );
+
                 $new_session_data = array(
-                    'user_id' => $loaded_user_info_result->u_id,
-                    'user_nick' => $loaded_user_info_result->u_nick,
-                    'user_email' => $loaded_user_info_result->u_email_address,
-                    'user_is_admin' => $loaded_user_info_result->u_is_admin,
+                    'user_id' => $loaded_user_info_result->getUserId(),
+                    'user_nick' => $loaded_user_info_result->getNick(),
+                    'user_email' => $loaded_user_info_result->getEmailAddress(),
+                    'user_type' => $loaded_user_info_result->getUserType(),
                     'logged_in' => 1,
                 );
 
@@ -160,7 +200,7 @@ class C_user extends MY_Controller {
             log_message('debug', 'Nick: ' . $this->input->post('login_nick') . ' checked for DB presence.');
 
             $user_presence_result = $this->user_model->is_present_by(
-                    'u_nick', $this->input->post('login_nick')
+                    'usr_nick', $this->input->post('login_nick')
             );
 
             log_message('debug', print_r($user_presence_result, TRUE));
@@ -175,7 +215,7 @@ class C_user extends MY_Controller {
             log_message('debug', 'Email: ' . $this->input->post('login_email') . ' checked for DB presence.');
 
             $user_presence_result = $this->user_model->is_present_by(
-                    'u_email_address', $this->input->post('login_email')
+                    'usr_email_address', $this->input->post('login_email')
             );
 
             log_message('debug', print_r($user_presence_result, TRUE));
@@ -191,7 +231,7 @@ class C_user extends MY_Controller {
     public function nick_check($nick) {
 
         $user_presence_result = $this->user_model->is_present_by(
-                'u_nick', $nick
+                'usr_nick', $nick
         );
 
         log_message('debug', 'nick_check:' . print_r($user_presence_result, TRUE));
@@ -209,7 +249,7 @@ class C_user extends MY_Controller {
     public function email_check($email) {
 
         $user_presence_result = $this->user_model->is_present_by(
-                'u_email_address', $email
+                'usr_email_address', $email
         );
 
         log_message('debug', 'email_check:' . print_r($user_presence_result, TRUE));
@@ -222,15 +262,15 @@ class C_user extends MY_Controller {
             return FALSE;
         }
     }
-    
-    public function password_reset(){
-        
+
+    public function password_reset() {
+
         $email_addr_or_nick = $this->input->post('rpf_email_address_or_nick');
-        
-        if( is_null($email_addr_or_nick) || empty($email_addr_or_nick) ){
+
+        if (is_null($email_addr_or_nick) || empty($email_addr_or_nick)) {
             // just log sth down and render a page
             log_message('info', 'Input from password reset view is null or empty.');
-            
+
             $template_data = array();
 
             $this->set_title($template_data, 'Password reset');
@@ -239,77 +279,76 @@ class C_user extends MY_Controller {
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset');
             $this->load->view('templates/footer');
-        
+
             // break it
             return;
         }
-        
+
         // log info
-        log_message('debug','Attempt to reset password for email or nick: ' . $email_addr_or_nick);
-        
-        
+        log_message('debug', 'Attempt to reset password for email or nick: ' . $email_addr_or_nick);
+
+
         // validation and figuring out if such a email or nick exists
         $this->form_validation->set_rules('rpf_email_address_or_nick', 'Nick or Email', 'trim|required|min_length[4]|max_length[64]|xss_clean|callback_nick_or_email_check');
         $this->form_validation->set_message('nick_or_email_check', 'Such a nick nor email does not exist!');
 
-        
+
         // validation
         if ($this->form_validation->run() == FALSE) {
 
             log_message('debug', 'User not found by email nor by nick.');
-            
+
             // print out validation errors
             $template_data = array();
 
             $this->set_title($template_data, 'Registration');
-            $this->load_header_templates( $template_data );
+            $this->load_header_templates($template_data);
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset');
             $this->load->view('templates/footer');
-            
+
             // break
             return;
         }
 
         // *** user presence by email *** //
         $user_presence_by_email_result = $this->user_model->is_present_by(
-                'u_email_address', $email_addr_or_nick
-            );
-        
+                'usr_email_address', $email_addr_or_nick
+        );
+
         // if found reset password and send email
-        if( !is_null( $user_presence_by_email_result) && !empty( $user_presence_by_email_result ) ){
-            log_message('debug', 'Reseting password for email: ' . $user_presence_by_email_result->u_email_address );
-                        
+        if (!is_null($user_presence_by_email_result) && !empty($user_presence_by_email_result)) {
+            log_message('debug', 'Reseting password for email: ' . $user_presence_by_email_result->getEmailAddress());
+
             $new_password = substr(md5(rand()), 0, 7);
-            
+
             // update password
             $update_id = $this->user_model->update(
-                $user_presence_by_email_result->u_id, 
-                array(
-                    'u_password'=>md5( $new_password )
+                    $user_presence_by_email_result->getUserId(), array(
+                'usr_password' => md5($new_password)
                     ));
-            
+
             // sending email to user with new password
-            $this->email->subject(  $this->config->item('powporn_sending_email_pass_reset_subject')    );
-            $this->email->from(     $this->config->item('powporn_sending_email_sender')    );
-            $this->email->to(       $user_presence_by_email_result->u_email_address               );
-            
+            $this->email->subject($this->config->item('sb_sending_email_pass_reset_subject'));
+            $this->email->from($this->config->item('sb_sending_email_sender'));
+            $this->email->to($user_presence_by_email_result->getEmailAddress());
+
             // generate message body according to the user info
             $this->email->message(
-                    create_password_reset_email_body( $user_presence_by_email_result, $new_password)
-                    );
+                    create_password_reset_email_body($user_presence_by_email_result, $new_password)
+            );
 
             // send it!
-            $this->email->send();
-            
+            //TODO: uncomment in production $this->email->send();
+
             log_message('debug', $this->email->print_debugger());
-            
+
             // render view
             $template_data = array();
 
             $this->set_title($template_data, 'Password reset successful');
-            $this->load_header_templates( $template_data );
+            $this->load_header_templates($template_data);
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset_succes');
@@ -317,78 +356,77 @@ class C_user extends MY_Controller {
             return;
         }
 
-        
+
         // *** user presence by nick *** //
         // try to find user by nick because
         // by email not found
         $user_presence_by_nick_result = $this->user_model->is_present_by(
-                'u_nick', $email_addr_or_nick
-            );
-        
+                'usr_nick', $email_addr_or_nick
+        );
+
         // if found reset password and send email
-        if( !is_null( $user_presence_by_nick_result) && !empty( $user_presence_by_nick_result ) ){
-            log_message('debug', 'Reseting password for nick: ' . $user_presence_by_nick_result->u_nick );
-            
+        if (!is_null($user_presence_by_nick_result) && !empty($user_presence_by_nick_result)) {
+            log_message('debug', 'Reseting password for nick: ' . $user_presence_by_nick_result->getNick());
+
             $new_password = substr(md5(rand()), 0, 7);
-            
+
             // update password
             $update_id = $this->user_model->update(
-                $user_presence_by_nick_result->u_id, 
-                array(
-                    'u_password'=>md5( $new_password )
+                    $user_presence_by_nick_result->getUserId(), array(
+                'usr_password' => md5($new_password)
                     ));
-            
+
             // sending email to user with new password
-            $this->email->subject(  $this->config->item('powporn_sending_email_pass_reset_subject')    );
-            $this->email->from(     $this->config->item('powporn_sending_email_sender')    );
-            $this->email->to(       $user_presence_by_nick_result->u_email_address               );
-            
+            $this->email->subject($this->config->item('sb_sending_email_pass_reset_subject'));
+            $this->email->from($this->config->item('sb_sending_email_sender'));
+            $this->email->to($user_presence_by_nick_result->u_email_address);
+
             // generate message body according to the user info
             $this->email->message(
-                    create_password_reset_email_body( $user_presence_by_nick_result, $new_password)
-                    );
+                    create_password_reset_email_body($user_presence_by_nick_result, $new_password)
+            );
 
             // send it!
-            $this->email->send();
-            
+            //TODO: uncomment $this->email->send();
+
             log_message('debug', $this->email->print_debugger());
-            
+
             // render view
             $template_data = array();
 
             $this->set_title($template_data, 'Password reset successful');
-            $this->load_header_templates( $template_data );
+            $this->load_header_templates($template_data);
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset_succes');
             $this->load->view('templates/footer');
             return;
         }
-        
-            log_message('debug', 'User not found by email nor by nick.');
-            
-            // print out validation errors
-            $template_data = array();
 
-            $this->set_title($template_data, 'Registration');
-            $this->load_header_templates( $template_data );
+        log_message('debug', 'User not found by email nor by nick.');
 
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('v_password_reset');
-            $this->load->view('templates/footer');
+        // print out validation errors
+        $template_data = array();
+
+        $this->set_title($template_data, 'Registration');
+        $this->load_header_templates($template_data);
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('v_password_reset');
+        $this->load->view('templates/footer');
     }
 
-    public function nick_or_email_check( $nick_or_email ){
-        
-        if( $this->nick_check($nick_or_email) == TRUE && $this->email_check( $nick_or_email ) == TRUE ){
-            
+    public function nick_or_email_check($nick_or_email) {
+
+        if ($this->nick_check($nick_or_email) == TRUE && $this->email_check($nick_or_email) == TRUE) {
+
             // neither nick neither email exists
             return FALSE;
-        }else{
+        } else {
             return TRUE;
         }
     }
-    
+
 }
 
 /* End of file c_user.php */

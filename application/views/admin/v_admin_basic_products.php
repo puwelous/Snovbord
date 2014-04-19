@@ -16,14 +16,14 @@
                 <?php if (isset($error)) echo $error; ?>
                 <?php if (isset($successful)) echo $successful; ?>
 
-                <?php echo form_open_multipart('c_admin/add_products'); ?>
+                <?php echo form_open_multipart('c_admin/add_basic_product'); ?>
 
                 <h4 class="black">product name</h4>
                 <?php
                 $data = array(
                     'name' => 'pdf_product_name',
                     'id' => 'pdf_product_name',
-                    'value' => set_value('pdf_product_name', 'PP K2 Bambi'),
+                    'value' => set_value('pdf_product_name', 'Name for basic product'),
                     'maxlength' => '32',
                     'size' => '32',
                     'style' => 'width:100%'
@@ -111,7 +111,7 @@
                 <div class="line pp_dark_gray"></div>   
 
                 <div>
-                    <input type="submit" id="save" class="pp_button_active" value="Create product" />                
+                    <input type="submit" id="save" class="pp_button_active" value="Add basic product" />                
                 </div>
                 </form>
             </div>        

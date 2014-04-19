@@ -11,10 +11,10 @@ class C_paypal extends MY_Controller {
     
     const PAYMENT_TYPE = "Sale";
 
-    const RETURN_URL = "http://localhost:8888/CI_PP/index.php/c_paypal/return_to_review";
+    const RETURN_URL = "http://localhost:8888/Snovbord/index.php/c_paypal/return_to_review";
 
 
-    const CANCEL_URL = "http://localhost:8888/CI_PP/index.php/c_paypal/cancel_review";
+    const CANCEL_URL = "http://localhost:8888/Snovbord/index.php/c_paypal/cancel_review";
 
     public function __construct() {
         parent::__construct();

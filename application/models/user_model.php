@@ -2,34 +2,42 @@
 
 class User_model extends MY_Model {
 
-    public $_table = 'pp_user';
-    public $primary_key = 'u_id';
-    public $nick;
-    public $firstname;
-    public $lastname;
-    public $emailAddress;
-    public $password;
-    public $gender;
-    public $deliveryAddress;
-    public $address;
-    public $city;
-    public $zip;
-    public $country;
-    public $isAdmin;
+    protected $_table = 'sb_user';
+    protected $primary_key = 'usr_id';
+    private $userId;
+    private $nick;
+    private $emailAddress;
+    private $firstname;
+    private $lastname;
+    private $phoneNumber;
+    private $gender;
+    private $password;
+    private $address;
+    private $userType;
+//    private $city;
+//    private $zip;
+//    private $country;
+//    private $isAdmin;
 
-    public $protected_attributes = array( 'u_id' );
-    
+    public $protected_attributes = array('usr_id');
+
     public function __construct() {
         parent::__construct();
     }
 
-    public function setAll($nick, $firstname, $lastname, $emailAddress, $password, $gender, $address, $deliveryAddress, $city, $zip, $country, $isAdmin) {
+    public function instantiate(
+    $nick, $emailAddress, $firstname, $lastname, $phoneNumber, $gender, $password, $address, $userType) {
 
         $this->nick = $nick;
+        $this->emailAddress = $emailAddress;
+
         $this->firstname = $firstname;
         $this->lastname = $lastname;
-        $this->emailAddress = $emailAddress;
+
+        $this->phoneNumber = $phoneNumber;
+
         $this->password = md5($password); //MD5
+
         if ($gender == 'male') {
             $this->gender = 0;
         } else if ($gender == 'female') {
@@ -37,40 +45,33 @@ class User_model extends MY_Model {
         } else {
             $this->gender = -1;
         }
-        $this->deliveryAddress = $deliveryAddress;
+
         $this->address = $address;
-        $this->city = $city;
-        $this->zip = $zip;
-        $this->country = $country;
-        if ($isAdmin == FALSE) {
-            $this->isAdmin = 0;
-        } else {
-            $this->isAdmin = 1;
-        }
+        $this->userType = $userType;
     }
 
-    public function add_user(User_model $user) {
-
-        $this->user_model->insert(
-                array(
-                    'u_nick' => $user->nick,
-                    'u_firstname' => $user->firstname,
-                    'u_lastname' => $user->lastname,
-                    'u_email_address' => $user->emailAddress,
-                    'u_password' => $user->password,
-                    'u_gender' => $user->gender,
-                    'u_delivery_address' => $user->deliveryAddress,
-                    'u_address' => $user->address,
-                    'u_city' => $user->city,
-                    'u_zip' => $user->zip,
-                    'u_country' => $user->country,
-                    'u_is_admin' => $user->isAdmin
-        ));
+    public function save() {
+        return $this->user_model->insert(
+                        array(
+                            'usr_nick' => $this->nick,
+                            'usr_email_address' => $this->emailAddress,
+                            'usr_firstname' => $this->firstname,
+                            'usr_lastname' => $this->lastname,
+                            'usr_phone_number' => $this->phoneNumber,
+                            'usr_gender' => $this->gender,
+                            'usr_password' => $this->password,
+                            'usr_address_id' => ( $this->address instanceof Address_model ? $this->address->getAddressId() : $this->address ),
+                            'usr_user_type_id' => ( $this->userType instanceof User_type_model ? $this->userType->getUserTypeId() : $this->userType )
+                ));
+    }
+    
+    public function update_user_type( $user_id, $new_user_type_id) {
+        return $this->user_model->update( $user_id , array('usr_user_type_id' => $new_user_type_id) );
     }
 
     public function get_by_email_or_nick_and_password($email_or_nick, $password) {
 
-        $where = "(u_email_address=".$this->db->escape($email_or_nick)." OR u_nick=". $this->db->escape($email_or_nick) .") AND u_password=".$this->db->escape(md5($password))."";
+        $where = "(usr_email_address=" . $this->db->escape($email_or_nick) . " OR usr_nick=" . $this->db->escape($email_or_nick) . ") AND usr_password=" . $this->db->escape(md5($password)) . "";
         $this->db->where($where);
         $this->db->limit(1);
 
@@ -81,25 +82,96 @@ class User_model extends MY_Model {
         if ($query->num_rows() > 0) {
             $row = $query->row();
             log_message('debug', print_r($row, TRUE));
-            return $row;
+            $result = new User_model();
+            $result->instantiate($row->usr_nick, $row->usr_email_address, $row->usr_firstname, $row->usr_lastname, $row->usr_phone_number, $row->usr_gender, $row->usr_password, $row->usr_address_id, $row->usr_user_type_id);
+
+            $result->setUserId($row->usr_id);
+
+            return $result;
         } else {
             return NULL;
         }
     }
-    
-    public function is_present_by( $column, $value){
-        $row = $this->user_model->as_object()->get_by( $column, $value );
+
+    public function is_present_by($column, $value) {
+        $row = $this->user_model->as_object()->get_by($column, $value);
+
+        if (count($row) <= 0) {
+            return NULL;
+        }
         
+        $result = new User_model();
+        $result->instantiate($row->usr_nick, $row->usr_email_address, $row->usr_firstname, $row->usr_lastname, $row->usr_phone_number, $row->usr_gender, $row->usr_password, $row->usr_address_id, $row->usr_user_type_id);
+
+        $result->setUserId($row->usr_id);
+        
+        return $result;
+    }
+
+    public function get_user_by($column, $value) {
+        $row = $this->user_model->as_object()->get_by($column, $value);
+
         return $row;
     }
     
-    public function get_user_by( $column, $value){
-        $row = $this->user_model->as_object()->get_by( $column, $value );
+    public function get_all_users(){
+        $result = $this->user_model->get_all();
         
-        return $row;
-    }    
+        $result_array = array();
+        
+        foreach ($result as $user_instance_std_obj) {
+            $user_model_inst = new User_model();
+            $user_model_inst->instantiate(
+                    $user_instance_std_obj->usr_nick, $user_instance_std_obj->usr_email_address, $user_instance_std_obj->usr_firstname, $user_instance_std_obj->usr_lastname, $user_instance_std_obj->usr_phone_number,
+                    $user_instance_std_obj->usr_gender, 'SECRET', $user_instance_std_obj->usr_address_id, $user_instance_std_obj->usr_user_type_id);
+            $user_model_inst->setUserId($user_instance_std_obj->usr_id);
+            $result_array[] = $user_model_inst;
+        }
+        
+        return $result_array;
+    }
+
+    public function getUserId() {
+        return $this->userId;
+    }
+
+    public function getNick() {
+        return $this->nick;
+    }
+
+    public function getEmailAddress() {
+        return $this->emailAddress;
+    }
+
+    public function getFirstName() {
+        return $this->firstname;
+    }
+
+    public function getLastName() {
+        return $this->lastname;
+    }
+
+    public function getGender() {
+        return $this->gender;
+    }
+
+    public function getPhoneNumber() {
+        return $this->phoneNumber;
+    }
+
+    public function getAddress() {
+        return $this->address;
+    }
+
+    public function getUserType() {
+        return $this->userType;
+    }
+
+    protected function setUserId($usrId) {
+        $this->userId = $usrId;
+    }
 
 }
 
-/* End of file company_model.php */
-/* Location: ./application/models/company_model.php */
+/* End of file user_model.php */
+/* Location: ./application/models/user_model.php */

@@ -2,7 +2,7 @@
 
 class Paypal_shipping_data_model extends MY_Model {
 
-    public $_table = 'pp_paypal_shipping_data';
+    public $_table = 'sb_paypal_shipping_data';
     public $primary_key = 'psd_order_id';
     public $orderId;
     public $email;

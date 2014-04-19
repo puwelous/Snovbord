@@ -2,7 +2,7 @@
 
 class Company_model extends MY_Model {
 
-    public $_table = 'pp_company';
+    public $_table = 'sb_company';
     public $primary_key = 'cmpn_id';
     
     public $provider_firstname;

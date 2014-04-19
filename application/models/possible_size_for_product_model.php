@@ -2,7 +2,7 @@
 
 class Possible_size_for_product_model extends MY_Model {
 
-    public $_table = 'pp_possible_size_for_product';
+    public $_table = 'sb_possible_size_for_product';
     public $primary_key = 'psfp_id';
 
     public $product_definition;//refers to product_definition model by id or not????

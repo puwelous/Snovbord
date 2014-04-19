@@ -9,7 +9,7 @@ class C_ucreate extends MY_Controller {
         parent::__construct();
     }
 
-    public function index($prodId) {
+    public function index($prodId = NULL) {
 
         if ( !$this->authentify() ) {
             log_message('debug', 'Attempt to edit product for unlogged user. Redirect!');
@@ -23,7 +23,7 @@ class C_ucreate extends MY_Controller {
 
         //$prodId = 30;
         
-        if (is_null($prodId) || !isset($prodId) || !is_numeric($prodId)) {
+        if (!isset($prodId) || is_null($prodId) || !is_numeric($prodId)) {
             log_message('debug', 'Param for c_preview/show not initialized, redirecting to welcome page!');
             redirect('/c_finalproducts', 'refresh');
             return;

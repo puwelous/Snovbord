@@ -64,12 +64,12 @@
                                     <label for = "female" class="css-label">female</label>                                    
                                 </li>
                                 <li>
-                                    <label for="tf_delivery_addres" >delivery address</label>
-                                    <input type="text" id="tf_delivery_addres" name="tf_delivery_addres" value="<?php echo set_value('tf_delivery_addres'); ?>" size="32" maxlength="256" />
+                                    <label for="tf_phone_number" >phone number</label>
+                                    <input type="tel" id="tf_phone_number" name="tf_phone_number" value="<?php echo set_value('tf_phone_number'); ?>" size="32" maxlength="32" />
                                 </li>
                                 <li>
-                                    <label for="tf_address" class="required">address</label>
-                                    <input type="text" id="tf_address" name="tf_address" value="<?php echo set_value('tf_address'); ?>" size="32" maxlength="256"/>
+                                    <label for="tf_street" class="required">street</label>
+                                    <input type="text" id="tf_street" name="tf_street" value="<?php echo set_value('tf_street'); ?>" size="32" maxlength="128"/>
                                 </li>
                                 <li>
                                     <label for="tf_city" class="required">city</label>

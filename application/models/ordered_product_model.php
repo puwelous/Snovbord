@@ -2,7 +2,7 @@
 
 class Ordered_product_model extends MY_Model {
 
-    public $_table = 'pp_ordered_product';
+    public $_table = 'sb_ordered_product';
     public $primary_key = 'op_id';
     public $product_definition;
     public $amount;
@@ -43,11 +43,11 @@ class Ordered_product_model extends MY_Model {
     }
 
     public function get_ordered_product_full_info_by_cart_id($cart_id) {
-        $this->db->select('pp_ordered_product.op_id, pp_ordered_product.psfp_name, pp_ordered_product.op_amount, pp_ordered_product.pd_id, pp_product_definition.pd_id, pp_product_definition.pd_product_name, pp_product_definition.pd_photo_url,  pp_product_definition.pd_price, pp_user.u_nick');
-        $this->db->from('pp_ordered_product');
-        $this->db->where('pp_ordered_product.c_id', $cart_id);
-        $this->db->join('pp_product_definition', 'pp_ordered_product.pd_id = pp_product_definition.pd_id');
-        $this->db->join('pp_user', 'pp_product_definition.pd_product_creator = pp_user.u_id');
+        $this->db->select('sb_ordered_product.op_id, sb_ordered_product.psfp_name, sb_ordered_product.op_amount, sb_ordered_product.pd_id, sb_product_definition.pd_id, sb_product_definition.pd_product_name, sb_product_definition.pd_photo_url,  sb_product_definition.pd_price, sb_user.u_nick');
+        $this->db->from('sb_ordered_product');
+        $this->db->where('sb_ordered_product.c_id', $cart_id);
+        $this->db->join('sb_product_definition', 'sb_ordered_product.pd_id = sb_product_definition.pd_id');
+        $this->db->join('sb_user', 'sb_product_definition.pd_product_creator = sb_user.u_id');
 
         $query = $this->db->get();
 
@@ -65,10 +65,10 @@ class Ordered_product_model extends MY_Model {
     }
     
     public function get_all_ordered_products_price_including_by_cart_id( $cart_id ){
-        $this->db->select('pp_ordered_product.*, pp_product_definition.pd_price');
-        $this->db->from('pp_ordered_product');
-        $this->db->where('pp_ordered_product.c_id', $cart_id);
-        $this->db->join('pp_product_definition', 'pp_ordered_product.pd_id = pp_product_definition.pd_id');
+        $this->db->select('sb_ordered_product.*, sb_product_definition.pd_price');
+        $this->db->from('sb_ordered_product');
+        $this->db->where('sb_ordered_product.c_id', $cart_id);
+        $this->db->join('sb_product_definition', 'sb_ordered_product.pd_id = sb_product_definition.pd_id');
 
         $query = $this->db->get();
 

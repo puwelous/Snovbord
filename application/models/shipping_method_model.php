@@ -2,7 +2,7 @@
 
 class Shipping_method_model extends MY_Model {
 
-    public $_table = 'pp_shipping_method';
+    public $_table = 'sb_shipping_method';
     public $primary_key = 'sm_id';
 
     public $name;

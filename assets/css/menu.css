@@ -193,6 +193,16 @@ body {
     float: left;
 }
 
+#content div.content_wrapper div.container table.users_table{
+    border-collapse: collapse;
+}
+
+#content div.content_wrapper div.container table.users_table td, #content div.content_wrapper div.container table.users_table th {
+    border-collapse: collapse;
+    padding: 3px;
+}
+
+
 #error_output_section{
     height: 6%;
     width: 100%;
