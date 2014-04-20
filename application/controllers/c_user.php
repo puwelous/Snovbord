@@ -41,7 +41,6 @@ class C_user extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_registration');
-            $this->load->view('templates/footer');
         } else {
 
             $nick = $this->input->post('tf_nick');
@@ -278,7 +277,6 @@ class C_user extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset');
-            $this->load->view('templates/footer');
 
             // break it
             return;
@@ -306,7 +304,6 @@ class C_user extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset');
-            $this->load->view('templates/footer');
 
             // break
             return;
@@ -352,7 +349,6 @@ class C_user extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset_succes');
-            $this->load->view('templates/footer');
             return;
         }
 
@@ -399,7 +395,6 @@ class C_user extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_password_reset_succes');
-            $this->load->view('templates/footer');
             return;
         }
 
@@ -413,7 +408,6 @@ class C_user extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_password_reset');
-        $this->load->view('templates/footer');
     }
 
     public function nick_or_email_check($nick_or_email) {

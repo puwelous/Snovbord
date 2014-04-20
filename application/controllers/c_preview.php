@@ -39,7 +39,6 @@ class C_preview extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_preview', $data);
-        $this->load->view('templates/footer');
     }
 
     public function add_to_cart($productId) {

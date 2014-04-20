@@ -16,7 +16,7 @@
             <h1>
                 4. payment for order
             </h1>
-            <div class="red_line">
+            <div class="blue_line">
             </div>
 
             <div class="text_fields_wrapper">
@@ -146,7 +146,7 @@
                 </div>
                 <div class="bottom_wrapper right">
                     <div class="fl_right">
-                        <div class="text_medium upper_cased bold">total&nbsp;&nbsp;&nbsp;<span class="pp_red"><?php echo $total; ?>&nbsp;&euro;</span></div>
+                        <div class="text_medium upper_cased bold">total&nbsp;&nbsp;&nbsp;<span class="pp_blue"><?php echo $total; ?>&nbsp;&euro;</span></div>
                     </div>
                 </div>
                 <div style="clear:both;"></div>

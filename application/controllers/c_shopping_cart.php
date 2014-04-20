@@ -33,7 +33,6 @@ class C_shopping_cart extends MY_Controller {
             $this->set_title($template_data, 'Empty shopping cart');
             $this->load->view('templates/header', $template_data);
             $this->load->view('shopping_cart/v_shopping_cart_empty');
-            $this->load->view('templates/footer');
             return;
         }
 
@@ -69,7 +68,6 @@ class C_shopping_cart extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('shopping_cart/v_shopping_cart_nonempty', $data);
-        $this->load->view('templates/footer');
     }
 
     public function show_order_preview() {
@@ -172,7 +170,6 @@ class C_shopping_cart extends MY_Controller {
         $this->load_header_templates($template_data);
         $this->load->view('templates/header', $template_data);
         $this->load->view('order/v_order_preview', $data);
-        $this->load->view('templates/footer');
     }
 
     private function _parse_products_from_post() {

@@ -84,7 +84,6 @@ class C_paypal extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('paypal/v_paypal_express_checkout_failed', $data);
-            $this->load->view('templates/footer');
         }
     }
 
@@ -187,7 +186,6 @@ class C_paypal extends MY_Controller {
 
                 $this->load->view('templates/header', $template_data);
                 $this->load->view('paypal/v_paypal_review', $data); // review screen
-                $this->load->view('templates/footer');
             } else {
                 //Display a user friendly Error on the page using any of the following error information returned by PayPal
 
@@ -205,7 +203,6 @@ class C_paypal extends MY_Controller {
 
                 $this->load->view('templates/header', $template_data);
                 $this->load->view('paypal/v_paypal_get_shipping_details_failed', $data);
-                $this->load->view('templates/footer');
             }
         }
     }
@@ -327,7 +324,6 @@ class C_paypal extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('paypal/v_paypal_payment_success', $data); // review screen
-            $this->load->view('templates/footer');
         } else {
             //Display a user friendly Error on the page using any of the following error information returned by PayPal
 
@@ -345,7 +341,6 @@ class C_paypal extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('paypal/v_paypal_payment_confirmation_failed', $data);
-            $this->load->view('templates/footer');
         }
     }
 

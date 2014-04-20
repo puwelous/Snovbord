@@ -103,8 +103,7 @@ body {
     position: absolute;
     background: #fff;
     z-index: 1001;
-    margin-top: 1%;
-    border: solid #ef4623 1px;
+    border: dotted #003399 1px;
 }
 
 #m_login:hover #login_wrapper, #m_login #login_wrapper:hover  {
@@ -132,15 +131,15 @@ body {
 
 #login_wrapper .login_wrapper_single_row input[type=text], #login_wrapper .login_wrapper_single_row input[type=password]{
     border: 0px;
-    border-bottom: 2px solid #ef4623;
-    /*font-family: "compro_medium";*/
+    /*border-bottom: 2px solid #ef4623;*/
+    font-family: "compro_medium";
     /*color: black;*/
     margin-left: 5px;
 }
 
 
-.red_line{
-    background: #ef4623  no-repeat scroll center;
+.blue_line{
+    background: blue  no-repeat scroll center;
     width: 100%;
     height: 2px;
 }
@@ -153,8 +152,8 @@ body {
     margin-bottom: 4px;
 }
 
-.line.pp_red{
-    background-color: #ef4623;
+.line.pp_blue{
+    background-color: blue;
 }
 
 .line.pp_dark_gray{
@@ -560,13 +559,13 @@ h2{
     color: black;
 }
 
-/**h2{
+h3{
     font-family: "compro_medium";
     font-weight:bold;
-    font-size: 1.2em;
+    font-size: 1.0em;
     text-transform: uppercase;
     color: black;
-}*/
+}
 
 h4{
     font-family: "compro_medium";
@@ -585,7 +584,7 @@ h5{
 }
 
 .red_on_hover:hover{
-    color: red;
+    color: #003399;
 }
 
 .upper_cased{
@@ -610,22 +609,22 @@ h5{
 /* regular */
 @font-face {
     font-family: "compro_regular";
-    src: local("PFDinTextCompPro-Regular.ttf"),
-        url("PFDinTextCompPro-Light.ttf") format("truetype");
+    src: local("LISTFCEI.ttf"),
+        url("LISTFCEI.ttf") format("truetype");
 }
 
 /* light */
 @font-face {
     font-family: "compro_light";
-    src: local("PFDinTextCompPro-Light.ttf"),
-        url("PFDinTextCompPro-Light.ttf") format("truetype");
+    src: local("LISTFCEI.ttf"),
+        url("LISTFCEI.ttf") format("truetype");
 }
 
 /* medium */
 @font-face {
     font-family: "compro_medium";
-    src: local("PFDinTextCompPro-Medium.ttf"),
-        url("PFDinTextCompPro-Light.ttf") format("truetype");
+    src: local("LISTFCEI.ttf"),
+        url("LISTFCEI.ttf") format("truetype");
 }
 
 .text_regular {
@@ -716,8 +715,8 @@ h5{
     color: #c0c0c0;
 }
 
-.pp_red{
-    color: #ef4623;
+.pp_blue{
+    color: #003399;
 }
 
 .pp_green{

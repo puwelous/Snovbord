@@ -51,11 +51,20 @@ div.gallery_item_name {
     color: #c0c0c0;
 }
 
-div.gallery_item img {
-    display: inline;
+div.gallery_item .gallery_item_imgs_wrapper{
+    /*display: inline;*/
     margin: 0px;
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 175px;
+    text-align: initial;
+}
+
+div.gallery_item .gallery_item_imgs_wrapper img {
+    position: absolute;
+    /*margin: 0px;*/
+    width: 120px;
+    height: 175px;
+    
 }
 
 div.gallery_item a:hover img {

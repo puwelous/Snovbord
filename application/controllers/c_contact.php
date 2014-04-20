@@ -38,7 +38,6 @@ class C_contact extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_contact', $data);
-        $this->load->view('templates/footer');
     }
 }
 

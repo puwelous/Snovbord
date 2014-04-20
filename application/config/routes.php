@@ -42,6 +42,7 @@ $route['ucreate']                       = 'c_ucreate';
 $route['registration']                  = 'c_registration';
 $route['user/password_reset']           = 'c_user/password_reset';
 $route['contact']                       = 'c_contact';
+$route['products']                      = 'c_products';
 $route['finalproducts']                 = 'c_finalproducts';
 $route['preview/show/(:num)']           = 'c_preview/show/$1';
 $route['ucreate/(:num)']                = 'c_ucreate/index/$1';

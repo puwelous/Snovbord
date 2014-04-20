@@ -90,7 +90,6 @@
                     <div style="clear:both;"></div>
                     <div class="bottom_wrapper">
                         <div class="bottom_wrapper left">
-                            <span class="text_light smaller pp_light_gray">By clicking SIGN UP, you are agreeing to <a href="../policy.html" target="_blank">POWPORN Policy</a> and <a href="../terms.html" target="_blank">Terms &amp; Conditions</a></span>
                         </div>
                         <div class="bottom_wrapper right">
                             <!--<input type="button" value="SIGN UP"/>-->
@@ -109,7 +108,7 @@
 
         <div class="overlay-bg">
             <div class="overlay-content">
-                <h1 class="upper_cased text_medium pp_red">thank you!</h1>
+                <h1 class="upper_cased text_medium pp_blue">thank you!</h1>
                 <p class="text_regular smaller">You will recieve registration mail on address <span id="user_email">@</span></p>
                 <button class="pp_button_active upper_cased">login</button>
             </div>

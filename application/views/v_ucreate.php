@@ -38,7 +38,7 @@
 
     <div class="preview_left">
 
-        <div class="line pp_red"></div>
+        <div class="line pp_blue"></div>
 
         <?php
 //        $attributes = array('name' => 'pp_add_product_to_cart_form');

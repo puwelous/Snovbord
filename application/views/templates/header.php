@@ -3,11 +3,10 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title><?php echo ( empty($title) ? 'PowPorn' : $title) ?></title>
+        <title><?php echo ( empty($title) ? 'Snovbord' : $title) ?></title>
         <?php
         // css
         echo link_tag('assets/css/menu.css');
-        echo link_tag('assets/css/footer.css');
         echo link_tag('assets/css/finalproducts.css');
         echo link_tag('assets/css/socialsidebar.css');
         echo link_tag('assets/css/jquery.mCustomScrollbar.css');
@@ -133,23 +132,6 @@
                 }
                 
                 $('#login_result_message').hide();
-                $('#loading_gif').hide();
-                
-                $("#footer_switcher_wrapper").click( function(){
-                    
-                    $('#footer').toggleClass( "f_active" );
-                    $('.footer_l').toggleClass("active");
-                    $('#footer').toggleClass( "f_inactive" );
-                    $('.footer_l').toggleClass("inactive");
-    
-                    $('#footer .text_wrapper_middle_part').toggleClass("active");
-                    $('#footer .text_wrapper_middle_part').toggleClass("inactive");
-    
-                    $('#footer_switcher').toggleClass("active");
-                    $('#footer_switcher').toggleClass("inactive");
-
-                });
-                
                 
                 $('#login_wrapper').bind('keypress', function(e) {
                     if(e.keyCode!=13){
@@ -189,6 +171,8 @@
                     });
                     return false;
                 });
+                
+                $('#loading_gif').hide();
             });
         </script>
     </head>
@@ -208,13 +192,13 @@
                     <?php echo anchor('ucreate', 'u create', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
                 </li>
                 <li>
-                    <?php echo anchor('finalproducts', 'products', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
+                    <?php echo anchor('products', 'products', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
                 </li>
-            </ul>
-            <ul class="menu_r">
-                <li id="m_language">
+            <!--</ul>-->
+<!--            <ul class="menu_r">-->
+<!--                <li id="m_language">
                     <?php echo anchor('shopping_cart', 'en / sk', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
-                </li>
+                </li>-->
 <!--                <li id="m_cart">
                     <?php //echo anchor('shopping_cart', 'shopping cart', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
                 </li>-->
@@ -230,7 +214,7 @@
                 ?>
 
                 <li id="m_contact">
-                    <?php echo anchor('contact', 'contact', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
+                    <?php echo anchor('contact', 'info', array('class' => 'text_light smaller pp_dark_gray red_on_hover upper_cased')); ?>
                 </li>
                 
                 <?php
@@ -241,3 +225,4 @@
                 ?>                
             </ul>
         </div>
+        <div class="line pp_blue"></div>

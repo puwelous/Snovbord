@@ -134,7 +134,7 @@
                 1. shopping cart
             </h1>
             <!--</div>-->
-            <div class="red_line">
+            <div class="blue_line">
             </div>                    
 
 
@@ -226,12 +226,12 @@
                     <!--<input type="button" value="SIGN UP"/>-->
                     <div class="fl_right">
                         <!--<div class="text_medium upper_cased bold">subtotal&nbsp;&nbsp;&nbsp;-->
-                        <h2 style="display:inline-block">subtotal&nbsp;</h2><span id="subtotal_first_section_sum" class="text_medium upper_cased bold pp_red"><?php echo $shopping_cart_sum; ?></span><span class="text_medium upper_cased bold pp_red">&nbsp;&euro;</span>
+                        <h2 style="display:inline-block">subtotal&nbsp;</h2><span id="subtotal_first_section_sum" class="text_medium upper_cased bold pp_blue"><?php echo $shopping_cart_sum; ?></span><span class="text_medium upper_cased bold pp_blue">&nbsp;&euro;</span>
                         <!--</div>-->
                     </div>
                     <div style="clear:both;"></div>
                     <div class="right_pp_button_wrapper">
-                        <button class="pp_button_active" type="button" name="submit">NEXT STEP&nbsp;<span class="pp_red">&gt;</span></button>
+                        <button class="pp_button_active" type="button" name="submit">NEXT STEP&nbsp;<span class="pp_blue">&gt;</span></button>
                     </div>
                 </div>
                 <div style="clear:both;"></div>
@@ -248,7 +248,7 @@
                 2. shipping & payment
             </h1>
             <!--</div>-->
-            <div class="red_line">
+            <div class="blue_line">
             </div>                    
             <!--<form name="pp_form_name" action="#" method="POST">-->
 
@@ -382,13 +382,13 @@
                     <div class="fl_right">
                         <!--<div class="text_medium upper_cased bold">subtotal&nbsp;&nbsp;&nbsp;<span class="pp_red">520 &euro;</span></div>-->
                         <h2 style="display:inline-block">subtotal</h2>    
-                        <span class="text_medium upper_cased bold pp_red">
-                            <span id="subtotal_second_section_sum" class="text_medium upper_cased bold pp_red"><?php echo $second_section_subtotal; ?></span>&nbsp;&euro;
+                        <span class="text_medium upper_cased bold pp_blue">
+                            <span id="subtotal_second_section_sum" class="text_medium upper_cased bold pp_blue"><?php echo $second_section_subtotal; ?></span>&nbsp;&euro;
                         </span>
                     </div>
                     <div style="clear:both;"></div>
                     <div class="right_pp_button_wrapper">
-                        <button class="pp_button_active" type="submit" name="submit">NEXT STEP <span class="pp_red">&gt;</span></button>
+                        <button class="pp_button_active" type="submit" name="submit">NEXT STEP <span class="pp_blue">&gt;</span></button>
                     </div>
                 </div>
                 <div style="clear:both;"></div>

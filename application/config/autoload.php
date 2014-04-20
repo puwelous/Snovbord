@@ -125,7 +125,12 @@ $autoload['model'] = array(
     'paypal_transaction_data_model',
     
     'address_model',
-    'user_type_model'
+    'user_type_model',
+    'basic_product_raster_model',
+    'possible_size_for_product_model',
+    'product_model',
+    'basic_product_model',
+    'supported_point_of_view_model'
     );
 
 

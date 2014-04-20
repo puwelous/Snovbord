@@ -48,7 +48,6 @@ class C_ucreate extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_ucreate', $data);
-        $this->load->view('templates/footer');
     }
 }
 

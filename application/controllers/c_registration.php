@@ -18,7 +18,6 @@ class C_registration extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_registration');
-        $this->load->view('templates/footer');
     }
 }
 

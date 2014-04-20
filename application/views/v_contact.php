@@ -8,43 +8,24 @@
                     <!-- Title -->
                     <!--<div class="title upper_cased black">-->
                     <h1>
-                        about us
+                        Info
                     </h1>
                     <!--</div>-->
-                    <div class="red_line">
+                    <div class="blue_line">
                     </div>                    
                     <!--<form name="pp_form_name" action="#" method="POST">-->
                     <div class="half_container">
                         <!--<div class="text_medium upper_cased bold">-->
                         <h2>
-                            rules
+                            Object
                         </h2>
                         <!--</div>-->
                         <div class="text_light">
                             <?php echo $company->cmpn_rules ?>
                         </div>
-                        <div id="video_section">
-                            <div id="video_section_container" class="full_video_container">
-                                <div class="video_item_wrapper">
-                                    <div class="video_item_screen"></div>
-                                    <div class="video_item_title text_light smaller upper_cased pp_dark_gray">choose</div>
-                                </div>
-                                <div class="video_item_wrapper">
-                                    <div class="video_item_screen"></div>
-                                    <div class="video_item_title text_light smaller upper_cased pp_dark_gray">create</div>
-                                </div>
-                                <div class="video_item_wrapper">
-                                    <div class="video_item_screen"></div>
-                                    <div class="video_item_title text_light smaller upper_cased pp_dark_gray">create</div>
-                                </div>
-                                <div class="video_item_wrapper">
-                                    <div class="video_item_screen"></div>
-                                    <div class="video_item_title text_light smaller upper_cased pp_dark_gray">create</div>
-                                </div>
-                            </div>
-                        </div> 
-                        <div style="clear:both;"></div>
+
                         <!--<div class="text_medium upper_cased bold">-->
+                        <br />
                         <h2>
                             contact
                         </h2>

@@ -31,7 +31,10 @@ if (!function_exists('get_product_upload_path')) {
 if (!function_exists('generate_product_file_name')) {
 
     function generate_product_file_name( $user_nick, $product_name) {
-        $prefix = $user_nick . '_' . $product_name . '_';
+        // get rid of dots if necessary
+        $product_name_without_dots = str_replace(".", "_", $product_name);
+        
+        $prefix = $user_nick . '_' . $product_name_without_dots . '_';
         // 13 chars long
         return uniqid($prefix);
     }

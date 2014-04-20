@@ -14,7 +14,6 @@ class C_welcome extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_welcome');
-        $this->load->view('templates/footer');
     }
 }
 

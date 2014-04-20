@@ -8,7 +8,7 @@
                 product administration
                 <?php echo anchor('c_admin/index', '<-go back', array('class' => 'text_light smaller pp_dark_gray red_on_hover inunderlined upper_cased')); ?>                 
             </h1>
-            <div class="red_line">
+            <div class="blue_line">
             </div>                    
             <div class="half_container">
 

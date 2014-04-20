@@ -166,7 +166,6 @@ class C_order extends MY_Controller {
         $this->load_header_templates($template_data);
         $this->load->view('templates/header', $template_data);
         $this->load->view('order/v_order_payment', $data);
-        $this->load->view('templates/footer');
     }
 
 //    public function view_order() {
