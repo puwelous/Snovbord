@@ -3,13 +3,16 @@
 class Ordered_product_model extends MY_Model {
 
     public $_table = 'sb_ordered_product';
-    public $primary_key = 'op_id';
-    public $product_definition;
-    public $amount;
-    public $size_name; //refers to possible_size_for_product's name
+    public $primary_key = 'ordrd_prdct_id';
+
+    private $id;
+   
+    public $product;
+    public $count;
+    public $possible_size_for_product;
     public $cart;
-    public $orderer; //refers to user's u_id
-    public $protected_attributes = array('op_id');
+
+    public $protected_attributes = array('ordrd_prdct_id');
 
     /* basic constructor */
 
@@ -19,26 +22,25 @@ class Ordered_product_model extends MY_Model {
 
     /* instance "constructor" */
 
-    public function instantiate($product_definition, $amount, $size_name, $cart, $orderer) {
+    public function instantiate( $product, $count, $possible_size_for_product, $cart ) {
 
-        $this->product_definition = $product_definition;
-        $this->amount = $amount;
-        $this->size_name = $size_name;
+        $this->product = $product;
+        $this->count = $count;
+        $this->possible_size_for_product = $possible_size_for_product;
         $this->cart = $cart;
-        $this->orderer = $orderer;
+
     }
 
     /*     * * database operations ** */
 
-    public function insert_ordered_product() {
+    public function save() {
 
         return $this->ordered_product_model->insert(
                         array(
-                            'pd_id' => $this->product_definition,
-                            'op_amount' => $this->amount,
-                            'psfp_name' => $this->size_name,
-                            'c_id' => $this->cart,
-                            'u_id' => $this->orderer
+                            'ordrd_prdct_id' => $this->product,
+                            'ordrd_prdct_count' => $this->count,
+                            'ordrd_prdct_psfp_id' => ( $this->possible_size_for_product instanceof Possible_size_for_product_model ? $this->possible_size_for_product->getId() : $this->possible_size_for_product ),
+                            'ordrd_prdct_crt_id' => ( $this->cart instanceof Cart_model ? $this->cart->getId() : $this->cart )
                 ));
     }
 
@@ -80,7 +82,10 @@ class Ordered_product_model extends MY_Model {
     }    
 
     /*     * ********* setters *********** */
-
+    public function setId( $newId ){
+        $this->id = $newId;
+    }
+    
     public function setProductDefinition($newProductDefinition) {
         $this->product_definition = $newProductDefinition;
     }
@@ -102,7 +107,10 @@ class Ordered_product_model extends MY_Model {
     }
 
     /*     * ********* getters *********** */
-
+    public function getId(){
+        return $this->id;
+    }
+    
     public function getProductDefinition() {
         return $this->product_definition;
     }

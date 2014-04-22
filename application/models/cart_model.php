@@ -2,14 +2,21 @@
 
 class Cart_model extends MY_Model {
 
+    const CART_STATUS_INITIALIZED = 'INITIALIZED';
+    const CART_STATUS_OPEN = 'OPEN';
+    
     public $_table = 'sb_cart';
-    public $primary_key = 'c_id';
-    public $sum;
-    public $status;
-    public $order;
-    public $ordering_person;
-    public $protected_attributes = array('c_id');
-    public $has_many = array('ordered_product' => array('model' => 'ordered_product', 'primary_key' => 'c_id'));
+    public $primary_key = 'crt_id';
+    
+    protected $id;
+    
+    protected $sum;
+    protected $status;
+    protected $assignedOrder;
+    protected $ordering_person;
+    
+    public $protected_attributes = array('crt_id');
+    public $has_many = array('ordered_product' => array('model' => 'ordered_product', 'primary_key' => 'crt_id'));
 
     /* basic constructor */
 
@@ -23,8 +30,8 @@ class Cart_model extends MY_Model {
 
         $this->sum = $sum;
         $this->status = $status;
-        $this->order = $order;
-        $this->ordering_person = $ordering_person;
+        $this->assignedOrder = $order;
+        $this->ordering_person = ($ordering_person instanceof User_model ? $ordering_person->getId() : $ordering_person );
     }
 
     /*     * * database operations ** */
@@ -33,38 +40,27 @@ class Cart_model extends MY_Model {
      * create
      */
 
-    public function insert_cart() {
+    public function save() {
 
         return $this->cart_model->insert(
                         array(
-                            'c_sum' => $this->sum,
-                            'c_status' => $this->status,
-                            'o_id' => $this->order,
-                            'u_ordering_person_id' => $this->ordering_person
+                            'crt_sum' => $this->sum,
+                            'crt_status' => $this->status,
+                            'crt_assigned_order' => ($this->assignedOrder instanceof Order_model ? $this->assignedOrder->getId() : $this->assignedOrder ),
+                            'crt_ordering_person_id' => ( $this->ordering_person instanceof User_model ? $this->ordering_person->getId() : $this->ordering_person)
                 ));
     }
-
-//    public function get_by_email_or_nick_and_password($email_or_nick, $password) {
-//
-//        $this->db->where("u_email_address", $email_or_nick);
-//        $this->db->or_where('u_nick', $email_or_nick);
-//        $this->db->where("u_password", md5($password));
-//        $this->db->limit(1);
-//
-//        $query = $this->db->get($this->_table);
-//
-//        //$str = $this->db->last_query();
-//        //log_message('debug', print_r($str, TRUE));
-//
-//        if ($query->num_rows() > 0) {
-//            $row = $query->row();
-//
-//            return $row;
-//        } else {
-//            return NULL;
-//        }
-//    }
-//    
+    
+    public function update_cart(){
+        return $this->cart_model->update( 
+                $this->getId() , 
+                array(
+            'crt_sum' => $this->getSum(),
+            'crt_status' => $this->getStatus(),
+            'crt_assigned_order' => ( $this->getOrder() instanceof Order_model ? $this->getOrder()->getId() : $this->getOrder() ),
+            'crt_ordering_person_id' => ( $this->getOrderingPerson() instanceof User_model ? $this->getOrderingPerson()->getId() : $this->getOrderingPerson() )
+            ));
+    }
 
     public function is_present_by($column, $value, $asObject = TRUE) {
         if ($asObject) {
@@ -100,6 +96,9 @@ class Cart_model extends MY_Model {
 //    }
 
     /*     * ********* setters *********** */
+    public function setId( $newId ){
+        $this->id = $newId;
+    }
 
     public function setSum($newSum) {
         $this->sum = $newSum;
@@ -110,7 +109,7 @@ class Cart_model extends MY_Model {
     }
 
     public function setOrder($newOrder) {
-        $this->order = $newOrder;
+        $this->assignedOrder = $newOrder;
     }
 
     public function setOrderingPerson($newOrderingPerson) {
@@ -119,6 +118,10 @@ class Cart_model extends MY_Model {
 
     /*     * ********* getters *********** */
 
+    public function getId(){
+        return $this->id;
+    }    
+    
     public function getSum() {
         return $this->sum;
     }
@@ -128,7 +131,7 @@ class Cart_model extends MY_Model {
     }
 
     public function getOrder() {
-        return $this->order;
+        return $this->assignedOrder;
     }
 
     public function getOrderingPerson() {

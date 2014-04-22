@@ -12,7 +12,6 @@
 <!-- content -->
 <div id="content">
 
-
     <!-- Title -->
     <div id="gallery_title" class="title upper_cased pp_light_gray">
         already made models
@@ -72,7 +71,6 @@
             for ($i = $count_per_row; $i < count($products_representations_list); ++$i):
                 ?>
                 <div class="gallery_item">
-                    <!--<a href="images/klematis_big.htm">-->
                     <div class="gallery_item_imgs_wrapper">
                         <?php
                         $representation_urls = $products_representations_list[$i]->getUrls();
@@ -86,7 +84,6 @@
                         }
                         ?>
                     </div>
-                    <!--</a>-->
                     <div class="gallery_item_desc">
                         <div class="gallery_item_name text_light bold upper_cased"><?php echo $products_representations_list[$i]->getProductName() ?></div>
                         <!--<span class="gallery_item_option_items text_light smaller upper_cased pp_red">edit</span>-->
@@ -102,4 +99,3 @@
 
     </div>
 </div><!-- end of content-->
-

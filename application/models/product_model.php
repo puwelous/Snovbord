@@ -45,6 +45,25 @@ class Product_model extends MY_Model {
                             'prdct_creator' => ( $this->creator_id instanceof User_model ? $this->creator_id->getUserId() : $this->creator_id )
                 ));
     }
+    
+    public function get_product( $productId ){
+        $selected_product = $this->product_model->get( $productId );
+        #{ ["prdct_id"]=> string(2) "10" ["prdct_name"]=> string(18) "Snovbord Hoodie I." ["prdct_price"]=> string(6) "123.45" ["prdct_description"]=> string(62) "Unbelievably water-proof hoodie made of high-quality material." ["prdct_sex"]=> string(6) "female" ["prdct_creator"]=> string(1) "1" }
+        
+        if ( !$selected_product ){
+            return NULL;
+        }
+        
+        $loaded_product = new Product_model();
+        
+        $loaded_product->instantiate($selected_product->prdct_name,
+                $selected_product->prdct_price, $selected_product->prdct_description,
+                $selected_product->prdct_sex, $selected_product->prdct_creator);
+        
+        $loaded_product->setId( $selected_product->prdct_id );
+        
+       return  $loaded_product;
+    }
 
     public function get_all_products() {
         $all_products = $this->product_model->get_all();

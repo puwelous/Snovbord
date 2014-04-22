@@ -69,6 +69,22 @@ class User_model extends MY_Model {
         return $this->user_model->update( $user_id , array('usr_user_type_id' => $new_user_type_id) );
     }
 
+    public function get_user_by_id( $userId ){
+        
+        $result = $this->user_model->get( $userId );
+        
+        if ( !$result ) {
+            return NULL;
+        } else {
+            $loaded_user = new User_model();
+            $loaded_user->instantiate($result->usr_nick, $result->usr_email_address, $result->usr_firstname, $result->usr_lastname, $result->usr_phone_number, $result->usr_gender, $result->usr_password, $result->usr_address_id, $result->usr_user_type_id);
+
+            $loaded_user->setUserId($result->usr_id);
+
+            return $loaded_user;
+        }
+    }
+    
     public function get_by_email_or_nick_and_password($email_or_nick, $password) {
 
         $where = "(usr_email_address=" . $this->db->escape($email_or_nick) . " OR usr_nick=" . $this->db->escape($email_or_nick) . ") AND usr_password=" . $this->db->escape(md5($password)) . "";
@@ -131,6 +147,10 @@ class User_model extends MY_Model {
         return $result_array;
     }
 
+    public function getId() {
+        return $this->userId;
+    }    
+    
     public function getUserId() {
         return $this->userId;
     }
@@ -170,6 +190,10 @@ class User_model extends MY_Model {
     protected function setUserId($usrId) {
         $this->userId = $usrId;
     }
+    
+    protected function setId($newId) {
+        $this->userId = $newId;
+    }    
 
 }
 

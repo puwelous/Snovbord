@@ -5,6 +5,9 @@ class Order_model extends MY_Model {
     public $_table = 'sb_order';
     public $primary_key = 'o_id';
 
+    private $id;
+    
+    
     public $cart;
     public $shipping_method;
     public $payment_method;
@@ -50,7 +53,10 @@ class Order_model extends MY_Model {
     }
 
     /*     * ********* setters *********** */
-
+    public function setId( $newId ){
+        $this->id = $newId;
+    }
+    
     public function setCart($newCart) {
         $this->cart = $newCart;
     }
@@ -80,7 +86,10 @@ class Order_model extends MY_Model {
     }     
 
     /*     * ********* getters *********** */
-
+    public function getId( ){
+        return $this->id;
+    }
+    
     public function getCart() {
         return $this->cart;
     }

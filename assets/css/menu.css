@@ -964,3 +964,17 @@ div.overlay-content button.pp_button_active{
     /*border: solid gray 1px;*/
     /*float: left;*/
 }
+
+div.preview_item .preview_item_imgs_wrapper{
+    /*display: inline;*/
+    margin: 0px;
+    width: 240px;
+    height: 351px;
+    text-align: initial;
+}
+
+div.preview_item .preview_item_imgs_wrapper img {
+    position: absolute;
+    width: 240px;
+    height: 351px;
+}
