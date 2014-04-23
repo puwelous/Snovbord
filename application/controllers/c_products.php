@@ -3,6 +3,8 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
+require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
+
 class C_products extends MY_Controller {
 
     public function __construct() {
@@ -53,32 +55,6 @@ class C_products extends MY_Controller {
 
         $this->load->view('templates/header', $template_data);
         $this->load->view('v_products', $data);
-    }
-
-}
-
-class Product_screen_representation {
-
-    private $product_id;
-    private $product_name;
-    private $urls;
-
-    public function __construct($productId, $productName, $urls) {
-        $this->product_id = $productId;
-        $this->product_name = $productName;
-        $this->urls = $urls;
-    }
-
-    public function getProductId() {
-        return $this->product_id;
-    }
-
-    public function getProductName() {
-        return $this->product_name;
-    }
-
-    public function getUrls() {
-        return $this->urls;
     }
 
 }

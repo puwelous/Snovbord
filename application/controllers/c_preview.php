@@ -3,6 +3,9 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
+
+require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
+
 class C_preview extends MY_Controller {
 
     public function __construct() {
@@ -112,7 +115,7 @@ class C_preview extends MY_Controller {
         }
 
         // load user's cart
-        $users_cart = $this->cart_model->get_open_cart_by_owner_id($actual_user_id, TRUE);
+        $users_cart = $this->cart_model->get_open_cart_by_owner_id($actual_user_id);
 
 //        log_message('debug', 'ordered_size_id is:' . $ordered_size_id);
 //        $ordered_size_name = $this->possible_size_for_product_model->get_possible_size_for_product_by_id( $ordered_size_id )->getName();
@@ -184,33 +187,7 @@ log_message('debug', '$users_cart aft :' . print_r($users_cart, TRUE));
         }
 
 
-        redirect('/c_finalproducts/index', 'refresh');
-    }
-
-}
-
-class Product_screen_representation {
-
-    private $product_id;
-    private $product_name;
-    private $urls;
-
-    public function __construct($productId, $productName, $urls) {
-        $this->product_id = $productId;
-        $this->product_name = $productName;
-        $this->urls = $urls;
-    }
-
-    public function getProductId() {
-        return $this->product_id;
-    }
-
-    public function getProductName() {
-        return $this->product_name;
-    }
-
-    public function getUrls() {
-        return $this->urls;
+        redirect('/c_products/index', 'refresh');
     }
 
 }

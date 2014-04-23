@@ -76,15 +76,69 @@ class Cart_model extends MY_Model {
         return $this->is_present_by('u_ordering_person_id', $owner_id, $asObject);
     }
 
-    public function get_open_cart_by_owner_id($owner_id, $asObject = TRUE) {
-        if ($asObject) {
-            $row = $this->cart_model->as_object()->get_by(array('crt_ordering_person_id' => $owner_id, 'crt_status' => 'OPEN'));
-        } else {
-            $row = $this->cart_model->as_array()->get_by(array('crt_ordering_person_id' => $owner_id, 'crt_status' => 'OPEN'));
+    public function get_open_cart_by_owner_id($owner_id) {
+        
+        $result = $this->cart_model->get_by(array('crt_ordering_person_id' => $owner_id, 'crt_status' => self::CART_STATUS_OPEN));
+        
+        if ( !$result ) {
+            return NULL;
         }
-        return $row;
+        
+        $cart_instance = new Cart_model();
+        $cart_instance->instantiate($result->crt_sum, $result->crt_status, $result->crt_assigned_order, $result->crt_ordering_person_id);
+        $cart_instance->setId( $result->crt_id );
+        
+        return $cart_instance;
     }
 
+    public function remove_ordered_product( $orderedProduct ){
+        
+        $ordered_product_id = ( $orderedProduct instanceof Ordered_product_model ? $orderedProduct->getId() : $orderedProduct );
+        
+        log_message('debug', 'Trying to remove ordered_product ' . $ordered_product_id . ' from cart ' . $this->id );
+        
+        // load ordered_product according to parameter passes
+        // delete ordered product from sb_ordered_product table
+        $delete_result = $this->ordered_product_model->delete( $ordered_product_id );
+        if ($delete_result <= 0) {
+            log_message('debug', 'Result of deletion is nonpositive. How come user tried to delete ordered product that does not exist? Form generation failed?');
+            throw new Exception('Deleting ordered_product from DB failed.');
+            return;
+        }
+        
+        // recalculation
+        
+        $finalSum = 0.0;
+        
+        // get all ordered_products that belong to shopping cart
+        $ordered_products_price_incl = $this->ordered_product_model->get_all_ordered_products_price_including_by_cart_id( $this->id );
+        
+        if (count( $ordered_products_price_incl ) == 0) {
+            // no ordered products in a cart
+            //throw new EmptyCartException('Cart(ID:' . $this->id . ') is empty. Not necessary to calculate it`s value.');
+            throw new Exception('Cart(ID:' . $this->id . ') is empty. Not necessary to calculate it`s value.');
+        } else {
+            // some products in a cart still left, calculate value
+            foreach ($ordered_products_price_incl as $single_ordered_product_with_price) {
+                $price_per_ordered_product = ($single_ordered_product_with_price->getProductPrice() * $single_ordered_product_with_price->getOrderedProductCount());
+                $finalSum = $finalSum + $price_per_ordered_product;
+            }
+            
+            $this->setSum($finalSum);
+            // update price of a shopping cart
+//            $update_result = $this->cart_model->update( $this->id, array('crt_sum' => $finalSum));
+//
+//            if ($update_result <= 0) {
+//                // amount of cart could not be updated, throw exception
+//                //throw new CartUpdateException('Cart (' . $this->id . ') could not be updated to price ' . $finalSum);
+//                throw new Exception('Cart (' . $this->id . ') could not be updated to price ' . $finalSum);
+//            } else {
+//                log_message('debug', 'Shopping cart`s (' . $this->id . ') price successfully updated.');
+//            }
+        }        
+        
+    }
+    
 //    public function get_open_cart_including_ordered_prods_by_owner_id($owner_id, $asObject = TRUE) {
 //        if ($asObject) {
 //            $row = $this->cart_model->as_object()->with('ordered_product')->get_by(array('u_ordering_person_id' => $owner_id, 'c_status' => 'OPEN'));

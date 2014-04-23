@@ -5,8 +5,9 @@ class Shipping_method_model extends MY_Model {
     public $_table = 'sb_shipping_method';
     public $primary_key = 'sm_id';
 
-    public $name;
-    public $price;
+    private $id;
+    private $name;
+    private $cost;
     
     public $protected_attributes = array('sm_id');
 
@@ -21,38 +22,64 @@ class Shipping_method_model extends MY_Model {
     public function instantiate($name, $price) {
 
         $this->name=$name;
-        $this->price=$price;
+        $this->cost=$price;
     }
 
     /*     * * database operations ** */
     
-    public function insert_shipping_method(Shipping_method_model $shipping_method_instance) {
+    public function save() {
 
-        $this->shipping_method_model->insert(
+        return $this->shipping_method_model->insert(
                 array(
-                    'sm_name' => $shipping_method_instance->name,
-                    'sm_price'=> $shipping_method_instance->price
+                    'sm_name' => $this->name,
+                    'sm_cost'=> $this->cost
         ));
+    }
+    
+    public function get_all_shipping_methods(){
+        
+        $shipping_methods_raw = $this->shipping_method_model->as_object()->get_all();
+
+        if ( !$shipping_methods_raw ){
+            return NULL;
+        }
+        
+        $shipping_methods_instances_array = array();
+        
+        foreach ( $shipping_methods_raw as $shipping_method_instance_raw ){
+            $shipping_method_instance = new Shipping_method_model();
+            $shipping_method_instance->instantiate( $shipping_method_instance_raw->sm_name, $shipping_method_instance_raw->sm_cost);
+            $shipping_method_instance->setId($shipping_method_instance_raw->sm_id);
+            $shipping_methods_instances_array[] = $shipping_method_instance;
+        }
+        
+        return $shipping_methods_instances_array;
     }
 
     /*     * ********* setters *********** */
-
+    public function setId( $newId ){
+        $this->id = $newId;
+    }
+    
     public function setName($newName) {
         $this->name = $newName;
     }
     
-    public function setPrice($newPrice) {
-        $this->price = $newPrice;
+    public function setCost($newCost) {
+        $this->cost = $newCost;
     }    
 
     /*     * ********* getters *********** */
-
+    public function getId(){
+        return $this->id;
+    }
+    
     public function getName() {
         return $this->name;
     }
     
-    public function getPrice() {
-        return $this->price;
+    public function getCost() {
+        return $this->cost;
     }    
 }
 

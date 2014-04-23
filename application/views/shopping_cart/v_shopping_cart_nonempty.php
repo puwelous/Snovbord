@@ -1,7 +1,7 @@
 <script type="text/javascript">
     $(document).ready(function(){    
 
-        var formerShippingMethodPrice = parseFloat( <?php echo $shipping_methods[0]->sm_price; ?> );
+        var formerShippingMethodPrice = parseFloat( <?php echo $shipping_methods[0]->getCost(); ?> );
         $("li.hidable").css('visibility', 'hidden');
 
         $(".add_one_item_wrapper").click( function(){
@@ -139,40 +139,52 @@
 
 
             <div class="cart_list">
-                <?php for ($i = 0; $i < count($ordered_products); ++$i): ?>
+                <?php for ($i = 0; $i < count($ordered_products_full_info); ++$i): ?>
                     <div class="cart_list_item">
                         <?php
                         $dataId = array(
                             'type' => 'hidden',
-                            'name' => 'ordered_product_' . $ordered_products[$i]->op_id . '_id',
-                            'value' => $ordered_products[$i]->op_id
+                            'name' => 'ordered_product_' . $ordered_products_full_info[$i]->getOrderedProductId() . '_id',
+                            'value' => $ordered_products_full_info[$i]->getOrderedProductId()
                         );
                         echo form_input($dataId);
 
                         $dataPrice = array(
                             'type' => 'hidden',
-                            'name' => 'ordered_product_' . $ordered_products[$i]->op_id . '_item_price',
-                            'value' => $ordered_products[$i]->pd_price
+                            'name' => 'ordered_product_' . $ordered_products_full_info[$i]->getOrderedProductId() . '_item_price',
+                            'value' => $ordered_products_full_info[$i]->getProductPrice()
                         );
                         echo form_input($dataPrice);
                         ?>
                         <div class="product_view_section">
-                            <a href="images/klematis_big.htm">
-                                <?php echo img($ordered_products[$i]->pd_photo_url); ?>
-                            </a>
+                            <div class="preview_item">
+                                <div class="preview_item_imgs_wrapper">
+                                    <?php
+                                    $representation_urls = $ordered_products_full_info[$i]->getProductScreenRepresentation()->getUrls();
+                                    foreach ($representation_urls as $representation_url_item) {
+                                        $image_properties = array(
+                                            'src' => $representation_url_item,
+                                            'alt' => $ordered_products_full_info[$i]->getProductScreenRepresentation()->getProductName(),
+                                            'class' => 'product_image'
+                                        );
+                                        echo img($image_properties);
+                                    }
+                                    ?>
+                                </div>
+                            </div> 
                         </div>
                         <div class="product_details_section">
                             <div class="product_detail_line">
                                 <span class="text_light upper_cased">name:</span>
-                                <span class="text_light upper_cased bold"><?php echo $ordered_products[$i]->pd_product_name; ?></span>
+                                <span class="text_light upper_cased bold"><?php echo $ordered_products_full_info[$i]->getProductName(); ?></span>
                             </div>
                             <div class="product_detail_line">
                                 <span class="text_light upper_cased">author:</span>
-                                <span class="text_light upper_cased bold"><?php echo $ordered_products[$i]->u_nick; ?></span>
+                                <span class="text_light upper_cased bold"><?php echo $ordered_products_full_info[$i]->getCreatorNick(); ?></span>
                             </div>
                             <div class="product_detail_line">
                                 <span class="text_light upper_cased">size:</span>
-                                <span class="text_light upper_cased bold"><?php echo $ordered_products[$i]->psfp_name; ?></span>
+                                <span class="text_light upper_cased bold"><?php echo $ordered_products_full_info[$i]->getPossibleSizeForProductName(); ?></span>
                             </div>
                             <div class="product_detail_line">
                                 <span class="text_light upper_cased">count:</span>
@@ -181,14 +193,14 @@
                                     <?php
                                     $dataProductAmount = array(
                                         'type' => 'number',
-                                        'name' => 'ordered_product_' . $ordered_products[$i]->op_id . '_amount',
-                                        'value' => $ordered_products[$i]->op_amount,
+                                        'name' => 'ordered_product_' . $ordered_products_full_info[$i]->getOrderedProductId() . '_amount',
+                                        'value' => $ordered_products_full_info[$i]->getOrderedProductCount(),
                                         'class' => 'text_light upper_cased bold',
                                         'readonly' => 'readonly'
                                     );
                                     echo form_input($dataProductAmount);
                                     ?>                                    
-                                    <!--<input type="number" name="ABCD" value="<?php echo $ordered_products[$i]->op_amount; ?>" class="text_light upper_cased bold" readonly>-->  
+                                    <!--<input type="number" name="ABCD" value="<?php echo $ordered_products_full_info[$i]->getOrderedProductCount(); ?>" class="text_light upper_cased bold" readonly>-->  
                                     <!--</span>-->
                                 </span>
                                 <span class="add_one_item_wrapper"><span class="text_light upper_cased">+</span></span>
@@ -197,7 +209,7 @@
                             </div>
                             <div class="product_detail_line">
                                 <!--<span class="text_light upper_cased italic red_on_hover">-->
-                                    <?php echo anchor('c_shopping_cart/remove_item/' . $ordered_products[$i]->op_id, 'remove', array('class' => 'text_light upper_cased italic red_on_hover')); ?>
+                                <?php echo anchor('c_shopping_cart/remove_item/' . $ordered_products_full_info[$i]->getOrderedProductId(), 'remove', array('class' => 'text_light upper_cased italic red_on_hover')); ?>
                                 <!--</span>-->
                                 <span class="text_light italic">/</span>
                                 <span class="text_light upper_cased italic red_on_hover">edit</span>
@@ -207,7 +219,7 @@
                             <div class="product_price_line">
                                 <span class="text_light upper_cased">price/</span>
                                 <span class="text_light">item:</span>
-                                <span class="text_light upper_cased bold"><?php echo $ordered_products[$i]->pd_price; ?>&euro;</span>
+                                <span class="text_light upper_cased bold"><?php echo $ordered_products_full_info[$i]->getProductPrice(); ?>&euro;</span>
                                 <span class="text_light bold">dph</span>
                             </div>
                         </div>
@@ -327,19 +339,19 @@
                         <?php for ($i = 0; $i < count($shipping_methods); ++$i): ?>
                             <li>
                                 <span class="text_light upper_cased">
-                                    <?php echo $shipping_methods[$i]->sm_name; ?>&nbsp;
+                                    <?php echo $shipping_methods[$i]->getName(); ?>&nbsp;
                                 </span>
                                 <span class="shipping_method_price_wrapper text_light">
-                                    +<span class="shipping_method_price"><?php echo $shipping_methods[$i]->sm_price; ?></span>&nbsp;&euro;
+                                    +<span class="shipping_method_price"><?php echo $shipping_methods[$i]->getCost(); ?></span>&nbsp;&euro;
                                 </span>
                                 <input type = "radio"
                                        class="css-checkbox"
                                        name = "shipping_method"
-                                       id = "<?php echo 'shipping_method_' . $shipping_methods[$i]->sm_id; ?>"
-                                       value = "<?php echo $shipping_methods[$i]->sm_id; ?>"
+                                       id = "<?php echo 'shipping_method_' . $shipping_methods[$i]->getId(); ?>"
+                                       value = "<?php echo $shipping_methods[$i]->getId(); ?>"
                                        <?php if ($i == 0) echo 'checked ="checked"'; ?>
                                        />
-                                <label for="<?php echo 'shipping_method_' . $shipping_methods[$i]->sm_id; ?>" class="css-label">&nbsp;</label>
+                                <label for="<?php echo 'shipping_method_' . $shipping_methods[$i]->getId(); ?>" class="css-label">&nbsp;</label>
                                 <div style="clear:both;"></div> 
                             </li>
                         <?php endfor; ?>
@@ -353,16 +365,16 @@
                     </h2>
                     <ul id="shipping_list_section" class="shipping_list">
 
-                        <?php for ($i = 0; $i < count($payment_methods); ++$i): ?><li>
-                                <span class="text_light upper_cased"><?php echo $payment_methods[$i]->pm_name; ?>&nbsp;+<?php echo $payment_methods[$i]->pm_cost; ?>&nbsp;&euro;</span>
+                        <?php for ($i = 0; $i < count( $payment_methods ); ++$i): ?><li>
+                                <span class="text_light upper_cased"><?php echo $payment_methods[$i]->getName(); ?>&nbsp;+<?php echo $payment_methods[$i]->getCost(); ?>&nbsp;&euro;</span>
                                 <input type = "radio"
                                        class="css-checkbox"
                                        name = "payment_method"
-                                       id = "payment_method_<?php echo $payment_methods[$i]->pm_id; ?>"
-                                       value = "<?php echo $payment_methods[$i]->pm_id; ?>"
+                                       id = "payment_method_<?php echo $payment_methods[$i]->getId(); ?>"
+                                       value = "<?php echo $payment_methods[$i]->getId(); ?>"
                                        <?php if ($i == 0) echo 'checked ="checked"'; ?>
                                        />
-                                <label for="payment_method_<?php echo $payment_methods[$i]->pm_id; ?>" class="css-label">&nbsp;</label>
+                                <label for="payment_method_<?php echo $payment_methods[$i]->getId(); ?>" class="css-label">&nbsp;</label>
                                 <div style="clear:both;"></div></li>
                         <?php endfor; ?>                        
 

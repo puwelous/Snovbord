@@ -473,8 +473,8 @@ float: right;*/
 
 .cart_list .cart_list_item .product_view_section img {
 
-    height: 150px;
-    width: 150px;
+    max-height: 150px;
+    width: auto;
 
 }
 
@@ -723,6 +723,10 @@ h5{
     color: #33ff00;
 }
 
+.pp_light_blue{
+    color: deepskyblue;
+}
+
 [contenteditable]:hover:not(:focus) {
     outline: 1px dotted #ccc;
 }
@@ -965,8 +969,13 @@ div.overlay-content button.pp_button_active{
     /*float: left;*/
 }
 
+div.preview_item {
+    position: relative;
+}
+
 div.preview_item .preview_item_imgs_wrapper{
     /*display: inline;*/
+    /*position: relative;*/
     margin: 0px;
     width: 240px;
     height: 351px;

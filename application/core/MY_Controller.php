@@ -123,7 +123,7 @@ class MY_Controller extends CI_Controller {
 
         $user_cart = $this->cart_model->get_open_cart_by_owner_id( $user_id );
         
-        if ( empty( $user_cart ) || count( $user_cart ) <= 0 ) {
+        if ( is_null($user_cart)  ) {
             $template_data['shopping_cart_template'] = $this->parser->parse(constant('MY_Controller::' . 'SHOPPING_CART_EMPTY_TEMPLATE_PATH'), array(), TRUE);
         }else{
             $template_data['shopping_cart_template'] = $this->parser->parse(constant('MY_Controller::' . 'SHOPPING_CART_NONEMPTY_TEMPLATE_PATH'), array(), TRUE);

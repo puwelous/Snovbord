@@ -1,5 +1,7 @@
 <?php
 
+require_once( APPPATH . '/models/DataHolders/ordered_product_full_info.php');
+
 class Ordered_product_model extends MY_Model {
 
     public $_table = 'sb_ordered_product';
@@ -44,12 +46,14 @@ class Ordered_product_model extends MY_Model {
                 ));
     }
 
-    public function get_ordered_product_full_info_by_cart_id($cart_id) {
-        $this->db->select('sb_ordered_product.op_id, sb_ordered_product.psfp_name, sb_ordered_product.op_amount, sb_ordered_product.pd_id, sb_product_definition.pd_id, sb_product_definition.pd_product_name, sb_product_definition.pd_photo_url,  sb_product_definition.pd_price, sb_user.u_nick');
+    public function get_ordered_product_full_info_by_cart_id( $cartId ) {
+        $this->db->select(
+                'sb_ordered_product.ordrd_prdct_id as "orderedProductId", sb_ordered_product.ordrd_prdct_count as "orderedProductCount", sb_ordered_product.ordrd_prdct_crt_id, sb_possible_size_for_product.psfp_name as "possibleSizeForProductName", sb_possible_size_for_product.psfp_product_id, sb_product.prdct_id as "productId", sb_product.prdct_name as "productName", sb_product.prdct_price as "productPrice", sb_user.usr_nick as "creatorNick" ');
         $this->db->from('sb_ordered_product');
-        $this->db->where('sb_ordered_product.c_id', $cart_id);
-        $this->db->join('sb_product_definition', 'sb_ordered_product.pd_id = sb_product_definition.pd_id');
-        $this->db->join('sb_user', 'sb_product_definition.pd_product_creator = sb_user.u_id');
+        $this->db->where('sb_ordered_product.ordrd_prdct_crt_id', $cartId);
+        $this->db->join('sb_possible_size_for_product', 'sb_ordered_product.ordrd_prdct_psfp_id = sb_possible_size_for_product.psfp_id');
+        $this->db->join('sb_product', 'sb_possible_size_for_product.psfp_product_id = sb_product.prdct_id');
+        $this->db->join('sb_user', 'sb_product.prdct_creator = sb_user.usr_id');
 
         $query = $this->db->get();
 
@@ -57,7 +61,23 @@ class Ordered_product_model extends MY_Model {
             return NULL;
         }
 
-        return $query->result();
+        $ordered_products_full_info_array = array();
+        
+        foreach ( $query->result() as $raw_data) {
+          $ordered_product_full_info_instance = new Ordered_product_full_info(
+                  $raw_data->orderedProductId, 
+                  $raw_data->orderedProductCount,
+                  $raw_data->possibleSizeForProductName,
+                  $raw_data->productId,
+                  $raw_data->productName,
+                  $raw_data->productPrice,
+                  $raw_data->creatorNick,
+                  NULL // screen representation comes later
+                  );
+          $ordered_products_full_info_array[] = $ordered_product_full_info_instance;
+        }
+        
+        return $ordered_products_full_info_array;
     }
     
     public function get_all_ordered_products_by_cart_id( $cart_id ){
@@ -66,19 +86,37 @@ class Ordered_product_model extends MY_Model {
         return $result;
     }
     
-    public function get_all_ordered_products_price_including_by_cart_id( $cart_id ){
-        $this->db->select('sb_ordered_product.*, sb_product_definition.pd_price');
+    public function get_all_ordered_products_price_including_by_cart_id( $cartId ){
+        $this->db->select(
+                'sb_ordered_product.ordrd_prdct_id as "orderedProductId", sb_ordered_product.ordrd_prdct_count as "orderedProductCount", sb_ordered_product.ordrd_prdct_crt_id, sb_possible_size_for_product.psfp_product_id, sb_product.prdct_id as "productId", sb_product.prdct_price as "productPrice" ');
         $this->db->from('sb_ordered_product');
-        $this->db->where('sb_ordered_product.c_id', $cart_id);
-        $this->db->join('sb_product_definition', 'sb_ordered_product.pd_id = sb_product_definition.pd_id');
+        $this->db->where('sb_ordered_product.ordrd_prdct_crt_id', $cartId);
+        $this->db->join('sb_possible_size_for_product', 'sb_ordered_product.ordrd_prdct_psfp_id = sb_possible_size_for_product.psfp_id');
+        $this->db->join('sb_product', 'sb_possible_size_for_product.psfp_product_id = sb_product.prdct_id');
 
         $query = $this->db->get();
 
         if ($query->num_rows() <= 0) {
             return NULL;
         }
-
-        return $query->result();
+        
+        $ordered_products_full_info_array = array();
+        
+        foreach ( $query->result() as $raw_data) {
+          $ordered_product_full_info_instance = new Ordered_product_full_info(
+                  NULL, 
+                  $raw_data->orderedProductCount, // this
+                  NULL,
+                  NULL,
+                  NULL,
+                  $raw_data->productPrice, // this
+                  NULL,
+                  NULL 
+                  );
+          $ordered_products_full_info_array[] = $ordered_product_full_info_instance;
+        }
+        
+        return $ordered_products_full_info_array;
     }    
 
     /*     * ********* setters *********** */
