@@ -219,7 +219,9 @@
                 
                 <?php
                 /* dynamicaly added <LI> element for admin only */
-                if( isset($admin_template ) ) {
+                if ( isset( $customer_template ) ){
+                    echo $customer_template;
+                }else if( isset($admin_template ) ) {
                     echo $admin_template;
                 }
                 ?>                

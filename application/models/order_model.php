@@ -134,6 +134,29 @@ class Order_model extends MY_Model {
         
         return $result_array;
     }    
+    
+    public function get_all_shipping_orders(){
+        $result = $this->order_model->get_many_by('ordr_status', Order_model::ORDER_STATUS_SHIPPING);
+        
+        $result_array = array();
+        
+        foreach ($result as $order_instance_std_obj) {
+            $order_model_inst = new Order_model();
+            $order_model_inst->instantiate(
+                    $order_instance_std_obj->ordr_final_sum,
+                    $order_instance_std_obj->ordr_status,
+                    $order_instance_std_obj->ordr_assigned_cart,
+                    $order_instance_std_obj->ordr_assigned_shipping_method,
+                    $order_instance_std_obj->ordr_assigned_payment_method,
+                    $order_instance_std_obj->ordr_is_ship_addr_regist_addr,
+                    $order_instance_std_obj->ordr_order_address_id
+                    );
+            $order_model_inst->setId( $order_instance_std_obj->ordr_id );
+            $result_array[] = $order_model_inst;
+        }
+        
+        return $result_array;
+    }     
 
     /*     * ********* setters *********** */
     public function setId( $newId ){

@@ -12,11 +12,14 @@
             </div>                    
             <div class="half_container">
                 <h2>
-                    <?php echo anchor('c_admin/open_orders_admin', 'open orders', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
+                    <?php echo anchor('c_admin/order_admin/open', 'open orders', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
                 </h2>
                 <h2>
-                    <?php echo anchor('c_admin/paid_orders_admin', 'paid orders', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
-                </h2>                
+                    <?php echo anchor('c_admin/order_admin/paid', 'paid orders', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
+                </h2>
+                <h2>
+                    <?php echo anchor('c_admin/order_admin/shipping', 'shipping orders', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
+                </h2>                  
             </div>
         </div>
     </div>

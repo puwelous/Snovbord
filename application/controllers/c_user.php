@@ -102,6 +102,7 @@ class C_user extends MY_Controller {
                     'user_id' => $loaded_user_info_result->getUserId(),
                     'user_nick' => $loaded_user_info_result->getNick(),
                     'user_email' => $loaded_user_info_result->getEmailAddress(),
+                    'user_type' => $loaded_user_info_result->getUserType(),
                     'logged_in' => TRUE,
                 );
 
@@ -183,7 +184,7 @@ class C_user extends MY_Controller {
                     'user_nick' => $loaded_user_info_result->getNick(),
                     'user_email' => $loaded_user_info_result->getEmailAddress(),
                     'user_type' => $loaded_user_info_result->getUserType(),
-                    'logged_in' => 1,
+                    'logged_in' => TRUE,
                 );
 
                 $this->session->set_userdata($new_session_data);

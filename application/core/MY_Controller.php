@@ -7,11 +7,13 @@ class MY_Controller extends CI_Controller {
 
     const LOGIN_TEMPLATE_PATH = 'templates/login';
     const LOGOUT_TEMPLATE_PATH = 'templates/logout';
+    const CUSTOMER_TEMPLATE_PATH = 'templates/customer';
     const ADMIN_TEMPLATE_PATH = 'templates/admin';
     const SHOPPING_CART_EMPTY_TEMPLATE_PATH = 'templates/shopping_cart_empty';
     const SHOPPING_CART_NONEMPTY_TEMPLATE_PATH = 'templates/shopping_cart_nonempty';
     
     const USER_TYPE_PROVIDER_ID = 2;
+    const USER_TYPE_CUSTOMER_ID = 1;
 
     public function __construct() {
         parent::__construct();
@@ -74,6 +76,21 @@ class MY_Controller extends CI_Controller {
         return FALSE;
     }
     
+    protected function authentify_customer() {
+
+        if (!$this->authentify()) {
+            return FALSE;
+        }
+
+        // session ok, check if it's admin
+        if ($this->session->userdata('user_type') != NULL && $this->session->userdata('user_type') == self::USER_TYPE_CUSTOMER_ID ) {
+
+            return TRUE;
+        }
+
+        return FALSE;
+    }    
+    
     protected function authentify_provider() {
 
         if (!$this->authentify()) {
@@ -96,7 +113,7 @@ class MY_Controller extends CI_Controller {
     protected function load_header_templates(&$template_data) {
         $this->load_log_in_or_out_template($template_data);
         $this->load_shopping_cart_template($template_data);
-        $this->load_admin_template($template_data);
+        $this->load_user_template($template_data);
     }
 
     private function load_log_in_or_out_template(&$template_data) {
@@ -130,9 +147,12 @@ class MY_Controller extends CI_Controller {
         }
     }
 
-    private function load_admin_template(&$template_data) {
+    private function load_user_template(&$template_data) {
 
-        if ($this->authentify_admin()) {
+        if ( $this->authentify_customer() ){
+            // load elements to header for customer/client
+            $template_data['customer_template'] = $this->parser->parse(constant('MY_Controller::' . 'CUSTOMER_TEMPLATE_PATH'), array(), TRUE);
+        }else if ($this->authentify_provider()) {
             // load elements to header for admin
             $template_data['admin_template'] = $this->parser->parse(constant('MY_Controller::' . 'ADMIN_TEMPLATE_PATH'), array(), TRUE);
         }

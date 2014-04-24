@@ -25,11 +25,12 @@
             <h3>Ordered products info:</h3>
             <?php echo $table_data_ordered_products; ?>
             <br />
-            <h3>Change order status to SHIPPING:</h3>
+            <?php if ( isset( $order_next_status ) ) : ?>
+            <h3>Change order status <?php echo $order_actual_status; ?> to <?php echo $order_next_status; ?></h3>
             <?php 
-                echo form_open('c_admin/change_order_status_to_shipping/' . $order_id );
+                echo form_open('c_admin/change_order_status/next_status/' . $order_next_status .'/order_id/' . $order_id );                
                 echo form_submit('mysubmit', 'Change');
             ?>
-            
+            <?php endif?>
         </div>
     </div><!-- end of content-->

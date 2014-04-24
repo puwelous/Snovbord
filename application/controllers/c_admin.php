@@ -87,8 +87,7 @@ class C_admin extends MY_Controller {
         $data['actual_user_nick'] = $this->get_user_nick();
 
 
-        $this->db->trans_begin();
-        {        // field name, error message, validation rules
+        $this->db->trans_begin(); {        // field name, error message, validation rules
             $this->form_validation->set_rules('npf_product_name', 'Product name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
             $this->form_validation->set_rules('npf_available_sizes', 'Product sizes', 'required');
             $this->form_validation->set_rules('npf_product_price', 'Product price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
@@ -825,39 +824,7 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_orders', $data);
     }
 
-    public function open_orders_admin() {
-
-        if (!$this->authentify_provider()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $this->load->library('table');
-        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
-
-        $this->table->set_template($tmpl);
-        $this->table->set_heading('Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?');
-
-        $all_open_orders = $this->order_model->get_all_open_orders();
-
-        foreach ($all_open_orders as $single_open_order_model_instance) {
-            $this->table->add_row(
-                    $single_open_order_model_instance->getFinalSum() . ' &euro;', $single_open_order_model_instance->getCart(), $single_open_order_model_instance->getShippingMethod(), $single_open_order_model_instance->getPaymentMethod(), $single_open_order_model_instance->getIsShippingAddressRegistrationAddress()
-            );
-        }
-
-        $template_data = array();
-        $this->set_title($template_data, 'Open orders administration');
-        $this->load_header_templates($template_data);
-
-        $data['table_data'] = $this->table->generate();
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/orders/v_admin_open_orders', $data);
-    }
-
-    public function paid_orders_admin() {
-
+    public function order_admin( $order_type ) {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
@@ -869,9 +836,20 @@ class C_admin extends MY_Controller {
         $this->table->set_template($tmpl);
         $this->table->set_heading('ID', 'Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?', 'Detail');
 
-        $all_paid_orders = $this->order_model->get_all_paid_orders();
+        if ( strtoupper( $order_type ) == 'OPEN' ){
+            $all_specific_orders = $this->order_model->get_all_open_orders();
+        }else if (  strtoupper( $order_type ) == 'PAID' ){
+            $all_specific_orders = $this->order_model->get_all_paid_orders();
+        }else if ( strtoupper( $order_type ) == 'SHIPPING' ){
+            $all_specific_orders = $this->order_model->get_all_shipping_orders();
+        }else{
+            $all_specific_orders = NULL;
+            log_message('error', 'Parameter order type for order_admin incorrect.' . $order_type);
+            redirect('c_admin/orders_admin');
+            return;
+        }
 
-        foreach ($all_paid_orders as $single_paid_order_model_instance) {
+        foreach ($all_specific_orders as $single_specific_order_model_instance) {
 
             $atts = array(
                 'width' => '800',
@@ -883,24 +861,24 @@ class C_admin extends MY_Controller {
                 'screeny' => '0'
             );
 
-            $anchor = anchor_popup('c_admin/paid_order_index/' . $single_paid_order_model_instance->getId(), 'Details', $atts);
+            $anchor = anchor_popup('c_admin/any_order_detail_index/' . $single_specific_order_model_instance->getId(), 'Details', $atts);
 
             $this->table->add_row(
-                    $single_paid_order_model_instance->getId(), $single_paid_order_model_instance->getFinalSum() . ' &euro;', $single_paid_order_model_instance->getCart(), $single_paid_order_model_instance->getShippingMethod(), $single_paid_order_model_instance->getPaymentMethod(), ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $anchor
+                    $single_specific_order_model_instance->getId(), $single_specific_order_model_instance->getFinalSum() . ' &euro;', $single_specific_order_model_instance->getCart(), $single_specific_order_model_instance->getShippingMethod(), $single_specific_order_model_instance->getPaymentMethod(), ($single_specific_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $anchor
             );
         }
 
         $template_data = array();
-        $this->set_title($template_data, 'Paid orders administration');
+        $this->set_title($template_data, 'Shipping orders administration');
         $this->load_header_templates($template_data);
 
         $data['table_data'] = $this->table->generate();
 
         $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/orders/v_admin_paid_orders', $data);
+        $this->load->view('admin/orders/v_admin_shipping_orders', $data);
     }
 
-    public function paid_order_index($orderId) {
+    public function any_order_detail_index($orderId) {
 
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -994,6 +972,12 @@ class C_admin extends MY_Controller {
         $data['table_data_ordered_products'] = $this->table->generate();
 
         $data['order_id'] = $orderId;
+        $data['order_actual_status'] = $single_paid_order_model_instance->getStatus();
+        if ( $single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_OPEN ){
+            $data['order_next_status'] = Order_model::ORDER_STATUS_PAID;
+        }else if( $single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_PAID ){
+            $data['order_next_status'] = Order_model::ORDER_STATUS_SHIPPING;
+        }
 
         $template_data = array();
         $this->set_title($template_data, 'Order detail');
@@ -1037,27 +1021,42 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/orders/v_admin_photo_detail', $data);
     }
 
-    public function change_order_status_to_shipping($orderId) {
+    public function change_order_status() {
 
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
+        
+        $params = $this->uri->uri_to_assoc(3);
+        
+        $order_id = $params['order_id'];
+        $next_status = $params['next_status'];
 
-        if (is_null($orderId) || !isset($orderId) || !is_numeric($orderId)) {
-            $this->redirectToHomePage();
+        if (is_null($order_id) || !isset($order_id) || !is_numeric($order_id)) {
+            log_message('error', 'Parameter for order status change incorrect.' . $order_id);
+            redirect('c_admin/orders_admin');
             return;
         }
-        
-        $order = $this->order_model->get_order_by_id( $orderId );
-        
-        $order->setStatus( Order_model::ORDER_STATUS_SHIPPING );
-        if ( $order->update_order() <= 0 ){
-            // set some flash data
-            log_message('error', 'Order update with order ID = ' . $orderId . ' has failed!');
+
+        $order = $this->order_model->get_order_by_id($order_id);
+
+        if( strtoupper( $next_status ) == 'PAID' ){
+            $order->setStatus(Order_model::ORDER_STATUS_PAID);
+        }else if ( strtoupper( $next_status ) == 'SHIPPING' ){
+            $order->setStatus(Order_model::ORDER_STATUS_SHIPPING);
+        }else{
+            log_message('error', 'Incorrect params for change_order_status(): ' . print_r( $params ,true));
+            redirect('c_admin/orders_admin');
         }
         
-        redirect('c_admin/orders_admin','refresh');
+        if ($order->update_order() <= 0) {
+            // set some flash data
+            log_message('error', 'Order update with order ID = ' . $order_id . ' has failed!');
+            redirect('c_admin/orders_admin');
+        }
+
+        redirect('c_admin/orders_admin', 'refresh');
     }
 
 }
