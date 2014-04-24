@@ -38,13 +38,14 @@ class User_model extends MY_Model {
 
         $this->password = md5($password); //MD5
 
-        if ($gender == 'male') {
-            $this->gender = 0;
-        } else if ($gender == 'female') {
-            $this->gender = 1;
-        } else {
-            $this->gender = -1;
-        }
+//        if ($gender == 'male') {
+//            $this->gender = 0;
+//        } else if ($gender == 'female') {
+//            $this->gender = 1;
+//        } else {
+//            $this->gender = -1;
+//        }
+        $this->gender = $gender;
 
         $this->address = $address;
         $this->userType = $userType;

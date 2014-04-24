@@ -36,6 +36,21 @@ class Payment_method_model extends MY_Model {
         ));
     }
     
+    public function get_payment_method_by_id( $paymentMethodId ){
+        
+        $result = $this->payment_method_model->get( $paymentMethodId );
+        
+        if ( !$result ) {
+            return NULL;
+        } else {
+            $loaded_payment_method = new Payment_method_model();
+            $loaded_payment_method->instantiate($result->pm_name, $result->pm_cost);
+            $loaded_payment_method->setId($result->pm_id);
+
+            return $loaded_payment_method;
+        }
+    }    
+    
     public function get_all_payment_methods(){
         
         $payment_methods_raw = $this->payment_method_model->get_all();

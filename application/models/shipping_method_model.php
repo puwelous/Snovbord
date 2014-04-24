@@ -36,6 +36,21 @@ class Shipping_method_model extends MY_Model {
         ));
     }
     
+    public function get_shipping_method_by_id( $shippingMethodId ){
+        
+        $result = $this->shipping_method_model->get( $shippingMethodId );
+        
+        if ( !$result ) {
+            return NULL;
+        } else {
+            $loaded_shipping_method = new Shipping_method_model();
+            $loaded_shipping_method->instantiate($result->sm_name, $result->sm_cost);
+            $loaded_shipping_method->setId($result->sm_id);
+
+            return $loaded_shipping_method;
+        }
+    }     
+    
     public function get_all_shipping_methods(){
         
         $shipping_methods_raw = $this->shipping_method_model->as_object()->get_all();

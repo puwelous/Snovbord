@@ -114,14 +114,13 @@ class C_order extends MY_Controller {
             }
             // create order
             $newOrder = new Order_model();
-            $newOrder->instantiate(
-                    $this->input->post('cart_id'), $this->input->post('shipping_method_id'), $this->input->post('payment_method_id'), ($is_order_address_set ? '1' : '0'), 'OPEN', $this->input->post('total_sum'), $new_order_address_id);
+            $newOrder->instantiate( $this->input->post('total_sum'), Order_model::ORDER_STATUS_OPEN, $this->input->post('cart_id'), $this->input->post('shipping_method_id'), $this->input->post('payment_method_id'), ($is_order_address_set ? '0' : '1'), $new_order_address_id);
             log_message('debug', 'New order: ' . print_r($newOrder, true));
 
-            $new_order_id = $newOrder->insert_order();
+            $new_order_id = $newOrder->save();
             log_message('debug', '$new_order_id :' . print_r($new_order_id, TRUE));
 
-            if (is_null($new_order_id) || $new_order_id == NULL || empty($new_order_id)) {
+            if (is_null($new_order_id) || $new_order_id == NULL ) {
                 log_message('debug', 'Creation of order failed!. Redirect!');
                 log_message('debug', 'Rolling the transaction back!');
                 $this->db->trans_rollback();
@@ -129,9 +128,13 @@ class C_order extends MY_Controller {
             }
 
             // edit cart info -> setting order for a cart
-            $updated_cart_result = $this->cart_model->update($this->input->post('cart_id'), array('o_id' => $new_order_id, 'c_status' => 'closed'));
+            $actual_cart = $this->cart_model->get_cart_by_id( $this->input->post('cart_id') );
+            $actual_cart->setOrder( $new_order_id );
+            $actual_cart->setStatus( Cart_model::CART_STATUS_CLOSED );
+            
+            $updated_cart_result = $actual_cart->update_cart();
 
-            if ($updated_cart_result < 0) {
+            if ($updated_cart_result <= 0) {
                 log_message('debug', 'Update of cart failed!. Redirect!');
                 log_message('debug', 'Rolling the transaction back!');
                 $this->db->trans_rollback();
@@ -149,15 +152,21 @@ class C_order extends MY_Controller {
             $this->db->trans_commit();
         }
 
+        log_message('debug', 'Session data:');
+        
+        
         $data['invoice_id'] = $new_order_id;
-        $this->session->set_userdata(array('invoice_id' => $new_order_id));
+        $this->session->set_userdata( 'invoice_id' , $new_order_id );
         $data['total'] = $this->input->post('total_sum');
-        $data['ordered_products'] = $this->session->userdata('ordered_products'); //$this->ordered_product_model->get_ordered_product_full_info_by_cart_id( $this->input->post('cart_id') );
+        $data['ordered_products_full_info'] = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id( $actual_cart->getId() );
         $data['order_address'] = $this->session->userdata('order_address');
-        $data['payment_method'] = $this->session->userdata('payment_method');
-        $data['shipping_method'] = $this->session->userdata('shipping_method');
+        
+        $data['payment_method'] =  $this->payment_method_model->get_payment_method_by_id( $this->input->post('payment_method_id') );
+        $data['shipping_method'] = $this->shipping_method_model->get_shipping_method_by_id( $this->input->post('shipping_method_id') );
 
-        $this->session->set_userdata(array('payment_amount' => $data['total']));
+        $this->session->set_userdata( 'payment_amount', $data['total'] );
+        
+log_message('debug', print_r( $this->session->all_userdata() ,true));
 
         //$data for e-banking !
         // render payment screen for order

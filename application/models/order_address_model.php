@@ -4,13 +4,14 @@ class Order_address_model extends MY_Model {
 
     public $_table = 'sb_order_address';
     public $primary_key = 'oa_id';
-    public $name;
-    public $address;
-    public $city;
-    public $zip;
-    public $country;
-    public $phone_number;
-    public $email_address;
+    private $id;
+    private $name;
+    private $address;
+    private $city;
+    private $zip;
+    private $country;
+    private $phone_number;
+    private $email_address;
     public $protected_attributes = array('oa_id');
 
     /* basic constructor */
@@ -21,7 +22,7 @@ class Order_address_model extends MY_Model {
 
     /* instance "constructor" */
 
-    public function instantiate($name, $address, $city, $zip, $country, $phone_number,$email_address ) {
+    public function instantiate($name, $address, $city, $zip, $country, $phone_number, $email_address) {
 
         $this->name = $name;
         $this->address = $address;
@@ -51,43 +52,60 @@ class Order_address_model extends MY_Model {
                 ));
     }
 
-//    /*     * ********* setters *********** */
-//
-//    public function setSum($newSum) {
-//        $this->sum = $newSum;
-//    }
-//
-//    public function setStatus($newStatus) {
-//        $this->status = $newStatus;
-//    }
-//
-//    public function setOrder($newOrder) {
-//        $this->order = $newOrder;
-//    }
-//
-//    public function setOrderingPerson($newOrderingPerson) {
-//        $this->ordering_person = $newOrderingPerson;
-//    }
-//
-//    /*     * ********* getters *********** */
-//
-//    public function getSum() {
-//        return $this->sum;
-//    }
-//
-//    public function getStatus() {
-//        return $this->status;
-//    }
-//
-//    public function getOrder() {
-//        return $this->order;
-//    }
-//
-//    public function getOrderingPerson() {
-//        return $this->ordering_person;
-//    }
+    public function get_order_address_by_id($orderAddressId) {
 
+        $result = $this->order_address_model->get($orderAddressId);
+
+        if (!$result) {
+            return NULL;
+        } else {
+            $loaded_order_address = new Order_address_model();
+            $loaded_order_address->instantiate(
+                    $result->oa_name, $result->oa_address, $result->oa_city, $result->oa_zip, $result->oa_country, $result->oa_phone_number, $result->oa_email_address
+            );
+
+            $loaded_order_address->setId($result->oa_id);
+
+            return $loaded_order_address;
+        }
+    }
+
+    /*     * ********* setters *********** */
+    public function setId( $newId){
+        $this->id = $newId;
+    }
+    /*     * ********* getters *********** */
+    public function getId() {
+        return $this->id;
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+
+    public function getAddress() {
+        return $this->address;
+    }
+
+    public function getCity() {
+        return $this->city;
+    }
+
+    public function getZip() {
+        return $this->zip;
+    }
+
+    public function getCountry() {
+        return $this->country;
+    }
+    public function getPhoneNumber() {
+        return $this->phone_number;
+    }
+
+    public function getEmailAddress() {
+        return $this->email_address;
+    }
 }
 
-/* End of file cart_model.php */
-/* Location: ./application/models/cart_model.php */
+/* End of file order_address_model.php */
+/* Location: ./application/models/order_address_model.php */

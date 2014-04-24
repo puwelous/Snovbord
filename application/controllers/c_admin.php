@@ -3,6 +3,8 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
+require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
+
 class C_admin extends MY_Controller {
 
     public function __construct() {
@@ -54,14 +56,14 @@ class C_admin extends MY_Controller {
         log_message('debug', print_r($presentPointsOfView, TRUE));
 
         $with_value_included_array = array();
-        
+
         foreach ($presentPointsOfView as $value) {
-            $with_value_included_array[ $value ] = $value;
+            $with_value_included_array[$value] = $value;
         }
-        
-        
+
+
         $data['with_value_included_array'] = $with_value_included_array;
-        
+
         //login or logout in menu
         $template_data = array();
         $this->set_title($template_data, 'Admin interface');
@@ -85,7 +87,8 @@ class C_admin extends MY_Controller {
         $data['actual_user_nick'] = $this->get_user_nick();
 
 
-        $this->db->trans_begin(); {        // field name, error message, validation rules
+        $this->db->trans_begin();
+        {        // field name, error message, validation rules
             $this->form_validation->set_rules('npf_product_name', 'Product name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
             $this->form_validation->set_rules('npf_available_sizes', 'Product sizes', 'required');
             $this->form_validation->set_rules('npf_product_price', 'Product price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
@@ -224,7 +227,8 @@ class C_admin extends MY_Controller {
                     // load product's pov
                     $product_pov = $this->input->post('npf_point_of_view_name');
                 } else if ($pov_presence === 'old_pov') {
-                    $product_pov = $this->input->post('npf_present_povs');;
+                    $product_pov = $this->input->post('npf_present_povs');
+                    ;
                 } else {
                     log_message('error', 'Input type radio value neither new_pov neither old_pov! How come!!!');
                     log_message('error', 'POV creation in database failed! Rolling the transaction back!');
@@ -233,7 +237,7 @@ class C_admin extends MY_Controller {
                     $this->load->view('admin/v_admin_new_product_index', $data);
                     return;
                 }
-                
+
                 $new_supported_point_of_view = new Supported_point_of_view_model();
                 $new_supported_point_of_view->instantiate($product_pov, $new_product_id);
                 $new_supported_point_of_view_id = $new_supported_point_of_view->save();
@@ -289,8 +293,8 @@ class C_admin extends MY_Controller {
             $this->db->trans_commit();
 
             $data['error'] = NULL;
-            $data['successful'] = 'New basic product created succesfully!';            
-            
+            $data['successful'] = 'New basic product created succesfully!';
+
             redirect('/c_admin/new_product_admin_index', 'refresh');
         }
 
@@ -739,7 +743,7 @@ class C_admin extends MY_Controller {
         }
 
         $this->load->library('table');
-        $tmpl = array('table_open' => '<table border="1" class="users_table">');
+        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
 
         $this->table->set_template($tmpl);
         $this->table->set_heading('Nick', 'Firstname', 'Lastname', 'Email', 'Phone', 'Privilege', 'Change privilege');
@@ -802,6 +806,258 @@ class C_admin extends MY_Controller {
 
         log_message('info', 'Changing user privileges successful!');
         redirect('/c_admin/users_admin', 'refresh');
+    }
+
+    public function orders_admin() {
+        if (!$this->authentify_admin()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        //login or logout in menu
+        $template_data = array();
+        $this->set_title($template_data, 'Orders administration');
+        $this->load_header_templates($template_data);
+
+        $data['actual_user_nick'] = $this->get_user_nick();
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/v_admin_orders', $data);
+    }
+
+    public function open_orders_admin() {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $this->load->library('table');
+        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
+
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?');
+
+        $all_open_orders = $this->order_model->get_all_open_orders();
+
+        foreach ($all_open_orders as $single_open_order_model_instance) {
+            $this->table->add_row(
+                    $single_open_order_model_instance->getFinalSum() . ' &euro;', $single_open_order_model_instance->getCart(), $single_open_order_model_instance->getShippingMethod(), $single_open_order_model_instance->getPaymentMethod(), $single_open_order_model_instance->getIsShippingAddressRegistrationAddress()
+            );
+        }
+
+        $template_data = array();
+        $this->set_title($template_data, 'Open orders administration');
+        $this->load_header_templates($template_data);
+
+        $data['table_data'] = $this->table->generate();
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/orders/v_admin_open_orders', $data);
+    }
+
+    public function paid_orders_admin() {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $this->load->library('table');
+        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
+
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('ID', 'Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?', 'Detail');
+
+        $all_paid_orders = $this->order_model->get_all_paid_orders();
+
+        foreach ($all_paid_orders as $single_paid_order_model_instance) {
+
+            $atts = array(
+                'width' => '800',
+                'height' => '600',
+                'scrollbars' => 'yes',
+                'status' => 'yes',
+                'resizable' => 'yes',
+                'screenx' => '0',
+                'screeny' => '0'
+            );
+
+            $anchor = anchor_popup('c_admin/paid_order_index/' . $single_paid_order_model_instance->getId(), 'Details', $atts);
+
+            $this->table->add_row(
+                    $single_paid_order_model_instance->getId(), $single_paid_order_model_instance->getFinalSum() . ' &euro;', $single_paid_order_model_instance->getCart(), $single_paid_order_model_instance->getShippingMethod(), $single_paid_order_model_instance->getPaymentMethod(), ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $anchor
+            );
+        }
+
+        $template_data = array();
+        $this->set_title($template_data, 'Paid orders administration');
+        $this->load_header_templates($template_data);
+
+        $data['table_data'] = $this->table->generate();
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/orders/v_admin_paid_orders', $data);
+    }
+
+    public function paid_order_index($orderId) {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        if (is_null($orderId) || !isset($orderId) || !is_numeric($orderId)) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $single_paid_order_model_instance = $this->order_model->get_order_by_id($orderId);
+        $shipping_method = $this->shipping_method_model->get_shipping_method_by_id($single_paid_order_model_instance->getShippingMethod());
+        $payment_method = $this->payment_method_model->get_payment_method_by_id($single_paid_order_model_instance->getPaymentMethod());
+        $assigned_cart = $this->cart_model->get_cart_by_id($single_paid_order_model_instance->getCart());
+
+        $ordering_person = $this->user_model->get_user_by_id($assigned_cart->getOrderingPerson());
+
+        $ordered_products_full_info = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id($assigned_cart->getId());
+
+        $this->load->library('table');
+        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
+        $this->table->set_template($tmpl);
+
+
+        // order table
+        $this->table->set_heading('ID', 'Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?', 'Status');
+        $this->table->add_row(
+                $single_paid_order_model_instance->getId(), $single_paid_order_model_instance->getFinalSum() . ' &euro;', $single_paid_order_model_instance->getCart(), $shipping_method->getName(), $payment_method->getName(), ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $single_paid_order_model_instance->getStatus()
+        );
+        $data['table_data_order'] = $this->table->generate();
+
+        $this->table->clear();
+
+        // cart table
+        $this->table->set_heading('ID', 'Sum', 'Status');
+        $this->table->add_row(
+                $assigned_cart->getId(), $assigned_cart->getSum() . ' &euro;', $assigned_cart->getStatus()
+        );
+        $data['table_data_cart'] = $this->table->generate();
+
+        $this->table->clear();
+
+        // user table
+        $this->table->set_heading('ID', 'Nick', 'Email address', 'Firstname', 'Lastname', 'Gender', 'Phone');
+        $this->table->add_row(
+                $ordering_person->getId(), $ordering_person->getNick(), mailto($ordering_person->getEmailAddress(), $ordering_person->getEmailAddress()), $ordering_person->getFirstName(), $ordering_person->getLastName(), ($ordering_person->getGender() == 0 ? 'Male' : 'Female'), $ordering_person->getPhoneNumber()
+        );
+        $data['table_data_user'] = $this->table->generate();
+
+        $this->table->clear();
+
+        // address table
+        if ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress()) {
+            log_message('debug', 'Loading registration address');
+            $address = $this->address_model->get_address_by_id($ordering_person->getId());
+            $this->table->set_heading('ID', 'Street', 'City', 'Zip', 'Country');
+            $this->table->add_row(
+                    $address->getId(), $address->getStreet(), $address->getCity(), $address->getZip(), $address->getCountry()
+            );
+            $data['table_data_address'] = $this->table->generate();
+        } else {
+            log_message('debug', 'Loading order address');
+            $order_address = $this->order_address_model->get_order_address_by_id($single_paid_order_model_instance->getOrderAddress());
+            $this->table->set_heading('ID', 'Name', 'Address', 'City', 'Zip', 'Country', 'Phone', 'Email');
+            $this->table->add_row(
+                    $order_address->getId(), $order_address->getName(), $order_address->getAddress(), $order_address->getCity(), $order_address->getZip(), $order_address->getCountry(), $order_address->getPhoneNumber(), $order_address->getEmailAddress()
+            );
+            $data['table_data_address'] = $this->table->generate();
+        }
+
+        $this->table->clear();
+
+        // ordered products including full info
+        $this->table->set_heading('ID', 'Count', 'Size', 'Product ID', 'Product name', 'Product price', 'Creator', 'Photo');
+        foreach ($ordered_products_full_info as $ordered_product_item) {
+            $atts = array(
+                'width' => '800',
+                'height' => '600',
+                'scrollbars' => 'yes',
+                'status' => 'yes',
+                'resizable' => 'yes',
+                'screenx' => '0',
+                'screeny' => '0'
+            );
+            $photoAnchor = anchor_popup('c_admin/product_photo_index/' . $ordered_product_item->getProductId(), 'Photo', $atts);
+            $this->table->add_row(
+                    $ordered_product_item->getOrderedProductId(), $ordered_product_item->getOrderedProductCount(), $ordered_product_item->getPossibleSizeForProductName(), $ordered_product_item->getProductId(), $ordered_product_item->getProductName(), $ordered_product_item->getProductPrice(), $ordered_product_item->getCreatorNick(), $photoAnchor
+            );
+        }
+        $data['table_data_ordered_products'] = $this->table->generate();
+
+        $data['order_id'] = $orderId;
+
+        $template_data = array();
+        $this->set_title($template_data, 'Order detail');
+        $this->load_header_templates($template_data);
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/orders/v_admin_order_detail', $data);
+    }
+
+    public function product_photo_index($productId) {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $sup_povs = $this->supported_point_of_view_model->get_by_product($productId);
+
+        $urls = array();
+
+        if ($sup_povs !== NULL) {
+            foreach ($sup_povs as $sup_pov_item) {
+                $rasters = $this->supported_point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
+                //log_message('debug', print_r($rasters, true));
+                foreach ($rasters as $raster_item) {
+                    $urls[] = $raster_item->url;
+                }
+            }
+        }
+
+        $product_screen_representation = new Product_screen_representation(
+                        NULL, NULL, $urls);
+
+        $data['product_screen_representation'] = $product_screen_representation;
+
+        $template_data = array();
+        $this->set_title($template_data, 'Photo detail');
+        $this->load_header_templates($template_data);
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/orders/v_admin_photo_detail', $data);
+    }
+
+    public function change_order_status_to_shipping($orderId) {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        if (is_null($orderId) || !isset($orderId) || !is_numeric($orderId)) {
+            $this->redirectToHomePage();
+            return;
+        }
+        
+        $order = $this->order_model->get_order_by_id( $orderId );
+        
+        $order->setStatus( Order_model::ORDER_STATUS_SHIPPING );
+        if ( $order->update_order() <= 0 ){
+            // set some flash data
+            log_message('error', 'Order update with order ID = ' . $orderId . ' has failed!');
+        }
+        
+        redirect('c_admin/orders_admin','refresh');
     }
 
 }

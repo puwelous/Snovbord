@@ -136,28 +136,42 @@ class C_shopping_cart extends MY_Controller {
         $cart_final_sum = 0.0;
 
         /*         * *  TRANSACTION begin - update all ordered product ** */
-        $this->db->trans_begin();
-        {
-
-
+        $this->db->trans_begin(); {
             foreach ($products as $product_item) {
 
-                $updated_ordered_product_result = $this->ordered_product_model->update($product_item['item_id'], array('op_amount' => $product_item['item_amount']));
-                if ($updated_ordered_product_result < 0) {
-                    log_message('debug', 'Update of ordered product failed!. Redirect!');
-                    log_message('debug', 'Rolling the transaction back!');
-                    $this->db->trans_rollback();
-                    redirect('/c_shopping_cart/index', 'refresh');
+                // in any case add price to cart's final sum
+                $cart_final_sum += ($product_item['item_amount'] * $product_item['item_price']);                
+                
+                $actual_ordered_product = $this->ordered_product_model->get_ordered_product_by_id($product_item['item_id']);
+                if ($actual_ordered_product->getCount() == $product_item['item_amount']) {
+                    // no need to update DB data
+                    continue;
+                } else {
+                    // update DB data and recalculate
+                    $actual_ordered_product->setCount($product_item['item_amount']);
+                    $updated_ordered_product_result = $actual_ordered_product->update_ordered_product();
+                    if ($updated_ordered_product_result < 0) {
+                        log_message('error', 'Update of ordered product failed!. Redirect!');
+                        log_message('error', 'Rolling the transaction back!');
+                        $this->db->trans_rollback();
+                        redirect('/c_shopping_cart/index', 'refresh');return;
+                    }
                 }
-                $cart_final_sum += ($product_item['item_amount'] * $product_item['item_price']);
             }
 
-            $updated_cart_result = $this->cart_model->update($cart_id, array('c_sum' => $cart_final_sum));
-            if ($updated_cart_result < 0) {
-                log_message('debug', 'Update of cart failed!. Redirect!');
-                log_message('debug', 'Rolling the transaction back!');
-                $this->db->trans_rollback();
-                redirect('/c_shopping_cart/index', 'refresh');
+            $actual_cart = $this->cart_model->get_cart_by_id( $cart_id );
+            if ( $actual_cart->getSum() != $cart_final_sum ){
+                log_message('debug', 'Update for cart IS necessary...');
+                $finalSumRecalculation = $actual_cart->recalculate_sum();
+                log_message('debug', 'cart_final_sum:' . $cart_final_sum . ' recalculation sum:' . $finalSumRecalculation);
+                $update_cart_result = $actual_cart->update_cart();
+                if ( $update_cart_result <= 0 ){
+                    log_message('error', 'Update of cart failed!. Redirect!');
+                    $this->db->trans_rollback();
+                    redirect('/c_shopping_cart/index', 'refresh');return;
+                }
+            }else{
+                log_message('debug', 'No update for cart is necessary...');
             }
         }
         /*         * * TRANSACTION end  ** */
@@ -173,22 +187,22 @@ class C_shopping_cart extends MY_Controller {
         $db_odered_products_full_info = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id($cart_id);
 
         $data['shopping_cart_id'] = $cart_id;
-        $data['ordered_products'] = $db_odered_products_full_info;
-        $this->session->set_userdata(array('ordered_products' => $db_odered_products_full_info));
+        $data['ordered_products_full_info'] = $db_odered_products_full_info;
+        //$this->session->set_userdata(array('ordered_products_full_info' => $db_odered_products_full_info));
 
-        $data['payment_method'] = $this->payment_method_model->get($payment_method);
-        $this->session->set_userdata(array('payment_method' => $data['payment_method']));
+        $data['payment_method'] = $this->payment_method_model->get_payment_method_by_id($payment_method);
+        //$this->session->set_userdata('payment_method_id', $data['payment_method']->getId()  );
 
-        $data['shipping_method'] = $this->shipping_method_model->get($shipping_method);
-        $this->session->set_userdata(array('shipping_method' => $data['shipping_method']));
+        $data['shipping_method'] = $this->shipping_method_model->get_shipping_method_by_id($shipping_method);
+        //$this->session->set_userdata( 'shipping_method_id', $data['shipping_method']->getId()  );
 
         $data['order_address'] = $order_address;
-        $this->session->set_userdata(array('order_address' => $order_address));
+        $this->session->set_userdata('order_address', $order_address);
 
-        $total_final_sum = $cart_final_sum + $data['payment_method']->pm_cost + $data['shipping_method']->sm_price;
+        $total_final_sum = round($cart_final_sum + $data['payment_method']->getCost() + $data['shipping_method']->getCost(), 2);;
 
         $data['total'] = $total_final_sum;
-        $this->session->set_userdata(array('total' => $total_final_sum));
+        //$this->session->set_userdata('total', $total_final_sum);
 
 
         $template_data = array();
@@ -249,17 +263,18 @@ class C_shopping_cart extends MY_Controller {
 
     private function _prepare_order_address_acc_to_user_id($actual_user_id) {
 
-        $actual_user_data = $this->user_model->get($actual_user_id);
+        $actual_user = $this->user_model->get_user_by_id($actual_user_id);
+        $address = $this->address_model->get_address_by_id($actual_user->getAddress());
 
         $order_address = array();
-        $order_address['oa_first_name'] = $actual_user_data->u_firstname;
-        $order_address['oa_last_name'] = $actual_user_data->u_lastname;
-        $order_address['oa_address'] = $actual_user_data->u_address;
-        $order_address['oa_city'] = $actual_user_data->u_city;
-        $order_address['oa_zip'] = $actual_user_data->u_zip;
-        $order_address['oa_country'] = $actual_user_data->u_country;
-        $order_address['oa_phone_number'] = '';
-        $order_address['oa_email_address'] = $actual_user_data->u_email_address;
+        $order_address['oa_first_name'] = $actual_user->getFirstName();
+        $order_address['oa_last_name'] = $actual_user->getLastName();
+        $order_address['oa_address'] = $address->getStreet();
+        $order_address['oa_city'] = $address->getCity();
+        $order_address['oa_zip'] = $address->getZip();
+        $order_address['oa_country'] = $address->getCountry();
+        $order_address['oa_phone_number'] = $actual_user->getPhoneNumber();
+        $order_address['oa_email_address'] = $actual_user->getEmailAddress();
         return $order_address;
     }
 
@@ -289,7 +304,8 @@ class C_shopping_cart extends MY_Controller {
         }
 
 
-        $this->db->trans_begin(); {
+        $this->db->trans_begin();
+        {
             try {
                 $shopping_cart_of_user->remove_ordered_product($ordered_product_id);
                 $update_result = $shopping_cart_of_user->update_cart();
@@ -304,18 +320,21 @@ class C_shopping_cart extends MY_Controller {
                     log_message('error', 'Cart deletion failed! Cart ID: ' . $shopping_cart_of_user->getId());
                     log_message('error', 'Rolling the transaction back!');
                     $this->db->trans_rollback();
-                    redirect('/c_shopping_cart/index', 'refresh');return;
+                    redirect('/c_shopping_cart/index', 'refresh');
+                    return;
                 }
             } catch (CartUpdateException $cue) {
                 log_message('error', $cue);
                 log_message('error', 'Rolling the transaction back!');
                 $this->db->trans_rollback();
-                redirect('/c_shopping_cart/index', 'refresh');return;
+                redirect('/c_shopping_cart/index', 'refresh');
+                return;
             } catch (Exception $e) {
                 log_message('error', $e);
                 log_message('error', 'Rolling the transaction back!');
                 $this->db->trans_rollback();
-                redirect('/c_shopping_cart/index', 'refresh');return;
+                redirect('/c_shopping_cart/index', 'refresh');
+                return;
             }
         }
 

@@ -31,14 +31,14 @@
                     </h2>
                     <div class="final_items_list">
                         <?php
-                        for ($i = 0; $i < count($ordered_products); ++$i):
+                        for ($i = 0; $i < count($ordered_products_full_info); ++$i):
                             ?>
                             <div class="final_item">
-                                <span class="text_light smaller upper_cased bold"><?php echo $ordered_products[$i]->pd_product_name; ?></span>
-                                <span class="text_light smaller upper_cased">by:<span class="text_light upper_cased bold"><?php echo $ordered_products[$i]->u_nick; ?></span></span>
-                                <span class="text_light smaller upper_cased bold"><?php echo $ordered_products[$i]->psfp_name; ?></span>
-                                <span class="text_light smaller"><?php echo $ordered_products[$i]->op_amount; ?>&nbsp;pc.</span>
-                                <span class="text_light smaller upper_cased">price<span class="text_light lower_cased">/ks:</span><span class="text_light lower_cased bold"><?php echo $ordered_products[$i]->pd_price; ?>&euro; dph</span></span>                                
+                                <span class="text_light smaller upper_cased bold"><?php echo $ordered_products_full_info[$i]->getProductName(); ?></span>
+                                <span class="text_light smaller upper_cased">by:<span class="text_light upper_cased bold"><?php echo $ordered_products_full_info[$i]->getCreatorNick(); ?></span></span>
+                                <span class="text_light smaller upper_cased bold"><?php echo $ordered_products_full_info[$i]->getPossibleSizeForProductName(); ?></span>
+                                <span class="text_light smaller"><?php echo $ordered_products_full_info[$i]->getOrderedProductCount(); ?>&nbsp;pc.</span>
+                                <span class="text_light smaller upper_cased">price<span class="text_light lower_cased">/ks:</span><span class="text_light lower_cased bold"><?php echo $ordered_products_full_info[$i]->getProductPrice(); ?>&euro; dph</span></span>                                
                             </div>
                         <?php endfor; ?>
                     </div>
@@ -76,13 +76,13 @@
                         payment method
                     </h2>                            
                     <div>
-                        <div id="final_payment_method" class="text_light upper_cased"><?php echo $payment_method->pm_name; ?>&nbsp;(+<?php echo $payment_method->pm_cost; ?>&euro;)</div>
+                        <div id="final_payment_method" class="text_light upper_cased"><?php echo $payment_method->getName(); ?>&nbsp;(+<?php echo $payment_method->getCost(); ?>&euro;)</div>
                     </div>
                     <h2>
                         shipping method
                     </h2>                            
                     <div>
-                        <div id="final_shipping_method" class="text_light upper_cased"><?php echo $shipping_method->sm_name; ?>&nbsp;(+<?php echo $shipping_method->sm_price; ?>&euro;)</div>
+                        <div id="final_shipping_method" class="text_light upper_cased"><?php echo $shipping_method->getName(); ?>&nbsp;(+<?php echo $shipping_method->getCost(); ?>&euro;)</div>
                     </div>                        
                 </div>
                 <div class="text_field_wrapper right">

@@ -55,7 +55,7 @@ class C_paypal extends MY_Controller {
         $shipToState = $order_address['oa_country'];
         $shipToCountryCode = "SK"; // Please refer to the PayPal country codes in the API documentation
         $shipToZip = $order_address['oa_zip'];
-        $phoneNum = "+421915507714"; //TODO
+        $phoneNum = $order_address['oa_phone_number'];
 
         $resArray = $this->cpaypalimpl->CallMarkExpressCheckout($paymentAmount, self::CURRENCY_CODE_TYPE, self::PAYMENT_TYPE, self::RETURN_URL, self::CANCEL_URL, $shipToName, $shipToStreet, $shipToCity, $shipToState, $shipToCountryCode, $shipToZip, $shipToStreet2, $phoneNum
         );
@@ -171,12 +171,16 @@ class C_paypal extends MY_Controller {
                     log_message('error', $e);
                 }
 //TODO: set payment as OK< order flag change!
-                $data['invoice_id'] = $this->session->userdata('invoice_id');
+                $data['invoice_id'] = $order_id;
                 $data['total'] = $this->session->userdata('payment_amount');
-                $data['ordered_products'] = $this->session->userdata('ordered_products'); //$this->ordered_product_model->get_ordered_product_full_info_by_cart_id( $this->input->post('cart_id') );
                 $data['order_address'] = $this->session->userdata('order_address');
-                $data['payment_method'] = $this->session->userdata('payment_method');
-                $data['shipping_method'] = $this->session->userdata('shipping_method');
+                
+                $actual_order = $this->order_model->get_order_by_id( $order_id );
+                
+                $data['ordered_products_full_info'] = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id( $actual_order->getCart() );
+                
+                $data['payment_method'] = $this->payment_method_model->get_payment_method_by_id( $actual_order->getPaymentMethod() );
+                $data['shipping_method'] = $this->shipping_method_model->get_shipping_method_by_id( $actual_order->getShippingMethod() );
 
                 $template_data = array();
                 $this->set_title($template_data, 'Choose payment method!');
@@ -307,6 +311,14 @@ class C_paypal extends MY_Controller {
             log_message('debug', print_r($resArray, true));
 
             $order_id = $this->session->userdata('invoice_id');
+            $actual_order = $this->order_model->get_order_by_id( $order_id );
+            $actual_order->setStatus( Order_model::ORDER_STATUS_PAID );
+            if ( $actual_order->update_order() <= 0 ){
+                log_message('error', 'Order has been paid but cannot update it to the PAID status !!!');
+                log_message('error', 'Order:' . print_r($actual_order, true));
+                // do not interrupt, just continue with paypal transaction data model
+            }
+            
             $ptdm_instance = new Paypal_transaction_data_model();
             $ptdm_instance->instantiate($order_id, $transactionId, $transactionType, $paymentType, $orderTime, $amt, $currencyCode, $taxAmt, $paymentStatus, $pendingReason, $reasonCode, $ack);
             try {

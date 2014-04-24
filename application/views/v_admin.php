@@ -28,6 +28,11 @@
                     <?php echo anchor('c_admin/users_admin', 'users administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
                 </h2>
                 <div class="blue_line">
+                </div>  
+                <h2>
+                    <?php echo anchor('c_admin/orders_admin', 'orders administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
+                </h2>
+                <div class="blue_line">
                 </div>                 
                 <h2>
                     <?php echo anchor('c_admin/about_us', 'contact administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
