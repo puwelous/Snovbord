@@ -64,7 +64,7 @@
                                     <label for = "female" class="css-label">female</label>                                    
                                 </li>
                                 <li>
-                                    <label for="tf_phone_number" >phone number</label>
+                                    <label for="tf_phone_number" class="required">phone number</label>
                                     <input type="tel" id="tf_phone_number" name="tf_phone_number" value="<?php echo set_value('tf_phone_number'); ?>" size="32" maxlength="32" />
                                 </li>
                                 <li>
@@ -99,7 +99,6 @@
                         </div>
                         <div style="clear:both;"></div>
                     </div>
-                    <!--                    </form>-->
                     <?php echo form_close(); ?>
                 </div>
             </div>

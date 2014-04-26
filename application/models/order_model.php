@@ -156,6 +156,34 @@ class Order_model extends MY_Model {
         }
         
         return $result_array;
+    }
+    
+    public function get_all_by_user_id( $userId ){
+        
+        $query = $this->db->query('SELECT sb_order.* FROM sb_order WHERE sb_order.ordr_assigned_cart IN ( SELECT sb_cart.crt_id FROM sb_cart WHERE sb_cart.crt_ordering_person_id = '. $this->db->escape( $userId ) .' );');
+
+        if ( $query->num_rows() <= 0 ) {
+            return NULL;
+        }
+
+        $orders_array = array();
+
+        foreach ($query->result() as $raw_data) {
+            $order_model_inst = new Order_model();
+            $order_model_inst->instantiate(
+                    $raw_data->ordr_final_sum,
+                    $raw_data->ordr_status,
+                    $raw_data->ordr_assigned_cart,
+                    $raw_data->ordr_assigned_shipping_method,
+                    $raw_data->ordr_assigned_payment_method,
+                    $raw_data->ordr_is_ship_addr_regist_addr,
+                    $raw_data->ordr_order_address_id
+                    );
+            $order_model_inst->setId( $raw_data->ordr_id );
+            $orders_array[] = $order_model_inst;
+        }
+
+        return $orders_array;
     }     
 
     /*     * ********* setters *********** */

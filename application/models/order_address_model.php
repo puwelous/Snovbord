@@ -39,7 +39,7 @@ class Order_address_model extends MY_Model {
      * create
      */
 
-    public function insert_order_address() {
+    public function save() {
         return $this->order_address_model->insert(
                         array(
                             'oa_name' => $this->name,

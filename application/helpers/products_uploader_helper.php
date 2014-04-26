@@ -65,6 +65,29 @@ if (!function_exists('get_basic_product_upload_path')) {
     }
 }
 
+if (!function_exists('get_components_upload_configuration')) {
 
+    $components_upl_config = array();
+
+    function get_components_upload_configuration($config_helper) {
+
+        if (empty($components_upl_config)) {
+            // load once
+            $components_upl_config['upload_path'] = $config_helper->item('component_upload_path');
+            $components_upl_config['allowed_types'] = $config_helper->item('component_allowed_types');
+            $components_upl_config['max_size'] = $config_helper->item('component_max_size');
+            $components_upl_config['max_width'] = $config_helper->item('component_max_width');
+            $components_upl_config['max_height'] = $config_helper->item('component_max_height');
+        }
+        return $components_upl_config;
+    }
+}
+
+if (!function_exists('get_components_upload_path')) {
+
+    function get_components_upload_path( $config_helper ) {
+        return $config_helper->item('component_upload_path');
+    }
+}
 /* End of file products_uploader_helper.php */
 /* Location: ./application/helpers/products_uploader_helper.php */

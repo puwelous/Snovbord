@@ -44,17 +44,30 @@ class C_preview extends MY_Controller {
             $output_sizes[$psfp_instance->getId()] = $psfp_instance->getName();
         }
 
-        $urls = array();
-        $sup_povs = $this->supported_point_of_view_model->get_by_product($previed_product->getId());
+        // photos
+        $basic_pov = $this->point_of_view_model->get_basic_pov();
+        $basic_raster_model_object = $this->basic_product_raster_model->get_single_basic_product_raster_by_product_id_and_pov_id(
+                $previed_product->getId(), $basic_pov->getId()
+        );
 
-        if ($sup_povs !== NULL) {
-            foreach ($sup_povs as $sup_pov_item) {
-                $rasters = $this->supported_point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
-                foreach ($rasters as $raster_item) {
-                    $urls[] = $raster_item->url;
-                }
-            }
-        }
+        $urls = array();
+        // add basic raster object single URL
+        $urls[] = $basic_raster_model_object->getPhotoUrl();
+        
+        // add components URLs
+        //TODO...
+        
+        
+//        $sup_povs = $this->supported_point_of_view_model->get_by_product($previed_product->getId());
+
+//        if ($sup_povs !== NULL) {
+//            foreach ($sup_povs as $sup_pov_item) {
+//                $rasters = $this->supported_point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
+//                foreach ($rasters as $raster_item) {
+//                    $urls[] = $raster_item->url;
+//                }
+//            }
+//        }
 
         $product_screen_representation = new Product_screen_representation(
                         $previed_product->getId(), $previed_product->getName(), $urls);
@@ -123,8 +136,7 @@ class C_preview extends MY_Controller {
 
 
         /*         * * start TRANSACTION ** */
-        $this->db->trans_begin();
-        {
+        $this->db->trans_begin(); {
             // create user cart if necessary
             if (is_null($users_cart) || $users_cart == NULL || empty($users_cart)) {
 
@@ -167,9 +179,9 @@ class C_preview extends MY_Controller {
 
             // update cart's status
             $users_cart->setStatus(Cart_model::CART_STATUS_OPEN);
-log_message('debug', '$users_cart bef :' . print_r($users_cart, TRUE));
+            log_message('debug', '$users_cart bef :' . print_r($users_cart, TRUE));
             $succ_of_update = $users_cart->update_cart();
-log_message('debug', '$users_cart aft :' . print_r($users_cart, TRUE));
+            log_message('debug', '$users_cart aft :' . print_r($users_cart, TRUE));
             if ($succ_of_update <= 0) {
                 log_message('debug', 'Update of cart failed!. Redirect!');
                 log_message('debug', 'Rolling the transaction back!');

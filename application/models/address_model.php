@@ -34,6 +34,16 @@ class Address_model extends MY_Model {
                 ));
     }
 
+    public function update_address() {
+        return $this->address_model->update(
+                        $this->getId(), array(
+                             'addrs_street' => $this->street,
+                            'addrs_city' => $this->city,
+                            'addrs_zip' => $this->zip,
+                            'addrs_country' => $this->country
+                ));
+    }     
+    
     public function get_address_by_id($addressId) {
 
         $result = $this->address_model->get($addressId);
@@ -53,7 +63,10 @@ class Address_model extends MY_Model {
     }
 
     /* getters */
-
+    public function getId() {
+        return $this->id;
+    } 
+    
     public function getStreet() {
         return $this->street;
     }
@@ -75,14 +88,29 @@ class Address_model extends MY_Model {
         return $this->id;
     }
     
-    public function getId() {
-        return $this->id;
-    }    
-
+   
     /* setters */
+    
     public function setId( $newId ){
         $this->id = $newId;
     }
+    
+    public function setStreet( $newStreet) {
+         $this->street = $newStreet;
+    }
+
+    public function setCity( $newCity) {
+         $this->city = $newCity;
+    }
+
+    public function setZip( $newZip ) {
+         $this->zip = $newZip;
+    }
+
+    public function setCountry( $newCountry ) {
+        $this->country = $newCountry;
+    }
+    
 }
 
 /* End of file address_model.php */

@@ -14,10 +14,6 @@ class User_model extends MY_Model {
     private $password;
     private $address;
     private $userType;
-//    private $city;
-//    private $zip;
-//    private $country;
-//    private $isAdmin;
 
     public $protected_attributes = array('usr_id');
 
@@ -66,6 +62,21 @@ class User_model extends MY_Model {
                 ));
     }
     
+    public function update_user() {
+        return $this->user_model->update(
+                        $this->getId(), array(
+                            'usr_nick' => $this->nick,
+                            'usr_email_address' => $this->emailAddress,
+                            'usr_firstname' => $this->firstname,
+                            'usr_lastname' => $this->lastname,
+                            'usr_phone_number' => $this->phoneNumber,
+                            'usr_gender' => $this->gender,
+                            'usr_password' => $this->password,
+                            'usr_address_id' => ( $this->address instanceof Address_model ? $this->address->getAddressId() : $this->address ),
+                            'usr_user_type_id' => ( $this->userType instanceof User_type_model ? $this->userType->getUserTypeId() : $this->userType )
+                ));
+    }    
+    
     public function update_user_type( $user_id, $new_user_type_id) {
         return $this->user_model->update( $user_id , array('usr_user_type_id' => $new_user_type_id) );
     }
@@ -80,7 +91,7 @@ class User_model extends MY_Model {
             $loaded_user = new User_model();
             $loaded_user->instantiate($result->usr_nick, $result->usr_email_address, $result->usr_firstname, $result->usr_lastname, $result->usr_phone_number, $result->usr_gender, $result->usr_password, $result->usr_address_id, $result->usr_user_type_id);
 
-            $loaded_user->setUserId($result->usr_id);
+            $loaded_user->setId($result->usr_id);
 
             return $loaded_user;
         }
@@ -102,7 +113,7 @@ class User_model extends MY_Model {
             $result = new User_model();
             $result->instantiate($row->usr_nick, $row->usr_email_address, $row->usr_firstname, $row->usr_lastname, $row->usr_phone_number, $row->usr_gender, $row->usr_password, $row->usr_address_id, $row->usr_user_type_id);
 
-            $result->setUserId($row->usr_id);
+            $result->setId($row->usr_id);
 
             return $result;
         } else {
@@ -148,6 +159,8 @@ class User_model extends MY_Model {
         return $result_array;
     }
 
+    /* getters */
+    
     public function getId() {
         return $this->userId;
     }    
@@ -183,10 +196,16 @@ class User_model extends MY_Model {
     public function getAddress() {
         return $this->address;
     }
+    
+    public function getPassword(){
+        return $this->password;
+    }
 
     public function getUserType() {
         return $this->userType;
     }
+    
+    /* setters */
 
     protected function setUserId($usrId) {
         $this->userId = $usrId;
@@ -194,6 +213,42 @@ class User_model extends MY_Model {
     
     protected function setId($newId) {
         $this->userId = $newId;
+    }    
+ 
+    public function setNick( $newNick ) {
+         $this->nick = $newNick;
+    }
+
+    public function setEmailAddress( $newEmail ) {
+        $this->emailAddress = $newEmail;
+    }
+
+    public function setFirstName( $newFirstname) {
+        $this->firstname = $newFirstname;
+    }
+
+    public function setLastName( $newLastname ) {
+        $this->lastname = $newLastname;
+    }
+
+    public function setGender( $newGender) {
+        $this->gender = $newGender;
+    }
+
+    public function setPhoneNumber( $newPhoneNumber ) {
+        $this->phoneNumber = $newPhoneNumber;
+    }
+
+    public function setAddress( $newAddress ) {
+        $this->address = $newAddress;
+    }
+    
+    public function setPassword( $newPassword ){
+        $this->password = md5($newPassword);
+    }
+
+    public function setUserType( $newUserType) {
+        $this->userType = $newUserType;
     }    
 
 }

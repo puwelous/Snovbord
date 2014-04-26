@@ -47,6 +47,7 @@ $route['finalproducts']                 = 'c_finalproducts';
 $route['preview/show/(:num)']           = 'c_preview/show/$1';
 $route['ucreate/(:num)']                = 'c_ucreate/index/$1';
 $route['shopping_cart']                 = 'c_shopping_cart';
+$route['customer/index']                = 'c_customer/index';
 $route['admin']                         = 'c_admin/index';
 $route['admin/index']                   = 'c_admin/index';
 $route['welcome']                       = "c_welcome";

@@ -41,100 +41,101 @@ class C_user extends MY_Controller {
 
             $this->load->view('templates/header', $template_data);
             $this->load->view('v_registration');
-        } else {
+            return;
+        }
 
-            $nick = $this->input->post('tf_nick');
-            $emailAddress = $this->input->post('tf_email_address');
+        $nick = $this->input->post('tf_nick');
+        $emailAddress = $this->input->post('tf_email_address');
 
-            $firstname = $this->input->post('tf_first_name');
-            $lastname = $this->input->post('tf_last_name');
+        $firstname = $this->input->post('tf_first_name');
+        $lastname = $this->input->post('tf_last_name');
 
-            $phoneNumber = $this->input->post('tf_phone_number');
+        $phoneNumber = $this->input->post('tf_phone_number');
 
-            $gender = $this->input->post('tf_gender');
-            $password = $this->input->post('tf_password_base');
+        $gender = $this->input->post('tf_gender');
+        $password = $this->input->post('tf_password_base');
 
-            $street = $this->input->post('tf_street');
-            $city = $this->input->post('tf_city');
-            $zip = $this->input->post('tf_zip');
-            $country = $this->input->post('tf_country');
+        $street = $this->input->post('tf_street');
+        $city = $this->input->post('tf_city');
+        $zip = $this->input->post('tf_zip');
+        $country = $this->input->post('tf_country');
 //            $isAdmin = FALSE;
-            // save address first
-            $address_instance = new Address_model();
-            $address_instance->instantiate($street, $city, $zip, $country);
+        // save address first
+        $address_instance = new Address_model();
+        $address_instance->instantiate($street, $city, $zip, $country);
 
 
-            $this->db->trans_begin(); {
-                // save address
-                $address_insert_result = $address_instance->save();
+        $this->db->trans_begin();
+        {
+            // save address
+            $address_insert_result = $address_instance->save();
 
-                if (is_null($address_insert_result) || $address_insert_result == NULL || empty($address_insert_result)) {
-                    log_message('debug', 'Creation of address failed!. Redirect!');
-                    log_message('debug', 'Rolling the transaction back!');
-                    $this->db->trans_rollback();
-                    redirect('/c_registration/index', 'refresh');
-                    return;
-                }
-
-                $userType = $this->user_type_model->get_by_user_type_name('customer'); // customer
-                log_message('debug', 'Saving user as a user type: ' . print_r($userType, true));
-
-                $user_instance = new User_model();
-                $user_instance->instantiate(
-                        $nick, $emailAddress, $firstname, $lastname, $phoneNumber, $gender, $password, $address_insert_result, $userType);
-
-                $user_insert_result = $user_instance->save();
-
-                if (is_null($user_insert_result) || $user_insert_result == NULL || empty($user_insert_result)) {
-                    log_message('debug', 'Creation of user failed!. Redirect!');
-                    log_message('debug', 'Rolling the transaction back!');
-                    $this->db->trans_rollback();
-                    redirect('/c_registration/index', 'refresh');
-                    return;
-                }
-
-                log_message('debug', 'Saving user into database as: \n' . print_r($user_instance, TRUE) . ' success!');
-
-                $loaded_user_info_result = $this->user_model->get_by_email_or_nick_and_password($emailAddress, $password);
-
-                // setting session user data to cookies
-                $new_session_data = array(
-                    'user_id' => $loaded_user_info_result->getUserId(),
-                    'user_nick' => $loaded_user_info_result->getNick(),
-                    'user_email' => $loaded_user_info_result->getEmailAddress(),
-                    'user_type' => $loaded_user_info_result->getUserType(),
-                    'logged_in' => TRUE,
-                );
-
-                $this->session->set_userdata($new_session_data);
-
-                // sending registration email
-                $this->email->subject($this->config->item('powporn_sending_email_reg_subject'));
-                $this->email->from($this->config->item('powporn_sending_email_sender'));
-                $this->email->to($loaded_user_info_result->getEmailAddress());
-
-                // generate message body according to the user info
-                $this->email->message(
-                        create_registration_email_body_accor_user($user_instance)
-                );
-
-                // send it!
-                //TODO: turn off now, localhost!
-                //$this->email->send();
-
-                log_message('debug', $this->email->print_debugger());
-            }
-            if ($this->db->trans_status() === FALSE) {
-                log_message('debug', 'Transaction status is FALSE! Rolling the transaction back!');
+            if (is_null($address_insert_result) || $address_insert_result == NULL || empty($address_insert_result)) {
+                log_message('debug', 'Creation of address failed!. Redirect!');
+                log_message('debug', 'Rolling the transaction back!');
                 $this->db->trans_rollback();
                 redirect('/c_registration/index', 'refresh');
                 return;
-            } else {
-                log_message('debug', '... commiting transaction ...!');
-                $this->db->trans_commit();
-
-                redirect('/c_welcome/index', 'refresh');
             }
+
+            $userType = $this->user_type_model->get_by_user_type_name('customer'); // customer
+            log_message('debug', 'Saving user as a user type: ' . print_r($userType, true));
+
+            $user_instance = new User_model();
+            $user_instance->instantiate(
+                    $nick, $emailAddress, $firstname, $lastname, $phoneNumber, $gender, $password, $address_insert_result, $userType);
+
+            $user_insert_result = $user_instance->save();
+
+            if (is_null($user_insert_result) || $user_insert_result == NULL || empty($user_insert_result)) {
+                log_message('debug', 'Creation of user failed!. Redirect!');
+                log_message('debug', 'Rolling the transaction back!');
+                $this->db->trans_rollback();
+                redirect('/c_registration/index', 'refresh');
+                return;
+            }
+
+            log_message('debug', 'Saving user into database as: \n' . print_r($user_instance, TRUE) . ' success!');
+
+            $loaded_user_info_result = $this->user_model->get_by_email_or_nick_and_password($emailAddress, $password);
+
+            // setting session user data to cookies
+            $new_session_data = array(
+                'user_id' => $loaded_user_info_result->getUserId(),
+                'user_nick' => $loaded_user_info_result->getNick(),
+                'user_email' => $loaded_user_info_result->getEmailAddress(),
+                'user_type' => $loaded_user_info_result->getUserType(),
+                'logged_in' => TRUE,
+            );
+
+            $this->session->set_userdata($new_session_data);
+
+            // sending registration email
+            $this->email->subject($this->config->item('powporn_sending_email_reg_subject'));
+            $this->email->from($this->config->item('powporn_sending_email_sender'));
+            $this->email->to($loaded_user_info_result->getEmailAddress());
+
+            // generate message body according to the user info
+            $this->email->message(
+                    create_registration_email_body_accor_user($user_instance)
+            );
+
+            // send it!
+            //TODO: turn off now, localhost!
+            //$this->email->send();
+
+            log_message('debug', $this->email->print_debugger());
+        }
+        if ($this->db->trans_status() === FALSE) {
+            log_message('debug', 'Transaction status is FALSE! Rolling the transaction back!');
+            $this->db->trans_rollback();
+            redirect('/c_registration/index', 'refresh');
+            return;
+        } else {
+            log_message('debug', '... commiting transaction ...!');
+            $this->db->trans_commit();
+
+            redirect('/c_welcome/index', 'refresh');
         }
     }
 

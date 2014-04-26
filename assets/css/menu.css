@@ -156,6 +156,10 @@ body {
     background-color: blue;
 }
 
+.line.pp_light_blue{
+    background-color: lightblue;
+}
+
 .line.pp_dark_gray{
     background-color: #c0c0c0;
 }
@@ -187,9 +191,13 @@ body {
 }
 
 #content div.content_wrapper div.container div.half_container {
-    width: 50%;
+    width: 48%;
     height: 100%;
     float: left;
+}
+
+#content div.content_wrapper div.container div.half_container:last-child {
+    margin-left: 2%;
 }
 
 #content div.content_wrapper div.container table.admin_table{
@@ -986,4 +994,8 @@ div.preview_item .preview_item_imgs_wrapper img {
     position: absolute;
     width: 240px;
     height: 351px;
+}
+
+.full_width{
+    width: 100%;
 }

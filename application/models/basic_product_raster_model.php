@@ -2,14 +2,13 @@
 
 class Basic_product_raster_model extends MY_Model {
 
+// 
     protected $_table = 'sb_basic_prod_raster_representation';
     protected $primary_key = 'bs_prdct_rstr_rep_id';
-
     private $id;
     private $photoUrl;
     private $basicProduct;
-    private $supportedPointOfView;
-
+    private $pointOfView;
     public $protected_attributes = array('bs_prdct_rstr_rep_id');
 
     public function __construct() {
@@ -17,11 +16,11 @@ class Basic_product_raster_model extends MY_Model {
     }
 
     public function instantiate(
-    $photoUrl, $basicProduct, $supportedPointOfView) {
+    $photoUrl, $basicProduct, $pointOfView) {
 
         $this->photoUrl = $photoUrl;
         $this->basicProduct = $basicProduct;
-        $this->supportedPointOfView = $supportedPointOfView;
+        $this->pointOfView = $pointOfView;
     }
 
     public function save() {
@@ -29,18 +28,43 @@ class Basic_product_raster_model extends MY_Model {
                         array(
                             'bs_prdct_rstr_rep_photo_url' => $this->photoUrl,
                             'bs_prdct_rstr_rep_basic_product_id' => ( $this->basicProduct instanceof Basic_product_model ? $this->basicProduct->getId() : $this->basicProduct),
-                            'bs_prdct_rstr_rep_basic_product_supported_point_of_view_id' => ( $this->supportedPointOfView instanceof Supported_point_of_view_model ? $this->supportedPointOfView->getId() : $this->supportedPointOfView)
+                            'bs_prdct_rstr_rep_basic_product_point_of_view_id' => ( $this->pointOfView instanceof Point_of_view_model ? $this->pointOfView->getId() : $this->pointOfView)
                 ));
     }
-    
-    public function getId(){
+
+    public function get_single_basic_product_raster_by_product_id_and_pov_id($productId, $povId) {
+
+
+        $productId = $this->db->escape($productId);
+        $povId = $this->db->escape($povId);
+
+        $query = $this->db->query('SELECT bprr.* FROM sb_basic_prod_raster_representation bprr WHERE bprr.bs_prdct_rstr_rep_basic_product_point_of_view_id = ' . $povId . ' AND bprr.bs_prdct_rstr_rep_basic_product_id = ( SELECT bp.bsc_prdct_id FROM sb_basic_product bp WHERE bp.bsc_prdct_product_id = ' . $productId . ') LIMIT 1;');
+
+        if ($query->num_rows() <= 0) {
+            return NULL;
+        }
+
+        $raw_basic_product_raster_item = $query->row(); 
+         
+        $basic_product_raster = new Basic_product_raster_model();
+        $basic_product_raster->instantiate(
+                $raw_basic_product_raster_item->bs_prdct_rstr_rep_photo_url, 
+                $raw_basic_product_raster_item->bs_prdct_rstr_rep_basic_product_id, 
+                $raw_basic_product_raster_item->bs_prdct_rstr_rep_basic_product_point_of_view_id
+                );
+        $basic_product_raster->setId($raw_basic_product_raster_item->bs_prdct_rstr_rep_id);
+        
+        return $basic_product_raster;
+    }
+
+
+    public function getId() {
         return $this->id;
     }
     
-//  
-//    public function getUserId() {
-//        return $this->userId;
-//    }
+    public function getPhotoUrl(){
+        return $this->photoUrl;
+    }
 //
 //    public function getNick() {
 //        return $this->nick;
@@ -74,10 +98,9 @@ class Basic_product_raster_model extends MY_Model {
 //        return $this->userType;
 //    }
 //
-//    protected function setUserId($usrId) {
-//        $this->userId = $usrId;
-//    }
-
+    protected function setId($newId) {
+        $this->id = $newId;
+    }
 }
 
 /* End of file user_model.php */

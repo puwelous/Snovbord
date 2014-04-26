@@ -127,10 +127,13 @@ $autoload['model'] = array(
     'address_model',
     'user_type_model',
     'basic_product_raster_model',
+    'basic_product_vector_model',
     'possible_size_for_product_model',
     'product_model',
+    'category_model',
     'basic_product_model',
-    'supported_point_of_view_model'
+    'point_of_view_model',
+    'component_model'
     );
 
 
