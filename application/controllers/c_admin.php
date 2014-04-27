@@ -87,7 +87,8 @@ class C_admin extends MY_Controller {
         $data['actual_user_nick'] = $this->get_user_nick();
 
 
-        $this->db->trans_begin(); {        // field name, error message, validation rules
+        $this->db->trans_begin();
+        {        // field name, error message, validation rules
             $this->form_validation->set_rules('npf_product_name', 'Product name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
             $this->form_validation->set_rules('npf_available_sizes', 'Product sizes', 'required');
             $this->form_validation->set_rules('npf_product_price', 'Product price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
@@ -171,9 +172,29 @@ class C_admin extends MY_Controller {
             }
 
             try {
+
+                // create sb_basic_product
+                $new_basic_product = new Basic_product_model();
+                $new_basic_product->instantiate($product_price, $actual_user_id);
+                $new_basic_product_id = $new_basic_product->save();
+
+                if ($new_basic_product_id <= 0) {
+                    // add error message
+                    $data['error'] = 'Basic product creation in database failed!';
+                    $data['successful'] = NULL;
+                    log_message('error', 'Basic product creation in database failed! Rolling the transaction back!');
+                    $this->db->trans_rollback();
+
+                    $this->load->view('templates/header', $template_data);
+                    $this->load->view('admin/v_admin_new_product_index', $data);
+                    return;
+                } else {
+                    log_message('debug', 'Basic product creation successful');
+                }
+
                 // create sb_product
                 $new_product = new Product_model();
-                $new_product->instantiate($product_name, $product_price, $product_desc, $product_sex, $actual_user_id);
+                $new_product->instantiate($product_name, $product_price, $product_desc, $product_sex, Product_model::PRODUCT_STATUS_ACCEPTED, $actual_user_id, $new_basic_product_id);
                 $new_product_id = $new_product->save();
 
                 if ($new_product_id <= 0) {
@@ -200,25 +221,6 @@ class C_admin extends MY_Controller {
                     } else {
                         log_message('debug', 'Possible size creation successful');
                     }
-                }
-
-                // create sb_basic_product
-                $new_basic_product = new Basic_product_model();
-                $new_basic_product->instantiate($product_price, $new_product_id, $actual_user_id);
-                $new_basic_product_id = $new_basic_product->save();
-
-                if ($new_basic_product_id <= 0) {
-                    // add error message
-                    $data['error'] = 'Basic product creation in database failed!';
-                    $data['successful'] = NULL;
-                    log_message('error', 'Basic product creation in database failed! Rolling the transaction back!');
-                    $this->db->trans_rollback();
-
-                    $this->load->view('templates/header', $template_data);
-                    $this->load->view('admin/v_admin_new_product_index', $data);
-                    return;
-                } else {
-                    log_message('debug', 'Basic product creation successful');
                 }
 
                 // point of view
@@ -333,6 +335,213 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_new_product_index', $data);
     }
 
+    public function qualify_product_admin() {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+
+        $proposed_products = $this->product_model->get_proposed_products();
+        if (is_null($proposed_products)) {
+            $template_data = array();
+            $this->set_title($template_data, 'No proposed products');
+            $this->load_header_templates($template_data);
+            $this->load->view('templates/header', $template_data);
+            $this->load->view('admin/v_admin_no_proposed_products');
+            return;
+        }
+
+        $this->load->library('table');
+        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
+
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('ID', 'Name', 'Price' . ' &euro;', 'Description', 'Sizes', 'Sex', 'Status', 'Creator', 'Photo');
+
+
+        foreach ($proposed_products as $single_proposed_product_instance) {
+
+            $form_instance = form_open('c_admin/change_product_status/' . $single_proposed_product_instance->getId());
+
+            $sizesOptions = array(
+                'small' => 'Small',
+                'medium' => 'Medium',
+                'large' => 'Large',
+                'xlarge' => 'Xlarge'
+            );
+            $sizesSelected = array('small', 'medium', 'large', 'xlarge');
+            $sizesSelect = form_multiselect('uf_available_sizes[]', $sizesOptions, $sizesSelected, 'id="pdf_available_sizes"');
+
+
+            $sexSelectOption = array(
+                'male' => 'Male',
+                'female' => 'Female',
+                'unisex' => 'Unisex'
+            );
+
+            $sexSelect = form_dropdown('uf_sex', $sexSelectOption, 'unisex');
+
+            $statusSelectOptions = array(
+                'declined_unseen' => 'Decline',
+                'accepted' => 'Accept'
+            );
+
+            $statusSelect = form_dropdown('uf_status', $statusSelectOptions, 'accepted');
+
+            $submit_button = form_submit('mysubmit', 'Change');
+
+            $atts = array(
+                'width' => '800',
+                'height' => '600',
+                'scrollbars' => 'yes',
+                'status' => 'yes',
+                'resizable' => 'yes',
+                'screenx' => '0',
+                'screeny' => '0'
+            );
+
+            $anchorPhoto = anchor_popup('c_admin/product_photo_index/' . $single_proposed_product_instance->getId(), 'Photo', $atts);
+            $anchorUser = anchor_popup('c_admin/users_admin/' . $single_proposed_product_instance->getCreator(), $this->user_model->get_user_by_id($single_proposed_product_instance->getCreator())->getNick(), $atts);
+
+
+            $this->table->add_row(
+                    $single_proposed_product_instance->getId(), $single_proposed_product_instance->getName(), $single_proposed_product_instance->getPrice(), $single_proposed_product_instance->getDescription(), $form_instance . $sizesSelect, $sexSelect, $statusSelect . $submit_button . form_close(), $anchorUser, $anchorPhoto
+            );
+        }
+
+        $data['table_data'] = $this->table->generate();
+
+        $template_data = array();
+        $this->set_title($template_data, 'Prodposed products administration');
+        $this->load_header_templates($template_data);
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/v_admin_proposed_products', $data);
+    }
+
+    public function change_product_status($productId) {
+
+        if (!isset($productId) || is_null($productId) || !is_numeric($productId)) {
+            log_message('debug', 'Param for c_admin/change_status not initialized, redirecting to admin page!');
+            redirect('/c_admin/index', 'refresh');
+            return;
+        }
+
+        $selected_sex_value = $this->input->post('uf_sex');
+        $selected_status_value = $this->input->post('uf_status');
+
+        $product_to_qualify = $this->product_model->get_product($productId);
+        if (is_null($product_to_qualify)) {
+            log_message('debug', 'Could not load required product to be qualified!');
+            redirect('/c_admin/index', 'refresh');
+            return;
+        }
+
+        // if accepted also set sex value
+        if (strtoupper($selected_status_value) === Product_model::PRODUCT_STATUS_ACCEPTED) {
+            $product_to_qualify->setSex($selected_sex_value);
+        }
+
+        // set status
+        $product_to_qualify->setAcceptanceStatus(strtoupper($selected_status_value));
+
+        $this->db->trans_begin(); {
+            if (!$product_to_qualify->update_product()) {
+                log_message('debug', 'Could not update qualified product!');
+                $this->db->trans_rollback();
+                redirect('/c_admin/index', 'refresh');
+                return;
+            }
+
+            // insert possible sizes for product instance
+            $available_sizes_array = $this->input->post('uf_available_sizes');
+            foreach ($available_sizes_array as $available_size_item) {
+                $new_psfp_inst = new Possible_size_for_product_model();
+                $new_psfp_inst->instantiate(
+                        $available_size_item, 1, $product_to_qualify->getId());
+                $new_psfp_inst->save();
+            }
+        }
+        if ($this->db->trans_status() === FALSE) {
+            log_message('debug', 'Transaction status is FALSE! Rolling the transaction back!');
+            $this->db->trans_rollback();
+            redirect('/c_admin/index', 'refresh');
+            return;
+        } else {
+            log_message('debug', '... commiting transaction ...!');
+            $this->db->trans_commit();
+            log_message('info', 'Changing user privileges successful!');
+            redirect('/c_admin/qualify_product_admin', 'refresh');
+        }
+    }
+
+    public function qualify_component_admin() {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+
+        $proposed_components = $this->component_model->get_proposed_components();
+        if ( !$proposed_components) {
+            $template_data = array();
+            $this->set_title($template_data, 'No proposed components');
+            $this->load_header_templates($template_data);
+            $this->load->view('templates/header', $template_data);
+            $this->load->view('admin/v_admin_no_proposed_components');
+            return;
+        }
+
+        $this->load->library('table');
+        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
+
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('ID', 'Name', 'Price' . ' &euro;', 'Status', 'Is stable?', 'Creator', 'Category', 'Photo');
+
+
+        foreach ($proposed_components as $single_proposed_component_instance) {
+
+            $form_instance = form_open('c_admin/change_component_status/' . $single_proposed_component_instance->getId());
+
+            $statusSelectOptions = array(
+                'declined_unseen' => 'Decline',
+                'accepted' => 'Accept'
+            );
+
+            $statusSelect = form_dropdown('cf_status', $statusSelectOptions, 'accepted');
+
+            $submit_button = form_submit('mysubmit', 'Change');
+
+            $atts = array(
+                'width' => '800',
+                'height' => '600',
+                'scrollbars' => 'yes',
+                'status' => 'yes',
+                'resizable' => 'yes',
+                'screenx' => '0',
+                'screeny' => '0'
+            );
+
+            $anchorPhoto = anchor_popup('c_admin/component_photo_index/' . $single_proposed_component_instance->getId(), 'Photo', $atts);
+            $anchorUser = anchor_popup('c_admin/users_admin/' . $single_proposed_component_instance->getCreator(), $this->user_model->get_user_by_id($single_proposed_component_instance->getCreator())->getNick(), $atts);
+
+            $categoryName = $this->category_model->get_category_by_id($single_proposed_component_instance->getCategory())->getName();
+
+            $this->table->add_row(
+                    $single_proposed_component_instance->getId(), $single_proposed_component_instance->getName(), $single_proposed_component_instance->getPrice(), $form_instance . $statusSelect . $submit_button . form_close(), ($single_proposed_component_instance->getIsStable() == '1' ? 'Yes' : 'No'), $anchorUser, $categoryName, $anchorPhoto
+            );
+        }
+
+        $data['table_data'] = $this->table->generate();
+
+        $template_data = array();
+        $this->set_title($template_data, 'Prodposed components administration');
+        $this->load_header_templates($template_data);
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/v_admin_proposed_components', $data);
+    }
+
     public function components_admin() {
 
         if (!$this->authentify_admin()) {
@@ -340,7 +549,6 @@ class C_admin extends MY_Controller {
             return;
         }
 
-        //login or logout in menu
         $template_data = array();
         $this->set_title($template_data, 'Components administration');
         $this->load_header_templates($template_data);
@@ -360,20 +568,8 @@ class C_admin extends MY_Controller {
 
         $data['actual_user_nick'] = $this->get_user_nick();
 
-        $all_categories = $this->category_model->get_all_categories();
+        $data['categories_dropdown'] = $this->_prepare_categories();
 
-        $categories_dropdown = array();
-        
-        if (is_null($all_categories)) {
-            // no categories!
-            //let the array be empty, no problem
-        } else {
-            foreach ($all_categories as $single_category) {
-                $categories_dropdown[$single_category->getId()] = $single_category->getName();
-            }
-        }
-
-        $data['categories_dropdown'] = $categories_dropdown;
 
 //        $presentPointsOfView = $this->point_of_view_model->get_pov_names_distinct();
 //        log_message('debug', print_r($presentPointsOfView, TRUE));
@@ -395,12 +591,29 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_new_component_index', $data);
     }
 
+    private function _prepare_categories() {
+
+        $all_categories = $this->category_model->get_all_categories();
+
+        if (is_null($all_categories)) {
+            // no categories!
+            //let the array be empty, no problem
+            return array();
+        } else {
+            $categories_dropdown = array();
+            foreach ($all_categories as $single_category) {
+                $categories_dropdown[$single_category->getId()] = $single_category->getName();
+            }
+            return $categories_dropdown;
+        }
+    }
+
     public function new_component_admin_add() {
-        
+
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
-        }       
+        }
 
         $template_data = array();
         $this->set_title($template_data, 'New component interface');
@@ -409,17 +622,18 @@ class C_admin extends MY_Controller {
         $data['actual_user_nick'] = $this->get_user_nick();
 
 
-        $this->db->trans_begin(); 
-        {        
-        // field name, error message, validation rules
+        $this->db->trans_begin(); {
+            // field name, error message, validation rules
             $this->form_validation->set_rules('ncf_component_name', 'Component name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
             $this->form_validation->set_rules('ncf_component_price', 'Component price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
             $this->form_validation->set_rules('ncf_categories', 'Component category', 'required');
-            
+
             if ($this->form_validation->run() == FALSE) {
 
                 $data['error'] = NULL; // no need, printed out by library in a view
                 $data['successful'] = NULL;
+
+                $data['categories_dropdown'] = $this->_prepare_categories();
 
                 // print out validation errors
                 $this->load->view('templates/header', $template_data);
@@ -443,7 +657,7 @@ class C_admin extends MY_Controller {
 
             // load product's sex
             $category = $this->input->post('ncf_categories');
-echo $is_component_stable;echo $category; return;
+
 //            // load product's pov
 //            $product_pov = $this->input->post('npf_point_of_view_name');
             // calculate file name using user's nick and product's name
@@ -470,6 +684,8 @@ echo $is_component_stable;echo $category; return;
                 $data['error'] = $error['error'];
                 $data['successful'] = NULL;
 
+                $data['categories_dropdown'] = $this->_prepare_categories();
+
                 $this->load->view('templates/header', $template_data);
                 $this->load->view('admin/v_admin_new_component_index', $data);
                 return;
@@ -483,66 +699,35 @@ echo $is_component_stable;echo $category; return;
             $data['error'] = NULL;
             $data['successful'] = 'Upload successfull!';
 
-            // database insertions
-            
-            
+            // database insertions           
             $actual_user_id = $this->get_user_id();
             if (is_null($actual_user_id)) {
                 $data['error'] = 'Cannot find an user_id of the actual user. How should I assign the creator of a product?';
+
+                $data['categories_dropdown'] = $this->_prepare_categories();
+
                 $this->load->view('templates/header', $template_data);
-                $this->load->view('admin/v_admin_new_product_index', $data);
+                $this->load->view('admin/v_admin_new_component_index', $data);
                 return;
             }
 
             try {
-                // create sb_product
-                $new_product = new Product_model();
-                $new_product->instantiate($product_name, $product_price, $product_desc, $product_sex, $actual_user_id);
-                $new_product_id = $new_product->save();
-
-                if ($new_product_id <= 0) {
-                    // add error message
-                    $data['error'] = 'Product creation in database failed!';
+                // create component
+                $new_component = new Component_model();
+                $new_component->instantiate($component_name, $component_price, Component_model::COMPONENT_STATUS_ACCEPTED, $is_component_stable, $actual_user_id, $category);
+                $new_component_id = $new_component->save();
+                if ($new_component_id <= 0) {
+                    $data['error'] = 'Cannot save new component into database! Rolling transaction back!';
                     $data['successful'] = NULL;
-                    log_message('error', 'Product creation in database failed! Rolling the transaction back!');
+                    log_message('debug', 'Cannot save new component into database! Rolling transaction back!');
                     $this->db->trans_rollback();
 
+                    $data['categories_dropdown'] = $this->_prepare_categories();
                     $this->load->view('templates/header', $template_data);
-                    $this->load->view('admin/v_admin_new_product_index', $data);
+                    $this->load->view('admin/v_admin_new_component_index', $data);
                     return;
                 } else {
-                    log_message('debug', 'Product creation successful');
-                }
-
-                // insert possible sizes for product instance
-                $available_sizes_array = $this->input->post('npf_available_sizes');
-                foreach ($available_sizes_array as $available_size_item) {
-                    $new_psfp_inst = new Possible_size_for_product_model();
-                    $new_psfp_inst->instantiate($available_size_item, 1, $new_product_id);
-                    if ($new_psfp_inst->save() <= 0) {
-                        log_message('error', 'Possible size creation in database failed! Ignoring now!');
-                    } else {
-                        log_message('debug', 'Possible size creation successful');
-                    }
-                }
-
-                // create sb_basic_product
-                $new_basic_product = new Basic_product_model();
-                $new_basic_product->instantiate($product_price, $new_product_id, $actual_user_id);
-                $new_basic_product_id = $new_basic_product->save();
-
-                if ($new_basic_product_id <= 0) {
-                    // add error message
-                    $data['error'] = 'Basic product creation in database failed!';
-                    $data['successful'] = NULL;
-                    log_message('error', 'Basic product creation in database failed! Rolling the transaction back!');
-                    $this->db->trans_rollback();
-
-                    $this->load->view('templates/header', $template_data);
-                    $this->load->view('admin/v_admin_new_product_index', $data);
-                    return;
-                } else {
-                    log_message('debug', 'Basic product creation successful');
+                    log_message('debug', 'Component creation successful');
                 }
 
                 // point of view
@@ -553,9 +738,9 @@ echo $is_component_stable;echo $category; return;
                     $data['successful'] = NULL;
                     log_message('error', 'There is no basic POV in DB, rolling the transaction back!');
                     $this->db->trans_rollback();
-
+                    $data['categories_dropdown'] = $this->_prepare_categories();
                     $this->load->view('templates/header', $template_data);
-                    $this->load->view('admin/v_admin_new_product_index', $data);
+                    $this->load->view('admin/v_admin_new_component_index', $data);
                     return;
                 }
 
@@ -594,51 +779,79 @@ echo $is_component_stable;echo $category; return;
 //                } else {
 //                    log_message('debug', 'Point of view creation successful');
 //                }
-                // create sb_basic_product_raster_representation
-                $new_basic_product_raster = new Basic_product_raster_model();
-                $photoUrl = get_basic_product_upload_path($this->config) . $upload_photo_data['file_name'];
-                $new_basic_product_raster->instantiate($photoUrl, $new_basic_product_id, $basic_pov->getId());
-                $new_basic_product_raster_id = $new_basic_product_raster->save();
+//                
+                // create sb_component_raster_representation
+                $new_component_raster_model = new Component_raster_model();
+                $photoUrl = get_components_upload_path($this->config) . $upload_photo_data['file_name'];
+                $new_component_raster_model->instantiate($photoUrl, $new_component_id, $basic_pov->getId());
+                $new_component_raster_model_id = $new_component_raster_model->save();
 
-                if ($new_basic_product_raster_id <= 0) {
+                if (!$new_component_raster_model_id) {
                     // add error message
-                    $data['error'] = 'Raster representation creation in database failed!';
+                    $data['error'] = 'Component raster representation creation in database failed!';
                     $data['successful'] = NULL;
-                    log_message('error', 'Raster representation creation in database failed! Rolling the transaction back!');
+                    log_message('error', 'Component raster representation creation in database failed! Rolling the transaction back!');
                     $this->db->trans_rollback();
 
+                    $data['categories_dropdown'] = $this->_prepare_categories();
                     $this->load->view('templates/header', $template_data);
-                    $this->load->view('admin/v_admin_new_product_index', $data);
+                    $this->load->view('admin/v_admin_new_component_index', $data);
                     return;
                 } else {
-                    log_message('debug', 'Raster representation creation successful');
+                    log_message('debug', 'Component raster representation creation successful');
                 }
             } catch (Exception $e) {
                 log_message('error', print_r($e, TRUE));
             }
 
-            // create set of sb_basic_product_vector_representation
+            // create set of sb_component_vector_representation 
             for ($index = 0; $index <= 9; $index++) {
-                $svg_value = $this->input->post('npf_vector_' . $index);
+                $svg_value = $this->input->post('ncf_vector_' . $index);
                 if (strlen($svg_value) <= 0) {
                     continue;
                 }
 
-                $basic_product_vector_model = new Basic_product_vector_model();
-                $basic_product_vector_model->instantiate($svg_value, $new_basic_product_id, $basic_pov->getId());
-                if ($basic_product_vector_model->save() <= 0) {
-                    log_message('debug', 'Cannot save vector representation for basic product!');
+                $component_vector_model = new Component_vector_model();
+                $component_vector_model->instantiate($svg_value, $new_component_id, $basic_pov->getId());
+                if (!$component_vector_model->save()) {
+                    log_message('debug', 'Cannot save vector representation for component!');
+                    $data['error'] = 'Cannot save vector representation for component!';
                     $this->db->trans_rollback();
+                    $data['categories_dropdown'] = $this->_prepare_categories();
                     $this->load->view('templates/header', $template_data);
-                    $this->load->view('admin/v_admin_new_product_index', $data);
+                    $this->load->view('admin/v_admin_new_component_index', $data);
+                    return;
+                }
+            }
+
+            // create set of sb_component_colours 
+            for ($index = 0; $index <= 11; $index++) {
+                $colour_value = $this->input->post('colour_' . $index);
+                if (strtolower($colour_value) == 'false') {
+                    continue;
+                }
+
+                $new_component_colour = new Component_colour_model();
+                $new_component_colour->instantiate($colour_value, $new_component_id);
+                if (!$new_component_colour->save()) {
+                    log_message('debug', 'Cannot save colour for component!');
+                    $data['error'] = 'Cannot save colour for component!';
+                    $this->db->trans_rollback();
+                    $data['categories_dropdown'] = $this->_prepare_categories();
+                    $this->load->view('templates/header', $template_data);
+                    $this->load->view('admin/v_admin_new_component_index', $data);
                     return;
                 }
             }
         }
         if ($this->db->trans_status() === FALSE) {
             log_message('debug', 'Transaction status is FALSE! Rolling the transaction back!');
+            $data['error'] = 'Transaction status is FALSE! Rolling the transaction back!';
             $this->db->trans_rollback();
-            redirect('/c_admin/new_product_admin_index', 'refresh');
+
+            $data['categories_dropdown'] = $this->_prepare_categories();
+            $this->load->view('templates/header', $template_data);
+            $this->load->view('admin/v_admin_new_component_index', $data);
             return;
         } else {
             log_message('debug', '... commiting transaction ...!');
@@ -647,14 +860,11 @@ echo $is_component_stable;echo $category; return;
             $data['error'] = NULL;
             $data['successful'] = 'New basic product created succesfully!';
 
-            redirect('/c_admin/new_product_admin_index', 'refresh');
+            $data['categories_dropdown'] = $this->_prepare_categories();
+            $this->load->view('templates/header', $template_data);
+            $this->load->view('admin/v_admin_new_component_index', $data);
+            return;
         }
-
-        //login or logout in menu
-        $this->load_header_templates($template_data);
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_new_product_index', $data);
     }
 
     public function categories_admin_index() {
@@ -884,6 +1094,8 @@ echo $is_component_stable;echo $category; return;
 
             // insert possible sizes for product instance
             $available_sizes_array = $this->input->post('pdf_available_sizes');
+            //TODO!!!
+            throw new Exception('Pali: Change the code below!');
             foreach ($available_sizes_array as $available_size_item) {
                 $new_psfp_inst = new Possible_size_for_product_model();
                 $new_psfp_inst->instantiate($inserted_prod_def_id, $available_size_item, 1);
@@ -1156,7 +1368,7 @@ echo $is_component_stable;echo $category; return;
         }
     }
 
-    public function users_admin() {
+    public function users_admin($singleUserId = NULL) {
 
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -1169,13 +1381,19 @@ echo $is_component_stable;echo $category; return;
         $this->table->set_template($tmpl);
         $this->table->set_heading('Nick', 'Firstname', 'Lastname', 'Email', 'Phone', 'Privilege', 'Change privilege');
 
-        $all_users = $this->user_model->get_all_users();
+        if (!isset($singleUserId) || is_null($singleUserId)) {
+            $all_users = $this->user_model->get_all_users();
+        } else {
+            $all_users = array();
+            $all_users[] = $this->user_model->get_user_by_id($singleUserId);
+        }
+
 
         foreach ($all_users as $single_user_model_instance) {
 
             $user_type_name = $this->user_type_model->get($single_user_model_instance->getUserType())->usrtp_name;
 
-            $form_instance = form_open('c_admin/change_privilege/' . $single_user_model_instance->getUserId());
+            $form_instance = form_open('c_admin/change_privilege/' . $single_user_model_instance->getId());
 
             $options = array(
                 'customer' => 'Customer',
@@ -1409,38 +1627,52 @@ echo $is_component_stable;echo $category; return;
         $this->load->view('admin/orders/v_admin_order_detail', $data);
     }
 
-    public function product_photo_index($productId) {
-
+    public function component_photo_index($componentId) {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
 
-        $sup_povs = $this->supported_point_of_view_model->get_by_product($productId);
-
-        $urls = array();
-
-        if ($sup_povs !== NULL) {
-            foreach ($sup_povs as $sup_pov_item) {
-                $rasters = $this->supported_point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
-                //log_message('debug', print_r($rasters, true));
-                foreach ($rasters as $raster_item) {
-                    $urls[] = $raster_item->url;
-                }
-            }
+        if (is_null($componentId) || !isset($componentId) || !is_numeric($componentId)) {
+            $this->redirectToHomePage();
+            return;
         }
 
-        $product_screen_representation = new Product_screen_representation(
-                        NULL, NULL, $urls);
+        
+        $basic_pov = $this->point_of_view_model->get_basic_pov();
+        $singleComponentRasterModel = $this->component_raster_model->get_component_single_raster_by_component_and_point_of_view($componentId, $basic_pov->getId());
 
-        $data['product_screen_representation'] = $product_screen_representation;
+        $data['component_raster_model'] = $singleComponentRasterModel;
 
         $template_data = array();
-        $this->set_title($template_data, 'Photo detail');
+        $this->set_title($template_data, 'Component photo detail');
         $this->load_header_templates($template_data);
 
         $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/orders/v_admin_photo_detail', $data);
+        $this->load->view('admin/v_admin_component_detail', $data);
+    }
+
+    public function product_photo_index($productId) {
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        if (is_null($productId) || !isset($productId) || !is_numeric($productId)) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $singleProduct = $this->product_model->get_product($productId);
+
+        $data['product'] = $singleProduct;
+
+        $template_data = array();
+        $this->set_title($template_data, 'Product photo detail');
+        $this->load_header_templates($template_data);
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/v_admin_product_detail', $data);
     }
 
     public function change_order_status() {
@@ -1481,6 +1713,46 @@ echo $is_component_stable;echo $category; return;
         redirect('c_admin/orders_admin', 'refresh');
     }
 
+    
+    public function change_component_status( $componentId ) {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        if (!isset($componentId) || is_null($componentId) || !is_numeric($componentId)) {
+            log_message('debug', 'Param for c_admin/change_component_status not initialized, redirecting to admin page!');
+            redirect('/c_admin/index', 'refresh');
+            return;
+        }
+
+        $updated_component = $this->component_model->get_component_by_id( $componentId );
+        if( is_null($updated_component )){
+            log_message('debug', 'Such a component does not exist!, Searched for ID: ' . $componentId);
+            redirect('/c_admin/index', 'refresh');
+            return;
+        }
+        
+        $selected_component_status_value = $this->input->post('cf_status');
+
+        if(strtoupper($selected_component_status_value) == Component_model::COMPONENT_STATUS_ACCEPTED){
+            $updated_component->setAcceptanceStatus( Component_model::COMPONENT_STATUS_ACCEPTED );
+        }else{
+            $updated_component->setAcceptanceStatus( Component_model::COMPONENT_STATUS_DECLINED_UNSEEN );
+        }     
+
+        $update_result = $updated_component->update_component();
+
+        if ($update_result <= 0) {
+            log_message('error', 'Changing component status not successful!');
+            redirect('/c_admin/index', 'refresh');
+            return;
+        }
+
+        log_message('info', 'Changing user privileges successful!');
+        redirect('/c_admin/qualify_component_admin', 'refresh');
+    }    
 }
 
 /* End of file c_admin.php */

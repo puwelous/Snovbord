@@ -2,6 +2,11 @@
 
 class Product_model extends MY_Model {
 
+    const PRODUCT_STATUS_PROPOSED = 'PROPOSED';
+    const PRODUCT_STATUS_DECLINED_UNSEEN = 'DECLINED_UNSEEN';
+    const PRODUCT_STATUS_DECLINED_SEEN = 'DECLINED_SEEN';
+    const PRODUCT_STATUS_ACCEPTED = 'ACCEPTED';
+
     public $_table = 'sb_product';
     public $primary_key = 'prdct_id';
     private $id;
@@ -9,7 +14,10 @@ class Product_model extends MY_Model {
     private $price;
     private $description;
     private $sex;
+    private $acceptanceStatus;
     private $creator_id;
+    private $basic_product_id;
+    private $photo_url;
     public $protected_attributes = array('prdct_id');
 
     /* basic constructor */
@@ -20,13 +28,16 @@ class Product_model extends MY_Model {
 
     /* instance "constructor" */
 
-    public function instantiate($name, $price, $description, $sex, $creator_id) {
+    public function instantiate($name, $price, $description, $sex, $acceptanceStatus, $creator_id, $basic_product_id, $photo_url) {
 
         $this->name = $name;
         $this->price = $price;
         $this->description = $description;
         $this->sex = $sex;
+        $this->acceptanceStatus = $acceptanceStatus;
         $this->creator_id = $creator_id;
+        $this->basic_product_id = $basic_product_id;
+        $this->photo_url = $photo_url;
     }
 
     /*     * * database operations ** */
@@ -34,7 +45,7 @@ class Product_model extends MY_Model {
     /*
      * create
      */
-
+//prdct_id, prdct_name, prdct_price, prdct_description, prdct_sex, prdct_acceptance_status, prdct_creator, 
     public function save() {
         return $this->product_model->insert(
                         array(
@@ -42,27 +53,68 @@ class Product_model extends MY_Model {
                             'prdct_price' => $this->price,
                             'prdct_description' => $this->description,
                             'prdct_sex' => $this->sex,
-                            'prdct_creator' => ( $this->creator_id instanceof User_model ? $this->creator_id->getUserId() : $this->creator_id )
+                            'prdct_acceptance_status' => $this->acceptanceStatus,
+                            'prdct_creator' => ( $this->creator_id instanceof User_model ? $this->creator_id->getUserId() : $this->creator_id ),
+                            'prdct_basic_product_id' => $this->basic_product_id,
+                            'prdct_photo_url' => $this->photo_url
                 ));
     }
     
-    public function get_product( $productId ){
-        $selected_product = $this->product_model->get( $productId );
-        #{ ["prdct_id"]=> string(2) "10" ["prdct_name"]=> string(18) "Snovbord Hoodie I." ["prdct_price"]=> string(6) "123.45" ["prdct_description"]=> string(62) "Unbelievably water-proof hoodie made of high-quality material." ["prdct_sex"]=> string(6) "female" ["prdct_creator"]=> string(1) "1" }
-        
-        if ( !$selected_product ){
+    public function update_product() {
+        return $this->product_model->update(
+                        $this->getId(), array(
+                            'prdct_name' => $this->name,
+                            'prdct_price' => $this->price,
+                            'prdct_description' => $this->description,
+                            'prdct_sex' => $this->sex,
+                            'prdct_acceptance_status' => $this->acceptanceStatus,
+                            'prdct_creator' => ( $this->creator_id instanceof User_model ? $this->creator_id->getUserId() : $this->creator_id ),
+                            'prdct_basic_product_id' => $this->basic_product_id,
+                            'prdct_photo_url' => $this->photo_url
+                ));
+    }     
+
+    public function get_product($productId) {
+        $selected_product = $this->product_model->get($productId);
+
+        if (!$selected_product) {
             return NULL;
         }
-        
+
         $loaded_product = new Product_model();
-        
-        $loaded_product->instantiate($selected_product->prdct_name,
-                $selected_product->prdct_price, $selected_product->prdct_description,
-                $selected_product->prdct_sex, $selected_product->prdct_creator);
-        
-        $loaded_product->setId( $selected_product->prdct_id );
-        
-       return  $loaded_product;
+
+        $loaded_product->instantiate(
+                $selected_product->prdct_name, 
+                $selected_product->prdct_price, 
+                $selected_product->prdct_description, 
+                $selected_product->prdct_sex, 
+                $selected_product->prdct_acceptance_status, 
+                $selected_product->prdct_creator, 
+                $selected_product->prdct_basic_product_id,
+                $selected_product->prdct_photo_url);
+
+        $loaded_product->setId($selected_product->prdct_id);
+
+        return $loaded_product;
+    }
+
+    public function get_any_single_product() {
+
+        $query = $this->db->query('SELECT * FROM sb_product LIMIT 1;');
+
+        if ($query->num_rows() <= 0) {
+            return NULL;
+        }
+
+        $selected_product = $query->row();
+
+        $loaded_product = new Product_model();
+
+        $loaded_product->instantiate($selected_product->prdct_name, $selected_product->prdct_price, $selected_product->prdct_description, $selected_product->prdct_sex, $selected_product->prdct_acceptance_status, $selected_product->prdct_creator,  $selected_product->prdct_basic_product_id, $selected_product->prdct_photo_url);
+
+        $loaded_product->setId($selected_product->prdct_id);
+
+        return $loaded_product;
     }
 
     public function get_all_products() {
@@ -75,7 +127,7 @@ class Product_model extends MY_Model {
 
             foreach ($all_products as $item) {
                 $product_instance = new Product_model();
-                $product_instance->instantiate($item->prdct_name, $item->prdct_price, $item->prdct_description, $item->prdct_sex, $item->prdct_creator);
+                $product_instance->instantiate($item->prdct_name, $item->prdct_price, $item->prdct_description, $item->prdct_sex, $item->prdct_acceptance_status, $item->prdct_creator,  $item->prdct_basic_product_id, $item->prdct_photo_url);
                 $product_instance->setId($item->prdct_id);
                 $products_instances_array[] = $product_instance;
             }
@@ -83,7 +135,55 @@ class Product_model extends MY_Model {
             return $products_instances_array;
         };
     }
+    
+    public function get_accepted_products() {
+         return $this->get_products_by_status(Product_model::PRODUCT_STATUS_ACCEPTED);
+    }    
+    
+    public function get_proposed_products() {
+        return $this->get_products_by_status(Product_model::PRODUCT_STATUS_PROPOSED);
+    }
 
+    private function get_products_by_status( $status ){
+        $all_products = $this->product_model->get_many_by('prdct_acceptance_status', $status);
+
+        if (!isset($all_products) || is_null($all_products)) {
+            return NULL;
+        } else {
+            $products_instances_array = array();
+
+            foreach ($all_products as $item) {
+                $product_instance = new Product_model();
+                $product_instance->instantiate($item->prdct_name, $item->prdct_price, $item->prdct_description, $item->prdct_sex, $item->prdct_acceptance_status, $item->prdct_creator, $item->prdct_basic_product_id, $item->prdct_photo_url);
+                $product_instance->setId($item->prdct_id);
+                $products_instances_array[] = $product_instance;
+            }
+
+            return $products_instances_array;
+        };
+    }
+    
+    public function get_products_by_creator( $creator ) {
+        
+        $creatorId = ( $creator instanceof User_model ? $creator->getId() : $creator );
+        
+        $all_products = $this->product_model->get_many_by('prdct_creator', $creatorId);
+
+        if (!isset($all_products) || is_null($all_products)) {
+            return NULL;
+        } else {
+            $products_instances_array = array();
+
+            foreach ($all_products as $item) {
+                $product_instance = new Product_model();
+                $product_instance->instantiate($item->prdct_name, $item->prdct_price, $item->prdct_description, $item->prdct_sex, $item->prdct_acceptance_status, $item->prdct_creator, $item->prdct_basic_product_id, $item->prdct_photo_url);
+                $product_instance->setId($item->prdct_id);
+                $products_instances_array[] = $product_instance;
+            }
+
+            return $products_instances_array;
+        };
+    }     
     /*     * ********* getters *********** */
 
     public function getId() {
@@ -106,10 +206,22 @@ class Product_model extends MY_Model {
         return $this->sex;
     }
 
+    public function getAcceptanceStatus() {
+        return $this->acceptanceStatus;
+    }
+
     public function getCreator() {
         return $this->creator_id;
+    }
+    
+    public function getBasicProduct() {
+        return $this->basic_product_id;
     }    
     
+    public function getPhotoUrl(){
+        return $this->photo_url;
+    }
+
     /*     * ********* setters *********** */
 
     private function setId($newId) {
@@ -132,10 +244,21 @@ class Product_model extends MY_Model {
         $this->sex = $newSex;
     }
 
+    public function setAcceptanceStatus($newAcceptanceStatus) {
+        $this->acceptanceStatus = $newAcceptanceStatus;
+    }
+
     public function setCreator($newCreator) {
         $this->creator_id = $newCreator;
     }
 
+    public function setBasicProduct( $newBasicProduct){
+        $this->basic_product_id = $newBasicProduct;
+    }
+    
+    public function setPhotoUrl( $newPhotoUrl){
+        $this->photo_url = $newPhotoUrl;
+    }
 }
 
 /* End of file product_model.php */

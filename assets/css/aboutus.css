@@ -19,7 +19,6 @@
 	text-align: center;
 	background-color: #ffffff;
 	
-	//border: solid darkgrey 2px;
 }
 
 #main_screen_title #catchy_title {
@@ -47,9 +46,6 @@
 	height: 250px;
 	margin-bottom: 40px;
 	text-align: center;
-	
-	
-	//border: solid purple 3px;
 }
 
 #container_video .video_item{

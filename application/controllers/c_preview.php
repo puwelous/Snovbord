@@ -45,29 +45,9 @@ class C_preview extends MY_Controller {
         }
 
         // photos
-        $basic_pov = $this->point_of_view_model->get_basic_pov();
-        $basic_raster_model_object = $this->basic_product_raster_model->get_single_basic_product_raster_by_product_id_and_pov_id(
-                $previed_product->getId(), $basic_pov->getId()
-        );
-
         $urls = array();
-        // add basic raster object single URL
-        $urls[] = $basic_raster_model_object->getPhotoUrl();
-        
-        // add components URLs
-        //TODO...
-        
-        
-//        $sup_povs = $this->supported_point_of_view_model->get_by_product($previed_product->getId());
 
-//        if ($sup_povs !== NULL) {
-//            foreach ($sup_povs as $sup_pov_item) {
-//                $rasters = $this->supported_point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
-//                foreach ($rasters as $raster_item) {
-//                    $urls[] = $raster_item->url;
-//                }
-//            }
-//        }
+        $urls[] = $previed_product->getPhotoUrl();
 
         $product_screen_representation = new Product_screen_representation(
                         $previed_product->getId(), $previed_product->getName(), $urls);
@@ -136,7 +116,8 @@ class C_preview extends MY_Controller {
 
 
         /*         * * start TRANSACTION ** */
-        $this->db->trans_begin(); {
+        $this->db->trans_begin();
+        {
             // create user cart if necessary
             if (is_null($users_cart) || $users_cart == NULL || empty($users_cart)) {
 
@@ -157,10 +138,9 @@ class C_preview extends MY_Controller {
 
             $ordered_size_id = $this->input->post('pdf_product_sizes');
 
-
             // create ordered product
             $new_ordered_product = new Ordered_product_model();
-            $new_ordered_product->instantiate($product_instance->getid(), 1, $ordered_size_id, $users_cart->getId(), $actual_user_id);
+            $new_ordered_product->instantiate($product_instance->getId(), 1, $ordered_size_id, $users_cart->getId(), $actual_user_id);
             log_message('debug', 'Instantiated ordered product:' . print_r($new_ordered_product, TRUE));
             $new_ordered_product_id = $new_ordered_product->save();
             log_message('debug', '$new_ordered_product_id :' . print_r($new_ordered_product_id, TRUE));

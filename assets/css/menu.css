@@ -313,13 +313,24 @@ button[id="buy_button"]{
     color: white;
 }
 
-button[id="add_to_cart_button"]{
+button[id="add_to_cart_button"],button[id="create_button"] {
     background-color: #ef4623;
     color: white;
     border: #ef4623;
     width: 100%;
     cursor: pointer;
+    padding-top: 10px;
+     padding-bottom: 10px;
+    font-size: 1.25em;
 }
+
+/*button[id="create_button"]{
+    background-color: #ef4623;
+    color: white;
+    border: #ef4623;
+    width: 100%;
+    cursor: pointer;
+}*/
 
 .pp_button_passive {
 
@@ -998,4 +1009,44 @@ div.preview_item .preview_item_imgs_wrapper img {
 
 .full_width{
     width: 100%;
+}
+
+.possible_component_colour{
+    
+}
+
+.possible_component_colour{
+    display: inline-block;
+    height: 45px;
+    width: 45px;
+    margin: 0 8px 8px 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.possible_component_colour:after {
+    content:'\A';
+    position:absolute;
+    width:100%; height:100%;
+    top:0; left:0;
+    background:rgba(0,0,0,0.6);
+    opacity:0;
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+}
+
+.possible_component_colour:hover:after {
+    opacity:1;
+}
+
+.notselected{
+    border: solid black 2px;
+}
+
+.selected{
+    border: dotted black 2px;
+}
+
+.component_colour_possibilities{
+    /*display: none;*/
 }

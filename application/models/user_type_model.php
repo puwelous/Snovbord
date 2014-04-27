@@ -27,12 +27,26 @@ class User_type_model extends MY_Model {//,
         return $this->userTypeId;
     }    
     
+    public function getUserTypeName( ){
+        return $this->userTypeName;
+    }    
+    
     public function save() {
         return $this->user_type_model->insert(
                 array(
                     'usrtp_name' => $this->userTypeName
         ));
     }
+    
+    public function get_user_type_by_id( $userTypeId ){
+        $row = $this->user_type_model->as_object()->get( $userTypeId );
+        
+        $result = new User_type_model();
+        $result->instantiate( $row->usrtp_name );
+        $result->setUserTypeId( $row->usrtp_id );
+        
+        return $result;
+    }    
     
     public function get_by_user_type_name( $value ){
         $row = $this->user_type_model->as_object()->get_by( 'usrtp_name', $value );

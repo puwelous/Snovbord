@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
+    <head profile="http://www.w3.org/2005/10/profile">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title><?php echo ( empty($title) ? 'Snovbord' : $title) ?></title>
+        
+        <link rel="icon" type="image/ico" href="<?php echo base_url(); ?>assets/images/favicon.ico">        
         <?php
         // css
         echo link_tag('assets/css/menu.css');
@@ -21,6 +23,10 @@
         <script src="https://code.jquery.com/jquery-latest.js" type="text/javascript"></script>
 
         <script src="<?php echo base_url(); ?>assets/javascript/validate.min.js" text='text/javascript'></script>
+        <script src="<?php echo base_url(); ?>assets/javascript/svgfix-0.2.js" text='text/javascript'></script>
+        <script src="<?php echo base_url(); ?>assets/javascript/StackBlur.js" text='text/javascript'></script>
+        <script src="<?php echo base_url(); ?>assets/javascript/canvg.js" text='text/javascript'></script>
+        <script src="<?php echo base_url(); ?>assets/javascript/rgbcolor.js" text='text/javascript'></script>
 
         
         <script type="text/javascript">

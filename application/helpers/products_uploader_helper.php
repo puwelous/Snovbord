@@ -33,8 +33,9 @@ if (!function_exists('generate_product_file_name')) {
     function generate_product_file_name( $user_nick, $product_name) {
         // get rid of dots if necessary
         $product_name_without_dots = str_replace(".", "_", $product_name);
+        $product_name_without_dots_and_spaces = str_replace(" ", "_", $product_name_without_dots);
         
-        $prefix = $user_nick . '_' . $product_name_without_dots . '_';
+        $prefix = $user_nick . '_' . $product_name_without_dots_and_spaces . '_';
         // 13 chars long
         return uniqid($prefix);
     }

@@ -24,8 +24,8 @@ class C_services extends MY_Controller {
     const ALLOWED_URL_SCHEMA = 'http://puwel.sk/products/';
     const URI_SEGMENT_TO_PRODUCTS_PREVIEW = '/preview/show/';
     const CACHE_AGE = 21600;
-    const PP_PROVIDER_NAME = 'PowPorn';
-    const PP_STORE_NAME = 'PowPornStore';
+    const PP_PROVIDER_NAME = 'Snovbord';
+    const PP_STORE_NAME = 'SnovbordStore';
     const PP_CATEGORY = 'products';
 
     public function __construct() {
@@ -34,6 +34,7 @@ class C_services extends MY_Controller {
 
     // URL scheme - accepted url in our case is:http://www.puwel.sk/products/*
     // and API endpoint:http://www.puwel.sk/services/eombed/
+    //http://localhost:8888/Snovbord/index.php/c_services/oembed?url=http%3A//puwel.sk/products/1/
     public function oembed() {
 
         // load OEmbed library
@@ -117,9 +118,9 @@ class C_services extends MY_Controller {
         log_message('info', 'Loading data for product with ID:' . $product_id);
 
         // fetching the data
-        $product_def_inst = $this->product_definition_model->get($product_id);
+        $product_instance = $this->product_model->get_product($product_id);
 
-        if (!isset($product_def_inst) || empty($product_def_inst)) {
+        if (!isset($product_instance) || empty($product_instance)) {
             $responseErrorMessage = $this->coembedbasicerrorresponsegeneratorimpl->generate_404_not_found(self::ALLOWED_URL_SCHEMA);
             $this->output->set_output(json_encode($responseErrorMessage->getData()));
             return;
@@ -127,7 +128,7 @@ class C_services extends MY_Controller {
 
         // setting up data through the helper
         try {
-            $responseObject = $this->_prepare_data($product_def_inst);
+            $responseObject = $this->_prepare_data($product_instance);
         } catch (CInvalidRequiredOEmbedKeyException $noeke) {
             log_message('error', 'Data preparation failed:' . $noeke);
             $responseErrorMessage = $this->coembedbasicerrorresponsegeneratorimpl->generate_500_server_issues(self::ALLOWED_URL_SCHEMA);
@@ -157,7 +158,7 @@ class C_services extends MY_Controller {
         $this->output->set_output($encoded_response);
     }
 
-    private function _prepare_data($product_definition) {
+    private function _prepare_data($product_instance) {
 
         $responseMessage = new OEmbedResponseMessage(array());
         
@@ -180,10 +181,10 @@ class C_services extends MY_Controller {
                 ICOEmbedOptionalResponseKeyConstants::OERC_PROVIDER_NAME => self::PP_PROVIDER_NAME, // optional
                 ICOEmbedOptionalResponseKeyConstants::OERC_PROVIDER_URL => site_url(), // optional
                 ICOEmbedOptionalResponseKeyConstants::OERC_CACHE_AGE => self::CACHE_AGE, // optional
-                ICOEmbedOptionalResponseKeyConstants::OERC_TITLE => "In The Powporn Store: " . $product_definition->pd_product_name, // optional
+                ICOEmbedOptionalResponseKeyConstants::OERC_TITLE => "In The Snovbord Store: " . $product_instance->getName(), // optional
                 ICOEmbedOptionalResponseKeyConstants::OERC_AUTHOR_NAME => self::PP_STORE_NAME, // optional 
                 ICOEmbedOptionalResponseKeyConstants::OERC_AUTHOR_URL => site_url("welcome"), // optional
-                ICOEmbedOptionalResponseKeyConstants::OERC_THUMBNAIL_URL => base_url($product_definition->pd_photo_url), // optional
+                ICOEmbedOptionalResponseKeyConstants::OERC_THUMBNAIL_URL => base_url($product_instance->getPhotoUrl()), // optional
                 ICOEmbedOptionalResponseKeyConstants::OERC_THUMBNAIL_WIDTH => 195, // optional
                 ICOEmbedOptionalResponseKeyConstants::OERC_THUMBNAIL_HEIGHT => "*" // optional
                     ));
@@ -196,9 +197,9 @@ class C_services extends MY_Controller {
         try {
             $responseMessage = $this->cpinterestimpl->add_pinterest_required_response_items(
                     $responseMessage, array(
-                ICPinRequiredResponseKeyConstants::PRRKC_URL => site_url(self::URI_SEGMENT_TO_PRODUCTS_PREVIEW . $product_definition->pd_id),
-                ICPinRequiredResponseKeyConstants::PRRKC_TITLE => "In The Powporn Store: " . $product_definition->pd_product_name, // optional                    
-                ICPinRequiredResponseKeyConstants::PRRKC_PRICE => $product_definition->pd_price,
+                ICPinRequiredResponseKeyConstants::PRRKC_URL => site_url(self::URI_SEGMENT_TO_PRODUCTS_PREVIEW . $product_instance->getId()),
+                ICPinRequiredResponseKeyConstants::PRRKC_TITLE => "In The Powporn Store: " . $product_instance->getName(), // optional                    
+                ICPinRequiredResponseKeyConstants::PRRKC_PRICE => $product_instance->getPrice(),
                 ICPinRequiredResponseKeyConstants::PRRKC_CURRENCY_CODE => "EUR"
                     ));
         } catch (CInvalidRequiredPinKeyException $irpke) {
@@ -207,9 +208,9 @@ class C_services extends MY_Controller {
             throw $irpke;
         }
 
-        if ($product_definition->pd_sex == 'female') {
+        if ($product_instance->getSex() == 'female') {
             $product_for_gender = ICPinGenderValueConstants::PGVC_FEMALE;
-        } else if ($product_definition->pd_sex == 'male') {
+        } else if ($product_instance->getSex() == 'male') {
             $product_for_gender = ICPinGenderValueConstants::PGVC_MALE;
         } else {
             $product_for_gender = ICPinGenderValueConstants::PGVC_UNISEX;
@@ -220,12 +221,12 @@ class C_services extends MY_Controller {
         try{
         $this->cpinterestimpl->add_pinterest_optional_response_items(
                 $responseMessage, array(
-            ICPinOptionalResponseKeyConstants::PORKC_DESCRIPTION => $product_definition->pd_type,
-            ICPinOptionalResponseKeyConstants::PORKC_PRODUCT_ID => $product_definition->pd_id,
+            ICPinOptionalResponseKeyConstants::PORKC_DESCRIPTION => $product_instance->getDescription(),
+            ICPinOptionalResponseKeyConstants::PORKC_PRODUCT_ID => $product_instance->getId(),
             ICPinOptionalResponseKeyConstants::PORKC_AVAILABILITY => ICPinAvailabilityValueConstants::PAVC_PREORDER,
-            ICPinOptionalResponseKeyConstants::PORKC_STANDARD_PRICE => $product_definition->pd_price,
+            ICPinOptionalResponseKeyConstants::PORKC_STANDARD_PRICE => $product_instance->getPrice(),
             ICPinOptionalResponseKeyConstants::PORKC_GENDER => $product_for_gender,
-            ICPinOptionalResponseKeyConstants::PORKC_IMAGES => base_url($product_definition->pd_photo_url)
+            ICPinOptionalResponseKeyConstants::PORKC_IMAGES => base_url($product_instance->getPhotoUrl())
                 )
         );
         } catch (CInvalidOptionalPinKeyException $noeke) {

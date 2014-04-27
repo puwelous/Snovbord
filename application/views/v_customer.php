@@ -15,34 +15,13 @@
                 </h2>
                 <h2>
                     <?php echo anchor('c_customer/orders', 'my orders', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
-                </h2>                
-<!--                <h2>
-                    <?php echo anchor('c_admin/components_admin', 'components administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
-                </h2>                         
-                <h2>
-                    <?php echo anchor('c_admin/basic_products_admin', 'basic products administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
-                </h2>                        
-                <h2>
-                    <?php echo anchor('c_admin/products_admin', 'products administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
                 </h2>
-                <div class="blue_line">
-                </div>  
                 <h2>
-                    <?php echo anchor('c_admin/users_admin', 'users administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
+                    <?php echo anchor('c_customer/components_customer', 'my components', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
                 </h2>
-                <div class="blue_line">
-                </div>  
                 <h2>
-                    <?php echo anchor('c_admin/orders_admin', 'orders administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
+                    <?php echo anchor('c_customer/products_customer', 'my products', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
                 </h2>
-                <div class="blue_line">
-                </div>                 
-                <h2>
-                    <?php echo anchor('c_admin/about_us', 'contact administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
-                </h2>                        
-                <h2>
-                    <?php echo anchor('c_admin/rules', 'object administration', array('class' => 'black red_on_hover inunderlined upper_cased')); ?>
-                </h2>                 -->
             </div>
         </div>
     </div>

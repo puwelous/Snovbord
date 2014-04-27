@@ -52,8 +52,8 @@
             // updating second section
             var actualSubtotalSecondSection = parseFloat( $('#subtotal_second_section_sum').html());
             
-            actualSubtotalSecondSection -= valuePerItem;
-            $("#subtotal_second_section_sum").html(new Number(actualSubtotalSecondSection).toFixed(2));
+            actualSubtotalSecondSection = actualSubtotalSecondSection - valuePerItem;
+            $("#subtotal_second_section_sum").html( (new Number(actualSubtotalSecondSection)).toFixed(2) );
         });
         
         $("label[for^=shipping_method_]").click( function(){

@@ -14,7 +14,9 @@
                 <h2>
                     <?php echo anchor('c_admin/new_product_admin_index', 'add new product', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
                 </h2>                 
-              
+                <h2>
+                    <?php echo anchor('c_admin/qualify_product_admin', 'qualify products', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
+                </h2> 
             </div>
         </div>
     </div>

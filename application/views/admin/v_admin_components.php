@@ -17,6 +17,9 @@
                 <h2>
                     <?php echo anchor('c_admin/new_component_admin_index', 'add component', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
                 </h2> 
+                <h2>
+                    <?php echo anchor('c_admin/qualify_component_admin', 'qualify components', array('class' => 'text_light smaller black red_on_hover inunderlined upper_cased')); ?>
+                </h2>                 
             </div>
         </div>
     </div><!-- end of content-->

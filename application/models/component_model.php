@@ -39,7 +39,7 @@ class Component_model extends MY_Model {
     /*     * * database operations ** */
 
     public function save() {
-        return $this->component_model->insert(
+         return $this->component_model->insert(
                         array(
                             'cmpnt_name' => $this->name,
                             'cmpnt_price' => $this->price,
@@ -49,6 +49,18 @@ class Component_model extends MY_Model {
                             'cmpnt_category_id' => $this->category
                 ));
     }
+    
+    public function update_component() {
+        return $this->component_model->update(
+                        $this->getId(), array(
+                            'cmpnt_name' => $this->name,
+                            'cmpnt_price' => $this->price,
+                            'cmpnt_acceptance_status' => $this->acceptanceStatus,
+                            'cmpnt_is_stable' => $this->isStable,
+                            'cmpnt_creator_id' => $this->creator,
+                            'cmpnt_category_id' => $this->category
+                ));
+    }     
 
     public function get_component_by_id($componentId) {
         $result = $this->component_model->get($componentId);
@@ -71,7 +83,8 @@ class Component_model extends MY_Model {
         $components = array();
 
         //$this->db->order_by("ctgr_name", "asc");
-        $result_raw = $this->category_model->as_object()->get_all();
+        $this->db->order_by("cmpnt_category_id", "asc"); 
+        $result_raw = $this->component_model->as_object()->get_all();
 
         foreach ($result_raw as $result) {
             $component_instance = new Component_model();
@@ -85,6 +98,52 @@ class Component_model extends MY_Model {
 
         return $components;
     }
+    
+    public function get_components_by_category( $categoryId ) {
+
+        $components = array();
+
+        $result_raw = $this->component_model->get_many_by('cmpnt_category_id', $categoryId);
+
+        foreach ($result_raw as $result) {
+            $component_instance = new Component_model();
+            $component_instance->instantiate(
+                $result->cmpnt_name, $result->cmpnt_price, $result->cmpnt_acceptance_status, $result->cmpnt_is_stable, $result->cmpnt_creator_id, $result->cmpnt_category_id                    
+            );
+            $component_instance->setId($result->cmpnt_id);
+
+            $components[] = $component_instance;
+        }
+
+        return $components;
+    }  
+    
+    public function get_proposed_components(){
+        return $this->get_components_by_status(Component_model::COMPONENT_STATUS_PROPOSED);
+    }
+    
+    public function get_accepted_components(){
+        return $this->get_components_by_status(Component_model::COMPONENT_STATUS_ACCEPTED);
+    }    
+    
+    private function get_components_by_status( $status ) {
+
+        $components = array();
+
+        $result_raw = $this->component_model->get_many_by('cmpnt_acceptance_status', $status);
+
+        foreach ($result_raw as $result) {
+            $component_instance = new Component_model();
+            $component_instance->instantiate(
+                $result->cmpnt_name, $result->cmpnt_price, $result->cmpnt_acceptance_status, $result->cmpnt_is_stable, $result->cmpnt_creator_id, $result->cmpnt_category_id                    
+            );
+            $component_instance->setId($result->cmpnt_id);
+
+            $components[] = $component_instance;
+        }
+
+        return $components;
+    }     
 
     public function remove() {
         return $this->component_model->delete($this->id);

@@ -51,18 +51,21 @@ class C_shopping_cart extends MY_Controller {
 
         foreach ($db_odered_products_full_info as $db_odered_products_full_info_item) {
             $product_instance_id = $db_odered_products_full_info_item->getProductId();
-            $sup_povs = $this->supported_point_of_view_model->get_by_product($product_instance_id);
+            $product_url = $this->product_model->get_product($product_instance_id)->getPhotoUrl();
+//            $sup_povs = $this->supported_point_of_view_model->get_by_product($product_instance_id);
             $urls = array();
-            if ($sup_povs !== NULL) {
-                foreach ($sup_povs as $sup_pov_item) {
-                    $rasters = $this->supported_point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
-                    //log_message('debug', print_r($rasters, true));
-                    foreach ($rasters as $raster_item) {
-                        $urls[] = $raster_item->url;
-                    }
-                }
-            }
-
+//            if ($sup_povs !== NULL) {
+//                foreach ($sup_povs as $sup_pov_item) {
+//                    $rasters = $this->point_of_view_model->get_rasters_urls_by_pov($sup_pov_item->getId(), 'url');
+//                    //log_message('debug', print_r($rasters, true));
+//                    foreach ($rasters as $raster_item) {
+//                        $urls[] = $raster_item->url;
+//                    }
+//                }
+//            }
+             $urls[] = $product_url;
+            
+            
             $db_odered_products_full_info_item->setProductScreenRepresentation(
                     new Product_screen_representation(
                             $db_odered_products_full_info_item->getProductId(), $db_odered_products_full_info_item->getProductName(), $urls)
