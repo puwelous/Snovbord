@@ -113,7 +113,6 @@ $autoload['model'] = array(
     'company_model',
     'user_model',
     'cart_model',
-    'product_definition_model',
     'contact_video_model',
     'shipping_method_model',
     'possible_size_for_product_model',
@@ -133,7 +132,11 @@ $autoload['model'] = array(
     'category_model',
     'basic_product_model',
     'point_of_view_model',
-    'component_model'
+    'component_model',
+    'component_vector_model', 
+    'component_raster_model',
+    'component_colour_model',
+    'composition_model'
     );
 
 

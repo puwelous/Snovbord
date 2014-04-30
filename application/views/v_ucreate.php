@@ -12,50 +12,6 @@
         }else{
             alert('Your browser does not support HTML5!');
         }
-        
-        $("#save_button").click(function(){
-            
-            // draw svg
-            var xml = (new XMLSerializer).serializeToString( document.getElementById("svg_element") ); 
-            canvg(vectorCanvas, svgfix(xml), {  ignoreMouse: true, ignoreAnimation: true, ignoreClear: true, ignoreDimensions: true  });            
-
-            
-            // render basic image
-            const basic_image_src = $('#basic_image').attr('src');
-            var newBasicImage = new Image();
-            newBasicImage.src = basic_image_src;
-            newBasicImage.onload = function() {
-                rasterCanvasContext.drawImage( newBasicImage , 0, 0);
-            };
-            
-            // render components rasters
-            $('#applied_components_list').children('div').each(function () {
-                //alert($(this).data('identity')); // "this" is the current element in the loop
-                //applied_component_ids.push($(this).data('identity'));
-                var single_value_pair = {};
-                // identity of the component
-               
-                const component_id = $(this).data('identity');
-
-                var applied_component = $('#components').children('.component[data-identity="' + component_id.toString() +'"]');
-                
-                const applied_component_img_src = applied_component.data('src');
-                
-                var newComponentImage = new Image();
-                newComponentImage.src = applied_component_img_src;
-                newComponentImage.onload = function() {
-                    rasterCanvasContext.drawImage( newComponentImage , 0, 0);
-                };                
-            });    
-            
-            setTimeout(function(){
-                vectorCanvasContext.drawImage(rasterCanvas,0,0);
-                $('#loading_gif').hide();
-                window.open(vectorCanvas.toDataURL());  
-            },1000);            
-            // apply raster canvas to svg canvas
-            $('#loading_gif').show();
-        });
 
         $(".component_add").click( function(){
 
@@ -353,6 +309,8 @@
                         success: function(response) {
                             //alert(response.msg);
                             $('#loading_gif').hide(750);
+                            //TODO
+                            window.location.href = "<?php echo site_url('/c_customer/products_customer/'); ?>"; return;                            
                     
                             //                    $('#login_result_message').show();
                             //                            
@@ -363,7 +321,7 @@
                             //                        $('#loading_gif').hide();
                             //                    }else{
                             //                        $('#login_result_message').html('Login successful.');
-                            //                        window.location.href = "<?php echo site_url('welcome/index'); ?>";
+                            //                        window.location.href = "<?php echo site_url('/c_customer/products_customer/'); ?>";
                             //                    };                            
                         }, error : function(XMLHttpRequest, textStatus, errorThrown) {
                             //                    alert('error');
@@ -423,7 +381,6 @@
             <h1><span id="ucreate_price"><?php echo $product->getPrice(); ?></span>&nbsp;&euro;</h1>
 
             <button id="create_button" type="button">CREATE !</button>
-            <button id="save_button" type="button">SAVE !</button>
             <?php //echo form_close(); ?>
     </div>
 
@@ -442,11 +399,11 @@ $representation_urls = $product_representations[0]->getUrls();
 foreach ($representation_urls as $representation_url_item):
     ?>
     <?php $varname = 'imageObject_' . $index; ?>
-                                                                            var <?php echo $varname; ?> = new Image();
+                                                                                var <?php echo $varname; ?> = new Image();
     <?php echo $varname; ?>.src = '<?php echo base_url($representation_url_item); ?>';
     <?php echo $varname; ?>.onload = function() {
-                                                                            context.drawImage( <?php echo $varname; ?> , 0, 0);
-                                                                        };
+                                                                                context.drawImage( <?php echo $varname; ?> , 0, 0);
+                                                                            };
     <?php $index = $index + 1; ?>
 <?php endforeach; ?>                
     }
@@ -481,6 +438,17 @@ foreach ($representation_urls as $representation_url_item):
                 );
                 echo img($image_properties);
             }
+            ?>
+        </div>
+        <div id="background_image_effect" style="position: absolute; width: 240px; height: 350px;">
+            <?php
+            $image_properties_basic_effect = array(
+                'id' => 'basic_image_effect',
+                'src' => 'assets/css/images/bottomshadow.png',
+                'alt' => 'Image bottom effect',
+                'style' => 'z-index: -1; position: absolute; width: 240px; height: 350px;'
+            );
+            echo img($image_properties_basic_effect);
             ?>
         </div>
     </div>
@@ -527,6 +495,7 @@ foreach ($representation_urls as $representation_url_item):
         <h3>Applied components</h3>
         <div id="applied_components_list">
         </div>
+        <div class="line pp_dark_gray"></div>
         <h3>Colour range</h3>
         <div id="applied_component_colours">
             <?php foreach ($ucreate_component_full_info_array as $singleComponentFullInfo): ?>

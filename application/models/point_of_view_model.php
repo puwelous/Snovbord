@@ -1,14 +1,38 @@
 <?php
 
+/**
+ * Model class representing point of view.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class Point_of_view_model extends MY_Model {
 
+    /**
+     * @var string $_table
+     *  Name of a database table. Used for CRUD abstraction in MY_Model class
+     */    
     protected $_table = 'sb_point_of_view';
+    /**
+     * @var string $primary_key
+     *  Primary key in database schema for current table
+     */    
     protected $primary_key = 'pov_id';
     private $id;
     private $name;
     private $isBasic;
+    
+    /**
+     * 
+     * @var array $protected_attributes
+     *  Array of attributes that are not directly accesed via CRUD abstract model
+     */    
     public $protected_attributes = array('pov_id');
 
+    /**
+     * Basic constructor calling parent CRUD abstraction layer contructor
+     */    
     public function __construct() {
         parent::__construct();
     }
@@ -20,6 +44,11 @@ class Point_of_view_model extends MY_Model {
         $this->isBasic = $isBasic;
     }
 
+    /**
+     * Inserts this object into a database. Database create operation
+     * @return object
+     *  NULL or object as a result of insertion
+     */     
     public function save() {
         return $this->point_of_view_model->insert(
                         array(
@@ -63,26 +92,6 @@ class Point_of_view_model extends MY_Model {
             return $loaded_pov;
         }        
     }
-//    public function get_by_product($product) {
-//
-//        $product_id = ( $product instanceof Product_model ? $product->getId() : $product );
-//        $povs_by_product = $this->point_of_view_model->get_many_by('spprtd_pov_product_id', $product_id);
-//
-//        if (!isset($povs_by_product) || is_null($povs_by_product)) {
-//            return NULL;
-//        } else {
-//            $sup_pov_instances_array = array();
-//
-//            foreach ($povs_by_product as $item) {
-//                $sup_pov_instance = new Supported_point_of_view_model();
-//                $sup_pov_instance->instantiate($item->spprtd_pov_name, $item->spprtd_pov_product_id);
-//                $sup_pov_instance->setId($item->spprtd_pov_id);
-//                $sup_pov_instances_array[] = $sup_pov_instance;
-//            }
-//
-//            return $sup_pov_instances_array;
-//        };
-//    }
 
     public function get_rasters_urls_by_pov($pov, $url_column_alias = NULL) {
 

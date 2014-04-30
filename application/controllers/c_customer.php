@@ -198,293 +198,142 @@ class C_customer extends MY_Controller {
         $this->load->view('admin/v_admin_new_product_index', $data);
     }
 
-    public function categories_admin() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        //login or logout in menu
-        $template_data = array();
-        $this->set_title($template_data, 'Categories administration');
-        $this->load_header_templates($template_data);
-
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_categories', $data);
-    }
-
-    public function components_admin() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        //login or logout in menu
-        $template_data = array();
-        $this->set_title($template_data, 'Components administration');
-        $this->load_header_templates($template_data);
-
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_components', $data);
-    }
-
-    public function final_products_admin() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        //login or logout in menu
-        $template_data = array();
-        $this->set_title($template_data, 'Final products administration');
-        $this->load_header_templates($template_data);
-
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_final_products', $data);
-    }
-
-    public function add_products() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $template_data = array();
-
-        $this->set_title($template_data, 'Products administration');
-        $this->load_header_templates($template_data);
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        // field name, error message, validation rules
-        $this->form_validation->set_rules('pdf_product_name', 'Product name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
-        $this->form_validation->set_rules('pdf_available_sizes', 'Product sizes', 'required');
-        $this->form_validation->set_rules('pdf_product_price', 'Product price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
-        $this->form_validation->set_rules('pdf_product_type', 'Product type', 'trim|required|min_length[1]|max_length[256]');
-
-        if ($this->form_validation->run() == FALSE) {
-
-            $data['error'] = NULL; // no need, prited out by library in a view
-            $data['successful'] = NULL;
-
-            // print out validation errors
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_products', $data);
-            return;
-        }
-
-        // validation ok
-        // load basic upload config
-        $prod_upl_config = get_products_upload_configuration($this->config);
-        // print out DEL later
-        log_message('debug', print_r($prod_upl_config, TRUE)); // delete me
-        // load user nick
-        $actual_user_nick = $this->get_user_nick(); // check if not null later
-        // load product's name
-        $product_name = $this->input->post('pdf_product_name');
-
-        // load product's type
-        $product_type = $this->input->post('pdf_product_type');
-
-        // load product's price
-        $product_price = $this->input->post('pdf_product_price');
-
-        $product_sex = $this->input->post('pdf_product_sexes');
-        log_message('debug', print_r($product_sex, TRUE)); // delete me later
-        // calculate file name using user's nick and product's name
-        $generated_product_file_name = generate_product_file_name(
-                $actual_user_nick, $product_name
-        );
-
-        // add to config
-        $prod_upl_config['file_name'] = $generated_product_file_name;
-
-
-        // init library
-        $this->load->library('upload', $prod_upl_config);
-
-        // try to upload and handle if does not work
-        if (!$this->upload->do_upload()) {
-
-            $error = array('error' => $this->upload->display_errors());
-
-            log_message('debug', print_r($error['error'], TRUE));
-
-            // add error message
-            $data['error'] = $error['error'];
-            $data['successful'] = NULL;
-
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_products', $data);
-            return;
-        }
-
-        // log some details
-        $upload_photo_data = $this->upload->data();
-        log_message('debug', 'Upload successfull!');
-        log_message('debug', print_r($upload_photo_data, TRUE));
-
-        $data['error'] = NULL;
-        $data['successful'] = 'Upload successfull!';
-
-        // database insertions
-        $actual_user_id = $this->get_user_id();
-        if (is_null($actual_user_id)) {
-            $data['error'] = 'Cannot find an user_id of the actual user. How should I assign the creator of a product?';
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_products', $data);
-        }
-
-        try {
-            // insert product definition instance
-            $new_product_definition = new Product_definition_model();
-            $new_product_definition->instantiate(
-                    //$generated_product_file_name, instead of generated use REAL path after file upload
-                    $product_name, get_product_upload_path($this->config) . $upload_photo_data['file_name'], $actual_user_id, $product_type, $product_price, $product_sex
-            );
-
-            $inserted_prod_def_id = $new_product_definition->insert_product_definition();
-
-            // insert possible sizes for product instance
-            $available_sizes_array = $this->input->post('pdf_available_sizes');
-            foreach ($available_sizes_array as $available_size_item) {
-                $new_psfp_inst = new Possible_size_for_product_model();
-                $new_psfp_inst->instantiate($inserted_prod_def_id, $available_size_item, 1);
-                $new_psfp_inst->insert_possible_size_for_product();
-            }
-        } catch (Exception $e) {
-            log_message('debug', print_r($e, TRUE));
-        }
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_products', $data);
-    }
 
     public function any_order_detail_index($orderId) {
-
-        if (!$this->authentify_provider()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        if (is_null($orderId) || !isset($orderId) || !is_numeric($orderId)) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $single_paid_order_model_instance = $this->order_model->get_order_by_id($orderId);
-        $shipping_method = $this->shipping_method_model->get_shipping_method_by_id($single_paid_order_model_instance->getShippingMethod());
-        $payment_method = $this->payment_method_model->get_payment_method_by_id($single_paid_order_model_instance->getPaymentMethod());
-        $assigned_cart = $this->cart_model->get_cart_by_id($single_paid_order_model_instance->getCart());
-
-        $ordering_person = $this->user_model->get_user_by_id($assigned_cart->getOrderingPerson());
-
-        $ordered_products_full_info = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id($assigned_cart->getId());
-
-        $this->load->library('table');
-        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
-        $this->table->set_template($tmpl);
-
-
-        // order table
-        $this->table->set_heading('ID', 'Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?', 'Status');
-        $this->table->add_row(
-                $single_paid_order_model_instance->getId(), $single_paid_order_model_instance->getFinalSum() . ' &euro;', $single_paid_order_model_instance->getCart(), $shipping_method->getName(), $payment_method->getName(), ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $single_paid_order_model_instance->getStatus()
-        );
-        $data['table_data_order'] = $this->table->generate();
-
-        $this->table->clear();
-
-        // cart table
-        $this->table->set_heading('ID', 'Sum', 'Status');
-        $this->table->add_row(
-                $assigned_cart->getId(), $assigned_cart->getSum() . ' &euro;', $assigned_cart->getStatus()
-        );
-        $data['table_data_cart'] = $this->table->generate();
-
-        $this->table->clear();
-
-        // user table
-        $this->table->set_heading('ID', 'Nick', 'Email address', 'Firstname', 'Lastname', 'Gender', 'Phone');
-        $this->table->add_row(
-                $ordering_person->getId(), $ordering_person->getNick(), mailto($ordering_person->getEmailAddress(), $ordering_person->getEmailAddress()), $ordering_person->getFirstName(), $ordering_person->getLastName(), ($ordering_person->getGender() == 0 ? 'Male' : 'Female'), $ordering_person->getPhoneNumber()
-        );
-        $data['table_data_user'] = $this->table->generate();
-
-        $this->table->clear();
-
-        // address table
-        if ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress()) {
-            log_message('debug', 'Loading registration address');
-            $address = $this->address_model->get_address_by_id($ordering_person->getId());
-            $this->table->set_heading('ID', 'Street', 'City', 'Zip', 'Country');
-            $this->table->add_row(
-                    $address->getId(), $address->getStreet(), $address->getCity(), $address->getZip(), $address->getCountry()
-            );
-            $data['table_data_address'] = $this->table->generate();
-        } else {
-            log_message('debug', 'Loading order address');
-            $order_address = $this->order_address_model->get_order_address_by_id($single_paid_order_model_instance->getOrderAddress());
-            $this->table->set_heading('ID', 'Name', 'Address', 'City', 'Zip', 'Country', 'Phone', 'Email');
-            $this->table->add_row(
-                    $order_address->getId(), $order_address->getName(), $order_address->getAddress(), $order_address->getCity(), $order_address->getZip(), $order_address->getCountry(), $order_address->getPhoneNumber(), $order_address->getEmailAddress()
-            );
-            $data['table_data_address'] = $this->table->generate();
-        }
-
-        $this->table->clear();
-
-        // ordered products including full info
-        $this->table->set_heading('ID', 'Count', 'Size', 'Product ID', 'Product name', 'Product price', 'Creator', 'Photo');
-        foreach ($ordered_products_full_info as $ordered_product_item) {
-            $atts = array(
-                'width' => '800',
-                'height' => '600',
-                'scrollbars' => 'yes',
-                'status' => 'yes',
-                'resizable' => 'yes',
-                'screenx' => '0',
-                'screeny' => '0'
-            );
-            $photoAnchor = anchor_popup('c_admin/product_photo_index/' . $ordered_product_item->getProductId(), 'Photo', $atts);
-            $this->table->add_row(
-                    $ordered_product_item->getOrderedProductId(), $ordered_product_item->getOrderedProductCount(), $ordered_product_item->getPossibleSizeForProductName(), $ordered_product_item->getProductId(), $ordered_product_item->getProductName(), $ordered_product_item->getProductPrice(), $ordered_product_item->getCreatorNick(), $photoAnchor
-            );
-        }
-        $data['table_data_ordered_products'] = $this->table->generate();
-
-        $data['order_id'] = $orderId;
-        $data['order_actual_status'] = $single_paid_order_model_instance->getStatus();
-        if ($single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_OPEN) {
-            $data['order_next_status'] = Order_model::ORDER_STATUS_PAID;
-        } else if ($single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_PAID) {
-            $data['order_next_status'] = Order_model::ORDER_STATUS_SHIPPING;
-        }
-
-        $template_data = array();
-        $this->set_title($template_data, 'Order detail');
-        $this->load_header_templates($template_data);
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/orders/v_admin_order_detail', $data);
-    }
-
-//    public function product_photo_index($productId) {
-//
-//        if (!$this->authentify_customer()) {
+throw new Exception("Should not be called at all!");
+//        if (!$this->authentify_provider()) {
 //            $this->redirectToHomePage();
 //            return;
 //        }
 //
+//        if (is_null($orderId) || !isset($orderId) || !is_numeric($orderId)) {
+//            $this->redirectToHomePage();
+//            return;
+//        }
+//
+//        $single_paid_order_model_instance = $this->order_model->get_order_by_id($orderId);
+//        $shipping_method = $this->shipping_method_model->get_shipping_method_by_id($single_paid_order_model_instance->getShippingMethod());
+//        $payment_method = $this->payment_method_model->get_payment_method_by_id($single_paid_order_model_instance->getPaymentMethod());
+//        $assigned_cart = $this->cart_model->get_cart_by_id($single_paid_order_model_instance->getCart());
+//
+//        $ordering_person = $this->user_model->get_user_by_id($assigned_cart->getOrderingPerson());
+//
+//        $ordered_products_full_info = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id($assigned_cart->getId());
+//
+//        $this->load->library('table');
+//        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
+//        $this->table->set_template($tmpl);
+//
+//
+//        // order table
+//        $this->table->set_heading('ID', 'Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?', 'Status');
+//        $this->table->add_row(
+//                $single_paid_order_model_instance->getId(), $single_paid_order_model_instance->getFinalSum() . ' &euro;', $single_paid_order_model_instance->getCart(), $shipping_method->getName(), $payment_method->getName(), ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $single_paid_order_model_instance->getStatus()
+//        );
+//        $data['table_data_order'] = $this->table->generate();
+//
+//        $this->table->clear();
+//
+//        // cart table
+//        $this->table->set_heading('ID', 'Sum', 'Status');
+//        $this->table->add_row(
+//                $assigned_cart->getId(), $assigned_cart->getSum() . ' &euro;', $assigned_cart->getStatus()
+//        );
+//        $data['table_data_cart'] = $this->table->generate();
+//
+//        $this->table->clear();
+//
+//        // user table
+//        $this->table->set_heading('ID', 'Nick', 'Email address', 'Firstname', 'Lastname', 'Gender', 'Phone');
+//        $this->table->add_row(
+//                $ordering_person->getId(), $ordering_person->getNick(), mailto($ordering_person->getEmailAddress(), $ordering_person->getEmailAddress()), $ordering_person->getFirstName(), $ordering_person->getLastName(), ($ordering_person->getGender() == 0 ? 'Male' : 'Female'), $ordering_person->getPhoneNumber()
+//        );
+//        $data['table_data_user'] = $this->table->generate();
+//
+//        $this->table->clear();
+//
+//        // address table
+//        if ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress()) {
+//            log_message('debug', 'Loading registration address');
+//            $address = $this->address_model->get_address_by_id($ordering_person->getId());
+//            $this->table->set_heading('ID', 'Street', 'City', 'Zip', 'Country');
+//            $this->table->add_row(
+//                    $address->getId(), $address->getStreet(), $address->getCity(), $address->getZip(), $address->getCountry()
+//            );
+//            $data['table_data_address'] = $this->table->generate();
+//        } else {
+//            log_message('debug', 'Loading order address');
+//            $order_address = $this->order_address_model->get_order_address_by_id($single_paid_order_model_instance->getOrderAddress());
+//            $this->table->set_heading('ID', 'Name', 'Address', 'City', 'Zip', 'Country', 'Phone', 'Email');
+//            $this->table->add_row(
+//                    $order_address->getId(), $order_address->getName(), $order_address->getAddress(), $order_address->getCity(), $order_address->getZip(), $order_address->getCountry(), $order_address->getPhoneNumber(), $order_address->getEmailAddress()
+//            );
+//            $data['table_data_address'] = $this->table->generate();
+//        }
+//
+//        $this->table->clear();
+//
+//        // ordered products including full info
+//        $this->table->set_heading('ID', 'Count', 'Size', 'Product ID', 'Product name', 'Product price', 'Creator', 'Photo');
+//        foreach ($ordered_products_full_info as $ordered_product_item) {
+//            $atts = array(
+//                'width' => '800',
+//                'height' => '600',
+//                'scrollbars' => 'yes',
+//                'status' => 'yes',
+//                'resizable' => 'yes',
+//                'screenx' => '0',
+//                'screeny' => '0'
+//            );
+//            $photoAnchor = anchor_popup('c_admin/product_photo_index/' . $ordered_product_item->getProductId(), 'Photo', $atts);
+//            $this->table->add_row(
+//                    $ordered_product_item->getOrderedProductId(), $ordered_product_item->getOrderedProductCount(), $ordered_product_item->getPossibleSizeForProductName(), $ordered_product_item->getProductId(), $ordered_product_item->getProductName(), $ordered_product_item->getProductPrice(), $ordered_product_item->getCreatorNick(), $photoAnchor
+//            );
+//        }
+//        $data['table_data_ordered_products'] = $this->table->generate();
+//
+//        $data['order_id'] = $orderId;
+//        $data['order_actual_status'] = $single_paid_order_model_instance->getStatus();
+//        if ($single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_OPEN) {
+//            $data['order_next_status'] = Order_model::ORDER_STATUS_PAID;
+//        } else if ($single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_PAID) {
+//            $data['order_next_status'] = Order_model::ORDER_STATUS_SHIPPING;
+//        }
+//
+//        $template_data = array();
+//        $this->set_title($template_data, 'Order detail');
+//        $this->load_header_templates($template_data);
+//
+//        $this->load->view('templates/header', $template_data);
+//        $this->load->view('admin/orders/v_admin_order_detail', $data);
+    }
+
+    /*
+     * necessary ! do not delete
+     */
+    public function product_photo_index($productId) {
+
+        if (!$this->authentify_customer()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        if (is_null($productId) || !isset($productId) || !is_numeric($productId)) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $singleProduct = $this->product_model->get_product($productId);
+
+        $data['product'] = $singleProduct;
+
+        $template_data = array();
+        $this->set_title($template_data, 'Product photo detail');
+        $this->load_header_templates($template_data);
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('common/v_common_photo_detail', $data);        
+//        
 //        $sup_povs = $this->supported_point_of_view_model->get_by_product($productId);
 //
 //        $urls = array();
@@ -510,7 +359,7 @@ class C_customer extends MY_Controller {
 //
 //        $this->load->view('templates/header', $template_data);
 //        $this->load->view('admin/orders/v_admin_photo_detail', $data);
-//    }
+    }
 
     public function change_order_status() {
 

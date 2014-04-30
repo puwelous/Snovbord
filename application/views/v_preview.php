@@ -10,7 +10,7 @@
         echo form_open("c_preview/add_to_cart/" . $previed_product->getId(), $attributes);
         echo form_hidden('product_id', $previed_product->getId());
         ?>
-        
+
         <h2><?php echo $previed_product->getName(); ?></h2>
         <div class="line pp_dark_gray"></div>
 
@@ -30,15 +30,16 @@
         </h4>
         <div class="line"></div>
 
-        <h1><?php echo  $previed_product->getPrice(); ?>&nbsp;&euro;</h1>
-        
+        <h1><?php echo $previed_product->getPrice(); ?>&nbsp;&euro;</h1>
+
         <button id="add_to_cart_button" type="submit">ADD TO CART</button>
         <?php echo form_close(); ?>
     </div>
 
     <div class="preview_center">
-        <div class="preview_item">
-            <div class="preview_item_imgs_wrapper">
+        <div class="preview_item">           
+            <div class="preview_item_imgs_wrapper" style="position:absolute;">
+                <?php echo img('assets/css/images/bottomshadow.png'); ?>
                 <?php
                 $representation_urls = $previed_product_screen_representation->getUrls();
                 foreach ($representation_urls as $representation_url_item) {

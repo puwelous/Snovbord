@@ -1,14 +1,34 @@
 <?php
 
+/**
+ * Model class representing order.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class Order_model extends MY_Model {
 
     const ORDER_STATUS_OPEN = 'OPEN';
     const ORDER_STATUS_PAID = 'PAID';
     const ORDER_STATUS_SHIPPING = 'SHIPPING';
-    
+
+    /**
+     * @var string $_table
+     *  Name of a database table. Used for CRUD abstraction in MY_Model class
+     */    
     public $_table = 'sb_order';
+    /**
+     * @var string $primary_key
+     *  Primary key in database schema for current table
+     */    
     public $primary_key = 'ordr_id';
 
+    /**
+     * 
+     * @var int $id
+     *  ID of order model
+     */
     private $id;
 
     private $finalSum;
@@ -19,9 +39,16 @@ class Order_model extends MY_Model {
     private $isShippingAddressRegistrationAddress;
     public $orderAddress;
     
+    /**
+     * 
+     * @var array $protected_attributes
+     *  Array of attributes that are not directly accesed via CRUD abstract model
+     */    
     public $protected_attributes = array('ordr_id');
 
-    /* basic constructor */
+    /**
+     * Basic constructor calling parent CRUD abstraction layer contructor
+     */
     public function __construct() {
         parent::__construct();
     }
@@ -40,6 +67,11 @@ class Order_model extends MY_Model {
     }
 
     /*     * * database operations ** */
+    /**
+     * Inserts this object into a database. Database create operation
+     * @return object
+     *  NULL or object as a result of insertion
+     */     
     public function save() {
 
         return $this->order_model->insert(
@@ -54,6 +86,11 @@ class Order_model extends MY_Model {
         ));
     }
     
+    /**
+     * Updates this object and propagates to a database. Database update operation
+     * @return object
+     *  NULL or object as a result of update (ID)
+     */     
     public function update_order(){
         return $this->order_model->update(
                         $this->getId(), array(
@@ -220,10 +257,14 @@ class Order_model extends MY_Model {
     }     
 
     /*     * ********* getters *********** */
-    public function getId( ){
+    /**
+     * Getter for ID
+     * @return int
+     *  Order model's ID
+     */
+    public function getId() {
         return $this->id;
     }
-    
     public function getCart() {
         return $this->assignedCart;
     }

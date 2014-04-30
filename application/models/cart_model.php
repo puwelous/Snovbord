@@ -1,29 +1,90 @@
 <?php
 
+/**
+ * Model class representing shopping cart.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class Cart_model extends MY_Model {
 
     const CART_STATUS_INITIALIZED = 'INITIALIZED';
     const CART_STATUS_OPEN = 'OPEN';
     const CART_STATUS_CLOSED = 'CLOSED';
 
+    /**
+     * @var string $_table
+     *  Name of a database table. Used for CRUD abstraction in MY_Model class
+     */    
     public $_table = 'sb_cart';
+    /**
+     * @var string $primary_key
+     *  Primary key in database schema for current table
+     */    
     public $primary_key = 'crt_id';
+    
+    /**
+     *
+     * @var int $id
+     *  ID of cart
+     */
     protected $id;
+    /**
+     *
+     * @var double $sum
+     *  Sum of cart
+     */
     protected $sum;
+    /**
+     *
+     * @var string $status
+     *  Status of cart
+     */
     protected $status;
+    /**
+     *
+     * @var int $assignedOrder
+     *  Cart's assigned order
+     */
     protected $assignedOrder;
+    /**
+     *
+     * @var int $ordering_person
+     *  Ordering person
+     */
     protected $ordering_person;
+    
+    /**
+     * 
+     * @var array $protected_attributes
+     *  Array of attributes that are not directly accesed via CRUD abstract model
+     */    
     public $protected_attributes = array('crt_id');
+    
     public $has_many = array('ordered_product' => array('model' => 'ordered_product', 'primary_key' => 'crt_id'));
 
-    /* basic constructor */
-
+    /**
+     * Basic constructor calling parent CRUD abstraction layer contructor
+     */
     public function __construct() {
         parent::__construct();
     }
 
     /* instance "constructor" */
 
+    /**
+     * Constructor-like method for instantiating object of the class.
+     * 
+     * @param double $sum
+     *  Actual sum of cart
+     * @param string $status
+     *  Cart status
+     * @param int $order
+     *  Order ID
+     * @param User_model $ordering_person
+     * Person who makes an order
+     */
     public function instantiate($sum, $status, $order, $ordering_person) {
 
         $this->sum = $sum;
@@ -33,11 +94,11 @@ class Cart_model extends MY_Model {
     }
 
     /*     * * database operations ** */
-
-    /*
-     * create
-     */
-
+    /**
+     * Inserts this object into a database. Database create operation
+     * @return object
+     *  NULL or object as a result of insertion
+     */     
     public function save() {
 
         return $this->cart_model->insert(
@@ -49,6 +110,11 @@ class Cart_model extends MY_Model {
                 ));
     }
 
+    /**
+     * Updates this object and propagates to a database. Database update operation
+     * @return object
+     *  NULL or object as a result of update (ID)
+     */     
     public function update_cart() {
         return $this->cart_model->update(
                         $this->getId(), array(
@@ -129,8 +195,8 @@ class Cart_model extends MY_Model {
 
         if (count($ordered_products_price_incl) == 0) {
             // no ordered products in a cart
-            //throw new EmptyCartException('Cart(ID:' . $this->id . ') is empty. Not necessary to calculate it`s value.');
-            throw new Exception('Cart(ID:' . $this->id . ') is empty. Not necessary to calculate it`s value.');
+            throw new EmptyCartException('Cart(ID:' . $this->id . ') is empty. Not necessary to calculate it`s value.');
+           // throw new Exception('Cart(ID:' . $this->id . ') is empty. Not necessary to calculate it`s value.');
         } else {
             // some products in a cart still left, calculate value
             foreach ($ordered_products_price_incl as $single_ordered_product_with_price) {
@@ -141,16 +207,6 @@ class Cart_model extends MY_Model {
             return $finalSum;
         }
     }
-
-//    public function get_open_cart_including_ordered_prods_by_owner_id($owner_id, $asObject = TRUE) {
-//        if ($asObject) {
-//            $row = $this->cart_model->as_object()->with('ordered_product')->get_by(array('u_ordering_person_id' => $owner_id, 'c_status' => 'OPEN'));
-//        } else {
-//            $row = $this->cart_model->as_array()->with('ordered_product')->get_by(array('u_ordering_person_id' => $owner_id, 'c_status' => 'OPEN'));
-//        }
-//
-//        return $row;
-//    }
 
     /*     * ********* setters *********** */
     public function setId($newId) {

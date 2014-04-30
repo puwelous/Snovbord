@@ -6,6 +6,16 @@ if (!defined('BASEPATH'))
 
 if ( !function_exists('create_registration_email_body_accor_user') ) {
 
+    /**
+     * Creates a body of a email according to given user as an agument.
+     * Retrievs basic information about user and sends it as an email.
+     * 
+     * 
+     * @param User_model $user
+     *  User to be described.
+     * @retval string
+     *  Body of an email.
+     */
     function create_registration_email_body_accor_user(User_model $user) {
         
         $message_body  = 'Dear ' . $user->getNick() . '!' . "\r\n";
@@ -40,6 +50,16 @@ if ( !function_exists('create_registration_email_body_accor_user') ) {
 
 if ( !function_exists('create_password_reset_email_body') ) {
 
+    /**
+     * Creates body for password reseting email.
+     * 
+     * @param User_model $user
+     *  User who asked for passowrd reset.
+     * @param string $password
+     *  Freshly generated password
+     * @retval string
+     * Reset password email body.
+     */
     function create_password_reset_email_body( User_model $user, $password) {
         
         $message_body  = 'Dear ' . $user->getNick() . '!' . "\r\n";

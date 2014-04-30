@@ -544,7 +544,7 @@ class C_admin extends MY_Controller {
 
     public function components_admin() {
 
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -869,7 +869,7 @@ class C_admin extends MY_Controller {
 
     public function categories_admin_index() {
 
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -909,7 +909,7 @@ class C_admin extends MY_Controller {
     }
 
     public function add_category() {
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -972,146 +972,9 @@ class C_admin extends MY_Controller {
         redirect('c_admin/categories_admin_index');
     }
 
-    public function basic_products_admin() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        //login or logout in menu
-        $template_data = array();
-        $this->set_title($template_data, 'Basic products administration');
-        $this->load_header_templates($template_data);
-
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_basic_products', $data);
-    }
-
-    public function add_basic_product() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $template_data = array();
-
-        $this->set_title($template_data, 'Adding basic products');
-        $this->load_header_templates($template_data);
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        // field name, error message, validation rules
-        $this->form_validation->set_rules('pdf_product_name', 'Product name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
-        $this->form_validation->set_rules('pdf_available_sizes', 'Product sizes', 'required');
-        $this->form_validation->set_rules('pdf_product_price', 'Product price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
-        $this->form_validation->set_rules('pdf_product_type', 'Product description', 'trim|required|min_length[1]|max_length[256]');
-
-        if ($this->form_validation->run() == FALSE) {
-
-            $data['error'] = NULL; // no need, prited out by library in a view
-            $data['successful'] = NULL;
-
-            // print out validation errors
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_basic_products', $data);
-            return;
-        }
-
-        // validation ok
-        // load basic upload config
-        $prod_upl_config = get_basic_products_upload_configuration($this->config);
-        // print out DEL later
-        log_message('debug', print_r($prod_upl_config, TRUE)); // delete me
-        // load user nick
-        $actual_user_nick = $this->get_user_nick(); // check if not null later
-        // load product's name
-        $product_name = $this->input->post('pdf_product_name');
-
-        // load product's type
-        $product_type = $this->input->post('pdf_product_type');
-
-        // load product's price
-        $product_price = $this->input->post('pdf_product_price');
-
-        $product_sex = $this->input->post('pdf_product_sexes');
-        log_message('debug', print_r($product_sex, TRUE)); // delete me later
-        // calculate file name using user's nick and product's name
-        $generated_product_file_name = generate_product_file_name(
-                $actual_user_nick, $product_name
-        );
-
-        // add to config
-        $prod_upl_config['file_name'] = $generated_product_file_name;
-
-
-        // init library
-        $this->load->library('upload', $prod_upl_config);
-
-        // try to upload and handle if does not work
-        if (!$this->upload->do_upload()) {
-
-            $error = array('error' => $this->upload->display_errors());
-
-            log_message('debug', print_r($error['error'], TRUE));
-
-            // add error message
-            $data['error'] = $error['error'];
-            $data['successful'] = NULL;
-
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_basic_products', $data);
-            return;
-        }
-
-        // log some details
-        $upload_photo_data = $this->upload->data();
-        log_message('debug', 'Upload successfull!');
-        log_message('debug', print_r($upload_photo_data, TRUE));
-
-        $data['error'] = NULL;
-        $data['successful'] = 'Upload successfull!';
-
-        // database insertions
-        $actual_user_id = $this->get_user_id();
-        if (is_null($actual_user_id)) {
-            $data['error'] = 'Cannot find an user_id of the actual user. How should I assign the creator of a product?';
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_basic_products', $data);
-        }
-
-        try {
-            // insert product definition instance
-            $new_product_definition = new Product_definition_model();
-            $new_product_definition->instantiate(
-                    //$generated_product_file_name, instead of generated use REAL path after file upload
-                    $product_name, get_basic_product_upload_path($this->config) . $upload_photo_data['file_name'], $actual_user_id, $product_type, $product_price, $product_sex
-            );
-
-            $inserted_prod_def_id = $new_product_definition->insert_product_definition();
-
-            // insert possible sizes for product instance
-            $available_sizes_array = $this->input->post('pdf_available_sizes');
-            //TODO!!!
-            throw new Exception('Pali: Change the code below!');
-            foreach ($available_sizes_array as $available_size_item) {
-                $new_psfp_inst = new Possible_size_for_product_model();
-                $new_psfp_inst->instantiate($inserted_prod_def_id, $available_size_item, 1);
-                $new_psfp_inst->save();
-            }
-        } catch (Exception $e) {
-            log_message('debug', print_r($e, TRUE));
-        }
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_basic_products', $data);
-    }
-
     public function final_products_admin() {
 
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -1127,126 +990,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_final_products', $data);
     }
 
-    public function add_products() {
-
-        if (!$this->authentify_admin()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $template_data = array();
-
-        $this->set_title($template_data, 'Products administration');
-        $this->load_header_templates($template_data);
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        // field name, error message, validation rules
-        $this->form_validation->set_rules('pdf_product_name', 'Product name', 'trim|required|min_length[1]|max_length[32]|xss_clean');
-        $this->form_validation->set_rules('pdf_available_sizes', 'Product sizes', 'required');
-        $this->form_validation->set_rules('pdf_product_price', 'Product price', 'trim|required|greater_than[0]|max_length[32]|xss_clean|numeric');
-        $this->form_validation->set_rules('pdf_product_type', 'Product type', 'trim|required|min_length[1]|max_length[256]');
-
-        if ($this->form_validation->run() == FALSE) {
-
-            $data['error'] = NULL; // no need, prited out by library in a view
-            $data['successful'] = NULL;
-
-            // print out validation errors
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_products', $data);
-            return;
-        }
-
-        // validation ok
-        // load basic upload config
-        $prod_upl_config = get_products_upload_configuration($this->config);
-        // print out DEL later
-        log_message('debug', print_r($prod_upl_config, TRUE)); // delete me
-        // load user nick
-        $actual_user_nick = $this->get_user_nick(); // check if not null later
-        // load product's name
-        $product_name = $this->input->post('pdf_product_name');
-
-        // load product's type
-        $product_type = $this->input->post('pdf_product_type');
-
-        // load product's price
-        $product_price = $this->input->post('pdf_product_price');
-
-        $product_sex = $this->input->post('pdf_product_sexes');
-        log_message('debug', print_r($product_sex, TRUE)); // delete me later
-        // calculate file name using user's nick and product's name
-        $generated_product_file_name = generate_product_file_name(
-                $actual_user_nick, $product_name
-        );
-
-        // add to config
-        $prod_upl_config['file_name'] = $generated_product_file_name;
-
-
-        // init library
-        $this->load->library('upload', $prod_upl_config);
-
-        // try to upload and handle if does not work
-        if (!$this->upload->do_upload()) {
-
-            $error = array('error' => $this->upload->display_errors());
-
-            log_message('debug', print_r($error['error'], TRUE));
-
-            // add error message
-            $data['error'] = $error['error'];
-            $data['successful'] = NULL;
-
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_products', $data);
-            return;
-        }
-
-        // log some details
-        $upload_photo_data = $this->upload->data();
-        log_message('debug', 'Upload successfull!');
-        log_message('debug', print_r($upload_photo_data, TRUE));
-
-        $data['error'] = NULL;
-        $data['successful'] = 'Upload successfull!';
-
-        // database insertions
-        $actual_user_id = $this->get_user_id();
-        if (is_null($actual_user_id)) {
-            $data['error'] = 'Cannot find an user_id of the actual user. How should I assign the creator of a product?';
-            $this->load->view('templates/header', $template_data);
-            $this->load->view('admin/v_admin_products', $data);
-        }
-
-        try {
-            // insert product definition instance
-            $new_product_definition = new Product_definition_model();
-            $new_product_definition->instantiate(
-                    //$generated_product_file_name, instead of generated use REAL path after file upload
-                    $product_name, get_product_upload_path($this->config) . $upload_photo_data['file_name'], $actual_user_id, $product_type, $product_price, $product_sex
-            );
-
-            $inserted_prod_def_id = $new_product_definition->insert_product_definition();
-
-            // insert possible sizes for product instance
-            $available_sizes_array = $this->input->post('pdf_available_sizes');
-            foreach ($available_sizes_array as $available_size_item) {
-                $new_psfp_inst = new Possible_size_for_product_model();
-                $new_psfp_inst->instantiate($inserted_prod_def_id, $available_size_item, 1);
-                $new_psfp_inst->insert_possible_size_for_product();
-            }
-        } catch (Exception $e) {
-            log_message('debug', print_r($e, TRUE));
-        }
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_products', $data);
-    }
-
     public function about_us() {
 
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -1317,7 +1063,7 @@ class C_admin extends MY_Controller {
 
     public function rules() {
 
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -1448,7 +1194,7 @@ class C_admin extends MY_Controller {
     }
 
     public function orders_admin() {
-        if (!$this->authentify_admin()) {
+        if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
             return;
         }
@@ -1478,10 +1224,13 @@ class C_admin extends MY_Controller {
 
         if (strtoupper($order_type) == 'OPEN') {
             $all_specific_orders = $this->order_model->get_all_open_orders();
+            $view_to_load = 'admin/orders/v_admin_open_orders';
         } else if (strtoupper($order_type) == 'PAID') {
             $all_specific_orders = $this->order_model->get_all_paid_orders();
+            $view_to_load = 'admin/orders/v_admin_paid_orders';
         } else if (strtoupper($order_type) == 'SHIPPING') {
             $all_specific_orders = $this->order_model->get_all_shipping_orders();
+            $view_to_load = 'admin/orders/v_admin_shipping_orders';
         } else {
             $all_specific_orders = NULL;
             log_message('error', 'Parameter order type for order_admin incorrect.' . $order_type);
@@ -1515,7 +1264,7 @@ class C_admin extends MY_Controller {
         $data['table_data'] = $this->table->generate();
 
         $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/orders/v_admin_shipping_orders', $data);
+        $this->load->view($view_to_load, $data);
     }
 
     public function any_order_detail_index($orderId) {
@@ -1752,6 +1501,131 @@ class C_admin extends MY_Controller {
 
         log_message('info', 'Changing user privileges successful!');
         redirect('/c_admin/qualify_component_admin', 'refresh');
+    }    
+    
+    public function profile() {
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        $actual_user_id = $this->get_user_id();
+
+        //loading user info
+        $user = $this->user_model->get_user_by_id($actual_user_id);
+        $data['user'] = $user;
+        $data['address'] = $this->address_model->get_address_by_id($user->getAddress());
+
+        $template_data = array();
+        $this->set_title($template_data, 'Edit profile');
+        $this->load_header_templates($template_data);
+
+        $this->load->view('templates/header', $template_data);
+        $this->load->view('admin/v_admin_profile', $data);
+    }    
+    
+    public function edit_profile() {
+
+        if (!$this->authentify_provider()) {
+            $this->redirectToHomePage();
+            return;
+        }
+
+        // field name, error message, validation rules
+        $this->form_validation->set_rules('tf_nick', 'User Name', 'trim|required|min_length[4]|max_length[32]|xss_clean|callback_nick_check');
+        $this->form_validation->set_rules('tf_first_name', 'First name', 'trim|required|min_length[4]|max_length[32]|xss_clean');
+        $this->form_validation->set_rules('tf_last_name', 'Last name', 'trim|required|min_length[4]|max_length[32]|xss_clean');
+        $this->form_validation->set_rules('tf_email_address', 'Your Email', 'trim|required|valid_email|max_length[64]|callback_email_check');
+        $this->form_validation->set_rules('tf_password_base', 'Password', 'trim|min_length[4]|max_length[32]');
+        $this->form_validation->set_rules('tf_password_confirm', 'Password Confirmation', 'trim|matches[tf_password_base]|max_length[32]');
+        $this->form_validation->set_rules('tf_phone_number', 'Phone number', 'trim|max_length[32]|xss_clean');
+        $this->form_validation->set_rules('tf_street', 'Street', 'trim|required|max_length[128]|xss_clean');
+        $this->form_validation->set_rules('tf_city', 'City', 'trim|required|max_length[64]|xss_clean');
+        $this->form_validation->set_rules('tf_zip', 'ZIP', 'trim|required|max_length[16]|xss_clean');
+        $this->form_validation->set_rules('tf_country', 'Country', 'trim|required|max_length[64]|xss_clean');
+
+        if ($this->form_validation->run() == FALSE) {
+
+            // print out validation errors
+            $template_data = array();
+
+            $this->set_title($template_data, 'Edit profile - fail');
+            $this->load_header_templates($template_data);
+
+            $this->load->view('templates/header', $template_data);
+            $this->load->view('admin/v_admin_profile');
+            return;
+        }
+
+        $user_id = $this->get_user_id();
+        $user = $this->user_model->get_user_by_id($user_id);
+        $address = $this->address_model->get_address_by_id($user->getAddress());
+
+
+        log_message('debug', 'User before: ' . print_r($user, true));
+        log_message('debug', 'Address before: ' . print_r($address, true));
+
+        $newNick = $this->input->post('tf_nick');
+        if ($user->getNick() !== $newNick) {
+            $user->setNick($newNick);
+        }
+
+        $newEmailAddress = $this->input->post('tf_email_address');
+        if ($user->getEmailAddress() !== $newEmailAddress) {
+            $user->setEmailAddress($newEmailAddress);
+        }
+
+        $newFirstname = $this->input->post('tf_first_name');
+        if ($user->getFirstName() !== $newFirstname) {
+            $user->setFirstName($newFirstname);
+        }
+
+        $newLastname = $this->input->post('tf_last_name');
+        if ($user->getLastName() !== $newLastname) {
+            $user->setLastName($newLastname);
+        }
+
+        $newPhoneNumber = $this->input->post('tf_phone_number');
+        if ($user->getPhoneNumber() !== $newPhoneNumber) {
+            $user->setPhoneNumber($newPhoneNumber);
+        }
+
+        $newGender = ( $this->input->post('tf_gender') == 'male' ? 0 : 1 );
+        if ($user->getGender() !== $newGender) {
+            $user->setGender($newGender);
+        }
+
+        $password = $this->input->post('tf_password_base');
+        if (strlen($password) > 0 && $user->getPassword() !== md5($password)) {
+            $user->setPassword($password);
+        }
+
+        $newStreet = $this->input->post('tf_street');
+        if ($address->getStreet() !== $newStreet) {
+            $address->setStreet($newStreet);
+        }
+        $newCity = $this->input->post('tf_city');
+        if ($address->getCity() !== $newCity) {
+            $address->setCity($newCity);
+        }
+
+        $newZip = $this->input->post('tf_zip');
+        if ($address->getZip() !== $newZip) {
+            $address->setZip($newZip);
+        }
+
+        $newCountry = $this->input->post('tf_country');
+        if ($address->getCountry() !== $newCountry) {
+            $address->setCountry($newCountry);
+        }
+
+        log_message('debug', 'User after: ' . print_r($user, true));
+        log_message('debug', 'Address after: ' . print_r($address, true));
+
+        $user->update_user();
+        $address->update_address();
+
+        redirect('c_admin/profile', 'refresh');
     }    
 }
 

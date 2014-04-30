@@ -5,7 +5,7 @@
         <div class="container">
             <!-- Title -->
             <h1>
-                about us administration
+                contact administration
                 <?php echo anchor('c_admin/index', '<-go back', array('class' => 'text_light smaller pp_dark_gray red_on_hover inunderlined upper_cased')); ?>
             </h1>
             <div class="blue_line">

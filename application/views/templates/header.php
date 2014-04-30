@@ -9,8 +9,7 @@
         <?php
         // css
         echo link_tag('assets/css/menu.css');
-        echo link_tag('assets/css/finalproducts.css');
-        echo link_tag('assets/css/socialsidebar.css');
+        echo link_tag('assets/css/products.css');
         echo link_tag('assets/css/jquery.mCustomScrollbar.css');
         echo link_tag('assets/css/checkbox.css');
         echo link_tag('assets/css/preview.css');

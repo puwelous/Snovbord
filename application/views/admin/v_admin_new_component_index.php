@@ -1,4 +1,36 @@
 <!-- content -->
+<script>
+    $(document).ready(function(){
+
+        $(".possible_component_colour").click( function(){
+            if(  $(this).hasClass( "notselected" ) ){
+                var colour = $(this).data("colour").toString();
+                var input_element = $("input[data-colour='" + colour + "']");
+                
+                // set value
+                input_element.val(colour)
+                
+                // visualize changes
+                $(this).removeClass('notselected');
+                $(this).addClass('selected');
+
+            }else{
+                var colour = $(this).data("colour").toString();
+                var input_element = $("input[data-colour='" + colour + "']");
+                
+                // set value
+                input_element.val('false')
+                
+                // visualize changes
+                $(this).removeClass('selected');
+                $(this).addClass('notselected');
+            }        
+        });        
+    });
+    
+  
+</script>
+<!--content-->
 <div id="content">
     <div class="content_wrapper">
         <!-- ******************* shopping cart section ******************* -->
@@ -85,8 +117,35 @@
                     echo form_dropdown('ncf_categories', $categories_dropdown, reset($categories_dropdown), 'style="width:100%;"');
                     ?>
                 </div>
-
-
+                <h4 class="black" >choose possible vector colours(if any)</h4>
+                <div class="component_colour_possibilities">
+                    <div class="possible_component_colour notselected" data-colour ="ffff80" style="background-color: #ffff80"></div>
+                    <div class="possible_component_colour notselected" data-colour ="ffff00" style="background-color: #ffff00"></div>
+                    <div class="possible_component_colour notselected" data-colour ="ff8000" style="background-color: #ff8000"></div>
+                    <div class="possible_component_colour notselected" data-colour ="80ff80" style="background-color: #80ff80"></div>
+                    <div class="possible_component_colour notselected" data-colour ="50f050" style="background-color: #50f050"></div>
+                    <div class="possible_component_colour notselected" data-colour ="56c232" style="background-color: #56c232"></div>                      
+                    
+                    <div class="possible_component_colour notselected" data-colour ="80ffff" style="background-color: #80ffff"></div>
+                    <div class="possible_component_colour notselected" data-colour ="009be6" style="background-color: #009be6"></div>
+                    
+                    <div class="possible_component_colour notselected" data-colour ="0000a0" style="background-color: #0000a0"></div>
+                    <div class="possible_component_colour notselected" data-colour ="56c232" style="background-color: #ff0000"></div>
+                    <div class="possible_component_colour notselected" data-colour ="ff00ff" style="background-color: #ff00ff"></div>
+                    <div class="possible_component_colour notselected" data-colour ="c66300" style="background-color: #c66300"></div>                    
+                </div>
+                <input type="hidden" name="colour_0" data-colour="ffff80" value="false" />
+                <input type="hidden" name="colour_1" data-colour="ffff00" value="false" />
+                <input type="hidden" name="colour_2" data-colour="ff8000" value="false" />
+                <input type="hidden" name="colour_3" data-colour="80ff80" value="false" />
+                <input type="hidden" name="colour_4" data-colour="50f050" value="false" />
+                <input type="hidden" name="colour_5" data-colour="56c232" value="false" />
+                <input type="hidden" name="colour_6" data-colour="80ffff" value="false" />
+                <input type="hidden" name="colour_7" data-colour="009be6" value="false" />
+                <input type="hidden" name="colour_8" data-colour="0000a0" value="false" />
+                <input type="hidden" name="colour_9" data-colour="56c232" value="false" />
+                <input type="hidden" name="colour_10" data-colour="ff00ff" value="false" />
+                <input type="hidden" name="colour_11" data-colour="c66300" value="false" />
             </div>
             <div class="half_container">
                 <h2 class="black">Graphic component data</h2>
@@ -110,41 +169,6 @@
                     <input type="text" name="ncf_vector_9" class="full_width">
                 </div>
 
-                <!--input for point of view-->
-                <!--                <h4 class="black" >Enter new point of view or choose existing one:</h4>
-                                <input type = "radio"
-                                       name = "npf_is_point_of_view_present"
-                                       id = "old_pov"
-                                       value = "old_pov" 
-                                       checked = "checked" />
-                                <label for = "old_pov" >already existing point of view</label>
-                
-                <?php
-                $selected_item = current($with_value_included_array);
-                echo form_dropdown('npf_present_povs', $with_value_included_array, $selected_item);
-                ?>
-                
-                                <br />
-                
-                                <input type = "radio"
-                                       name = "npf_is_point_of_view_present"
-                                       id = "new_pov"
-                                       value = "new_pov"
-                                       />
-                                <label for = "new_pov" >new point of view</label>
-                
-                
-                <?php
-                $data = array(
-                    'name' => 'npf_point_of_view_name',
-                    'id' => 'npf_point_of_view_name',
-                    'value' => set_value('npf_point_of_view_name', 'front'),
-                    'maxlength' => '64',
-                    'size' => '64',
-                    'style' => 'width:30%'
-                );
-                echo form_input($data);
-                ?>                -->
 
                 <!--last line-->
                 <div class="line pp_dark_gray"></div>

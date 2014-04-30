@@ -1,16 +1,38 @@
 <?php
 
+/**
+ * Model class representing component's category.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class Category_model extends MY_Model {
 
+    /**
+     * @var string $_table
+     *  Name of a database table. Used for CRUD abstraction in MY_Model class
+     */    
     public $_table = 'sb_category';
+    /**
+     * @var string $primary_key
+     *  Primary key in database schema for current table
+     */    
     public $primary_key = 'ctgr_id';
     private $id;
     private $name;
     private $description;
+    
+    /**
+     * 
+     * @var array $protected_attributes
+     *  Array of attributes that are not directly accesed via CRUD abstract model
+     */    
     public $protected_attributes = array('ctgr_id');
 
-    /* basic constructor */
-
+    /**
+     * Basic constructor calling parent CRUD abstraction layer contructor
+     */
     public function __construct() {
         parent::__construct();
     }
@@ -24,7 +46,11 @@ class Category_model extends MY_Model {
     }
 
     /*     * * database operations ** */
-
+    /**
+     * Inserts this object into a database. Database create operation
+     * @return object
+     *  NULL or object as a result of insertion
+     */ 
     public function save() {
 
         return $this->category_model->insert(

@@ -294,7 +294,8 @@ body {
     padding: 10px 20px;
     text-align: center;
 
-    border: 1px solid #ef4623; /* TODO: 2px? */
+    border: 1px solid blue; /* TODO: 2px? */
+    /*border: 1px solid #ef4623;  TODO: 2px? */
 }
 
 .pp_button_active:hover {

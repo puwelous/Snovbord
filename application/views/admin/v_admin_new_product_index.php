@@ -142,45 +142,6 @@
                     <input type="text" name="npf_vector_8" class="full_width">
                     <input type="text" name="npf_vector_9" class="full_width">
                 </div>
-                <button type="button" id="add_vector_representation" onclick="addVectorRepresentationInput()">
-                    Add another vector representation
-                </button>
-
-                <!--input for point of view-->
-                <!--                <h4 class="black" >Enter new point of view or choose existing one:</h4>
-                                <input type = "radio"
-                                       name = "npf_is_point_of_view_present"
-                                       id = "old_pov"
-                                       value = "old_pov" 
-                                       checked = "checked" />
-                                <label for = "old_pov" >already existing point of view</label>
-                
-                <?php
-                $selected_item = current($with_value_included_array);
-                echo form_dropdown('npf_present_povs', $with_value_included_array, $selected_item);
-                ?>
-                
-                                <br />
-                
-                                <input type = "radio"
-                                       name = "npf_is_point_of_view_present"
-                                       id = "new_pov"
-                                       value = "new_pov"
-                                       />
-                                <label for = "new_pov" >new point of view</label>
-                
-                
-                <?php
-                $data = array(
-                    'name' => 'npf_point_of_view_name',
-                    'id' => 'npf_point_of_view_name',
-                    'value' => set_value('npf_point_of_view_name', 'front'),
-                    'maxlength' => '64',
-                    'size' => '64',
-                    'style' => 'width:30%'
-                );
-                echo form_input($data);
-                ?>                -->
 
                 <!--last line-->
                 <div class="line pp_dark_gray"></div>

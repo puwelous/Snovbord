@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Model class representing component.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class Component_model extends MY_Model {
 
     const COMPONENT_STATUS_PROPOSED         = 'PROPOSED';
@@ -7,7 +14,15 @@ class Component_model extends MY_Model {
     const COMPONENT_STATUS_DECLINED_SEEN    = 'DECLINED_SEEN';
     const COMPONENT_STATUS_ACCEPTED         = 'ACCEPTED';
     
+    /**
+     * @var string $_table
+     *  Name of a database table. Used for CRUD abstraction in MY_Model class
+     */    
     public $_table = 'sb_component';
+    /**
+     * @var string $primary_key
+     *  Primary key in database schema for current table
+     */    
     public $primary_key = 'cmpnt_id';
     private $id;
     private $name;
@@ -16,10 +31,17 @@ class Component_model extends MY_Model {
     private $isStable;
     private $creator;
     private $category;
+    
+    /**
+     * 
+     * @var array $protected_attributes
+     *  Array of attributes that are not directly accesed via CRUD abstract model
+     */    
     public $protected_attributes = array('cmpnt_id');
 
-    /* basic constructor */
-
+    /**
+     * Basic constructor calling parent CRUD abstraction layer contructor
+     */
     public function __construct() {
         parent::__construct();
     }
@@ -38,6 +60,11 @@ class Component_model extends MY_Model {
 
     /*     * * database operations ** */
 
+    /**
+     * Inserts this object into a database. Database create operation
+     * @return object
+     *  NULL or object as a result of insertion
+     */     
     public function save() {
          return $this->component_model->insert(
                         array(
@@ -50,6 +77,11 @@ class Component_model extends MY_Model {
                 ));
     }
     
+    /**
+     * Updates this object and propagates to a database. Database update operation
+     * @return object
+     *  NULL or object as a result of update (ID)
+     */     
     public function update_component() {
         return $this->component_model->update(
                         $this->getId(), array(

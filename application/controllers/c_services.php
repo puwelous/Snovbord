@@ -2,21 +2,12 @@
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
-//log_message('debug', APPPATH . 'libraries/Pinterest/COEmbedImpl.php');
-//
-//if (file_exists(APPPATH . 'libraries/Pinterest/OEmbed/COEmbedImpl.php')) {
-//    log_message('debug', "The file filename exists");
-//} else {
-//    log_message('debug', "The file filename NOT exists");
-//}
-//require_once( APPPATH . '/libraries/Pinterest/OEmbed/COEmbedImpl.php');
-//
+
 // include helping library
 require_once( APPPATH . '/libraries/Pinterest/OEmbed/COEmbedBasicErrorResponseGeneratorImpl.php');
 require_once( APPPATH . '/libraries/Pinterest/OEmbed/OEmbedResponseMessage.php');
 
 require_once( APPPATH . '/libraries/Pinterest/CPinterestImpl.php');
-
 
 
 class C_services extends MY_Controller {
@@ -198,7 +189,7 @@ class C_services extends MY_Controller {
             $responseMessage = $this->cpinterestimpl->add_pinterest_required_response_items(
                     $responseMessage, array(
                 ICPinRequiredResponseKeyConstants::PRRKC_URL => site_url(self::URI_SEGMENT_TO_PRODUCTS_PREVIEW . $product_instance->getId()),
-                ICPinRequiredResponseKeyConstants::PRRKC_TITLE => "In The Powporn Store: " . $product_instance->getName(), // optional                    
+                ICPinRequiredResponseKeyConstants::PRRKC_TITLE => "In The Snovbord Store: " . $product_instance->getName(), // optional                    
                 ICPinRequiredResponseKeyConstants::PRRKC_PRICE => $product_instance->getPrice(),
                 ICPinRequiredResponseKeyConstants::PRRKC_CURRENCY_CODE => "EUR"
                     ));
