@@ -5,12 +5,25 @@ if (!defined('BASEPATH'))
 
 require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
 
+/**
+ * Class implementing customer actions.
+ *  
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_customer extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Renders customer menu page.
+     */
     public function index() {
 
         if (!$this->authentify_customer()) {
@@ -27,6 +40,9 @@ class C_customer extends MY_Controller {
         $this->load->view('v_customer');
     }
 
+    /**
+     * Renders edit profile screen for user of graphic type.
+     */    
     public function profile() {
         if (!$this->authentify_customer()) {
             $this->redirectToHomePage();
@@ -48,6 +64,9 @@ class C_customer extends MY_Controller {
         $this->load->view('customer/v_customer_profile', $data);
     }
 
+    /**
+     * Edit_profile() method serves for editing profile data provided in registration process in case of graphic user.
+     */    
     public function edit_profile() {
 
         if (!$this->authentify_customer()) {
@@ -152,164 +171,10 @@ class C_customer extends MY_Controller {
         redirect('c_customer/profile', 'refresh');
     }
 
-//    public function products_admin() {
-//
-//        if (!$this->authentify_provider()) {
-//            $this->redirectToHomePage();
-//            return;
-//        }
-//
-//        //login or logout in menu
-//        $template_data = array();
-//        $this->set_title($template_data, 'Admin interface');
-//        $this->load_header_templates($template_data);
-//
-//        $this->load->view('templates/header', $template_data);
-//        $this->load->view('admin/v_admin_products');
-//    }
-
-    public function new_product_admin_index() {
-
-        if (!$this->authentify_provider()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $data['actual_user_nick'] = $this->get_user_nick();
-
-        $presentPointsOfView = $this->supported_point_of_view_model->get_pov_names_distinct();
-        log_message('debug', print_r($presentPointsOfView, TRUE));
-
-        $with_value_included_array = array();
-
-        foreach ($presentPointsOfView as $value) {
-            $with_value_included_array[$value] = $value;
-        }
-
-
-        $data['with_value_included_array'] = $with_value_included_array;
-
-        //login or logout in menu
-        $template_data = array();
-        $this->set_title($template_data, 'Admin interface');
-        $this->load_header_templates($template_data);
-
-        $this->load->view('templates/header', $template_data);
-        $this->load->view('admin/v_admin_new_product_index', $data);
-    }
-
-
-    public function any_order_detail_index($orderId) {
-throw new Exception("Should not be called at all!");
-//        if (!$this->authentify_provider()) {
-//            $this->redirectToHomePage();
-//            return;
-//        }
-//
-//        if (is_null($orderId) || !isset($orderId) || !is_numeric($orderId)) {
-//            $this->redirectToHomePage();
-//            return;
-//        }
-//
-//        $single_paid_order_model_instance = $this->order_model->get_order_by_id($orderId);
-//        $shipping_method = $this->shipping_method_model->get_shipping_method_by_id($single_paid_order_model_instance->getShippingMethod());
-//        $payment_method = $this->payment_method_model->get_payment_method_by_id($single_paid_order_model_instance->getPaymentMethod());
-//        $assigned_cart = $this->cart_model->get_cart_by_id($single_paid_order_model_instance->getCart());
-//
-//        $ordering_person = $this->user_model->get_user_by_id($assigned_cart->getOrderingPerson());
-//
-//        $ordered_products_full_info = $this->ordered_product_model->get_ordered_product_full_info_by_cart_id($assigned_cart->getId());
-//
-//        $this->load->library('table');
-//        $tmpl = array('table_open' => '<table border="1" class="admin_table">');
-//        $this->table->set_template($tmpl);
-//
-//
-//        // order table
-//        $this->table->set_heading('ID', 'Total', 'Cart', 'Shipping method', 'Payment method', 'Registration address?', 'Status');
-//        $this->table->add_row(
-//                $single_paid_order_model_instance->getId(), $single_paid_order_model_instance->getFinalSum() . ' &euro;', $single_paid_order_model_instance->getCart(), $shipping_method->getName(), $payment_method->getName(), ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress() == 0 ? 'No' : 'Yes'), $single_paid_order_model_instance->getStatus()
-//        );
-//        $data['table_data_order'] = $this->table->generate();
-//
-//        $this->table->clear();
-//
-//        // cart table
-//        $this->table->set_heading('ID', 'Sum', 'Status');
-//        $this->table->add_row(
-//                $assigned_cart->getId(), $assigned_cart->getSum() . ' &euro;', $assigned_cart->getStatus()
-//        );
-//        $data['table_data_cart'] = $this->table->generate();
-//
-//        $this->table->clear();
-//
-//        // user table
-//        $this->table->set_heading('ID', 'Nick', 'Email address', 'Firstname', 'Lastname', 'Gender', 'Phone');
-//        $this->table->add_row(
-//                $ordering_person->getId(), $ordering_person->getNick(), mailto($ordering_person->getEmailAddress(), $ordering_person->getEmailAddress()), $ordering_person->getFirstName(), $ordering_person->getLastName(), ($ordering_person->getGender() == 0 ? 'Male' : 'Female'), $ordering_person->getPhoneNumber()
-//        );
-//        $data['table_data_user'] = $this->table->generate();
-//
-//        $this->table->clear();
-//
-//        // address table
-//        if ($single_paid_order_model_instance->getIsShippingAddressRegistrationAddress()) {
-//            log_message('debug', 'Loading registration address');
-//            $address = $this->address_model->get_address_by_id($ordering_person->getId());
-//            $this->table->set_heading('ID', 'Street', 'City', 'Zip', 'Country');
-//            $this->table->add_row(
-//                    $address->getId(), $address->getStreet(), $address->getCity(), $address->getZip(), $address->getCountry()
-//            );
-//            $data['table_data_address'] = $this->table->generate();
-//        } else {
-//            log_message('debug', 'Loading order address');
-//            $order_address = $this->order_address_model->get_order_address_by_id($single_paid_order_model_instance->getOrderAddress());
-//            $this->table->set_heading('ID', 'Name', 'Address', 'City', 'Zip', 'Country', 'Phone', 'Email');
-//            $this->table->add_row(
-//                    $order_address->getId(), $order_address->getName(), $order_address->getAddress(), $order_address->getCity(), $order_address->getZip(), $order_address->getCountry(), $order_address->getPhoneNumber(), $order_address->getEmailAddress()
-//            );
-//            $data['table_data_address'] = $this->table->generate();
-//        }
-//
-//        $this->table->clear();
-//
-//        // ordered products including full info
-//        $this->table->set_heading('ID', 'Count', 'Size', 'Product ID', 'Product name', 'Product price', 'Creator', 'Photo');
-//        foreach ($ordered_products_full_info as $ordered_product_item) {
-//            $atts = array(
-//                'width' => '800',
-//                'height' => '600',
-//                'scrollbars' => 'yes',
-//                'status' => 'yes',
-//                'resizable' => 'yes',
-//                'screenx' => '0',
-//                'screeny' => '0'
-//            );
-//            $photoAnchor = anchor_popup('c_admin/product_photo_index/' . $ordered_product_item->getProductId(), 'Photo', $atts);
-//            $this->table->add_row(
-//                    $ordered_product_item->getOrderedProductId(), $ordered_product_item->getOrderedProductCount(), $ordered_product_item->getPossibleSizeForProductName(), $ordered_product_item->getProductId(), $ordered_product_item->getProductName(), $ordered_product_item->getProductPrice(), $ordered_product_item->getCreatorNick(), $photoAnchor
-//            );
-//        }
-//        $data['table_data_ordered_products'] = $this->table->generate();
-//
-//        $data['order_id'] = $orderId;
-//        $data['order_actual_status'] = $single_paid_order_model_instance->getStatus();
-//        if ($single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_OPEN) {
-//            $data['order_next_status'] = Order_model::ORDER_STATUS_PAID;
-//        } else if ($single_paid_order_model_instance->getStatus() === Order_model::ORDER_STATUS_PAID) {
-//            $data['order_next_status'] = Order_model::ORDER_STATUS_SHIPPING;
-//        }
-//
-//        $template_data = array();
-//        $this->set_title($template_data, 'Order detail');
-//        $this->load_header_templates($template_data);
-//
-//        $this->load->view('templates/header', $template_data);
-//        $this->load->view('admin/orders/v_admin_order_detail', $data);
-    }
-
-    /*
-     * necessary ! do not delete
+    /**
+     * Renders proposed product photo.
+     * @param type $productId
+     *  ID of the product whose photo should be shown
      */
     public function product_photo_index($productId) {
 
@@ -361,44 +226,10 @@ throw new Exception("Should not be called at all!");
 //        $this->load->view('admin/orders/v_admin_photo_detail', $data);
     }
 
-    public function change_order_status() {
 
-        if (!$this->authentify_provider()) {
-            $this->redirectToHomePage();
-            return;
-        }
-
-        $params = $this->uri->uri_to_assoc(3);
-
-        $order_id = $params['order_id'];
-        $next_status = $params['next_status'];
-
-        if (is_null($order_id) || !isset($order_id) || !is_numeric($order_id)) {
-            log_message('error', 'Parameter for order status change incorrect.' . $order_id);
-            redirect('c_admin/orders_admin');
-            return;
-        }
-
-        $order = $this->order_model->get_order_by_id($order_id);
-
-        if (strtoupper($next_status) == 'PAID') {
-            $order->setStatus(Order_model::ORDER_STATUS_PAID);
-        } else if (strtoupper($next_status) == 'SHIPPING') {
-            $order->setStatus(Order_model::ORDER_STATUS_SHIPPING);
-        } else {
-            log_message('error', 'Incorrect params for change_order_status(): ' . print_r($params, true));
-            redirect('c_admin/orders_admin');
-        }
-
-        if ($order->update_order() <= 0) {
-            // set some flash data
-            log_message('error', 'Order update with order ID = ' . $order_id . ' has failed!');
-            redirect('c_admin/orders_admin');
-        }
-
-        redirect('c_admin/orders_admin', 'refresh');
-    }
-
+    /**
+     * Prints out custromers orders.
+     */
     public function orders() {
 
         if (!$this->authentify_customer()) {
@@ -454,6 +285,11 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_orders', $data);
     }
 
+    /**
+     * Prints out customer order detail.
+     * @param int $orderId
+     *  ID of the order to be shown in a details.
+     */
     public function order_detail_index($orderId) {
 
         if (!$this->authentify_customer()) {
@@ -548,6 +384,9 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_order_detail', $data);
     }
 
+    /**
+     * Renders index page for customer components administration.
+     */
     public function components_customer() {
 
         if (!$this->authentify_customer()) {
@@ -564,6 +403,9 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_components', $data);
     }
 
+    /**
+     * Renders index page for custoomer category administration.
+     */
     public function categories_customer_index() {
 
         if (!$this->authentify_customer()) {
@@ -579,6 +421,9 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_categories');
     }
 
+    /**
+     * Adds customer's category.
+     */
     public function add_category() {
         if (!$this->authentify_customer()) {
             $this->redirectToHomePage();
@@ -624,6 +469,9 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_categories', $data);
     }
 
+    /**
+     * Renders page for components administration from the point of view of customer
+     */
     public function new_component_customer_index() {
 
         if (!$this->authentify_customer()) {
@@ -656,6 +504,9 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_new_component_index', $data);
     }
 
+    /**
+     * Adds new component in customer interface
+     */    
     public function new_component_customer_add() {
         if (!$this->authentify_customer()) {
             $this->redirectToHomePage();
@@ -886,6 +737,9 @@ throw new Exception("Should not be called at all!");
         }
     }
 
+    /**
+     * Renders products page from the point of view of customer
+     */
     public function products_customer() {
 
         if (!$this->authentify_customer()) {
@@ -941,6 +795,11 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_products', $data);
     }
 
+    /**
+     * Renders product detail according to ID of the product.
+     * @param int $productId
+     *  ID of the product to be shown in details
+     */
     public function product_detail_index( $productId ) {
         
         if (!$this->authentify_customer()) {
@@ -965,6 +824,11 @@ throw new Exception("Should not be called at all!");
         $this->load->view('customer/v_customer_product_detail', $data);
     }
 
+    /**
+     * Helper function for preparing categories to be shown on specific customer pages.
+     * @return array
+     *  Array of categories' names in a simple array with integer indexes
+     */
     private function _prepare_categories() {
 
         $all_categories = $this->category_model->get_all_categories();
@@ -984,5 +848,5 @@ throw new Exception("Should not be called at all!");
 
 }
 
-/* End of file c_admin.php */
-    /* Location: ./application/controllers/c_admin.php */
+/* End of file c_customer.php */
+    /* Location: ./application/controllers/c_customer.php */

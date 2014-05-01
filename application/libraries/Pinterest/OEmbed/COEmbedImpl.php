@@ -47,7 +47,7 @@ class COEmbedImpl implements ICOEmbed {
     const ACCEPTED_URL_SCHEME_KEY_VALUE = 'accepted_url_scheme';
     
     /**
-     * @var string
+     * @var string $_acceptedUrlScheme
      *  URL scheme to be accepted. All oEmbed request calls meeting this schema should be accepted.
      */
     private $_acceptedUrlScheme = '';
@@ -112,7 +112,7 @@ class COEmbedImpl implements ICOEmbed {
      * Removes URL prefix according to the accepted URL schema which class implementing 
      * this interface is bound to.
      * 
-     * @param string $url
+     * @param string $full_url
      *  URL address from a request including accepted URL schema (prefix).
      * @retval string
      *  URL address without the prefix.

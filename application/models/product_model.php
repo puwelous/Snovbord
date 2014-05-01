@@ -184,7 +184,7 @@ class Product_model extends MY_Model {
      * Selects product from database according to passed ID
      * @param int $productId
      *  ID of selected product
-     * @return null|\Product_model
+     * @return null|Product_model
      *  Either NULL or single product model instance
      */
     public function get_product($productId) {
@@ -213,7 +213,7 @@ class Product_model extends MY_Model {
 
     /**
      * Selects any single product
-     * @return null|\Product_model
+     * @return null|Product_model
      *  Returns NULL if no product exists or single product model
      */
     public function get_any_single_product() {
@@ -237,7 +237,7 @@ class Product_model extends MY_Model {
 
     /**
      * Selects all products from database
-     * @return null|\Product_model
+     * @return null|Product_model
      * Either null if there are no products in database or array of all product models
      */
     public function get_all_products() {
@@ -261,7 +261,7 @@ class Product_model extends MY_Model {
     
     /**
      * Selects only accepted products
-     * @return null|\Product_model
+     * @return null|Product_model
      * Either null if there are no accepted products in database or array of all accepted product models
      */
     public function get_accepted_products() {
@@ -269,7 +269,7 @@ class Product_model extends MY_Model {
     }    
     /**
      * Selects only proposed products
-     * @return null|\Product_model
+     * @return null|Product_model
      * Either null if there are no proposed products in database or array of all proposed product models
      */
     public function get_proposed_products() {
@@ -280,7 +280,7 @@ class Product_model extends MY_Model {
      * Selects products by specified status
      * @param string $status
      *  Acceptance status of products to be selected
-     * @return null|\Product_model
+     * @return null|Product_model
      *  Either null if there are no specified products in database or array of all specified product models
      */
     private function get_products_by_status( $status ){
@@ -306,7 +306,7 @@ class Product_model extends MY_Model {
      * Selects all products from database according to passed creator argument
      * @param User_model $creator
      *  Creator of producct
-     * @return null|\Product_model
+     * @return null|Product_model
      *  Either null if there are no user's product or array of all products that belong to specified user
      */
     public function get_products_by_creator( $creator ) {

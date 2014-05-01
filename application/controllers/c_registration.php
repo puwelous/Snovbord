@@ -2,13 +2,25 @@
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
-
+/**
+ * Controller class rendering registration screen.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_registration extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Renders registration screen.
+     */
     public function index() {
         
         $template_data = array();

@@ -5,13 +5,21 @@ if (!defined('BASEPATH'))
 
 require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
 
+/**
+ * Controller class for handling shopping cart business logic.
+ * 
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_shopping_cart extends MY_Controller {
 
     /**
-     * Renders index page for shopping cart, either empty or with a content.
-     * 
-     * @retval string
-     *  Shopping cart HTML page. 
+     * Renders empty or non empty shopping cart screen according to the shopping cart assigned to actual user.
+     * If the cart is empty, simple screen with info about "Your cart is empty" is shown.
+     * If the cart is not empty, information about ordered products is selected from database and "nonemptycart" template is fulfilled with relevant information.
+     * User is lead to an ordering process later on.
      */
     public function index() {
         $template_data = array();
@@ -98,6 +106,13 @@ class C_shopping_cart extends MY_Controller {
         $this->load->view('shopping_cart/v_shopping_cart_nonempty', $data);
     }
 
+    /**
+     * Shows preview of an order. 
+     * Order has not been created yet. 
+     * Creation of order comes later.
+     * Cart is recalculated in case that any change has been made in the meantime on cart screen.
+     * Such a data are then inserted into database to hold the consistency.
+     */
     public function show_order_preview() {
 
         $actual_user_id = $this->get_user_id();
@@ -215,6 +230,12 @@ class C_shopping_cart extends MY_Controller {
         $this->load->view('order/v_order_preview', $data);
     }
 
+    /**
+     * Helper function for parsing product information from the POST array.
+     * 
+     * @return array
+     *  Multidimensional array with products information
+     */
     private function _parse_products_from_post() {
 
         $this->load->helper('my_string_helper');
@@ -250,6 +271,11 @@ class C_shopping_cart extends MY_Controller {
         return $products;
     }
 
+    /**
+     * Helper function for parsing order address information from the POST array.
+     * @return array
+     *  Array representing order address
+     */
     private function _parse_order_address_from_post() {
 
         $order_address = array();
@@ -264,6 +290,13 @@ class C_shopping_cart extends MY_Controller {
         return $order_address;
     }
 
+    /**
+     * Helper function for parsing order address information from the actual user and his/her assigned address model
+     * @param int $actual_user_id
+     *  ID of the user
+     * @return array
+     *  Simple array with user address information
+     */
     private function _prepare_order_address_acc_to_user_id($actual_user_id) {
 
         $actual_user = $this->user_model->get_user_by_id($actual_user_id);
@@ -281,6 +314,15 @@ class C_shopping_cart extends MY_Controller {
         return $order_address;
     }
 
+    /**
+     * Controller method responsible for removing ordered product from a cart.
+     * Initializes database REMOVE action and calls cart object for recalculation.
+     * 
+     * @param int $ordered_product_id
+     *  ID of ordered product to be removed from the cart
+     * @throws CartUpdateException
+     *  Thrown if cart update fails
+     */
     public function remove_item($ordered_product_id) {
 
         $template_data = array();
@@ -356,10 +398,24 @@ class C_shopping_cart extends MY_Controller {
 
 }
 
+/**
+ * Exception class representing a state when cart becomes empty.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class EmptyCartException extends Exception {
     
 }
 
+/**
+ * Exception class representing a state when cart failed in performing UPDATE database action.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class CartUpdateException extends Exception {
     
 }

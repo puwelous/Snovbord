@@ -147,7 +147,7 @@ class Order_address_model extends MY_Model {
      * Selects single order address from database by it's ID
      * @param int $orderAddressId
      *  ID of order address
-     * @return null|\Order_address_model
+     * @return null|Order_address_model
      *  Either null if such a order address does not exist or single order address object
      */
     public function get_order_address_by_id($orderAddressId) {

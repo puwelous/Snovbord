@@ -9,8 +9,17 @@
  */
 class Cart_model extends MY_Model {
 
+    /**
+     * Initialized - cart status
+     */
     const CART_STATUS_INITIALIZED = 'INITIALIZED';
+    /**
+     * Open - cart status
+     */    
     const CART_STATUS_OPEN = 'OPEN';
+    /**
+     * Closed - cart status
+     */    
     const CART_STATUS_CLOSED = 'CLOSED';
 
     /**
@@ -62,7 +71,6 @@ class Cart_model extends MY_Model {
      */    
     public $protected_attributes = array('crt_id');
     
-    public $has_many = array('ordered_product' => array('model' => 'ordered_product', 'primary_key' => 'crt_id'));
 
     /**
      * Basic constructor calling parent CRUD abstraction layer contructor
@@ -124,17 +132,14 @@ class Cart_model extends MY_Model {
                     'crt_ordering_person_id' => ( $this->getOrderingPerson() instanceof User_model ? $this->getOrderingPerson()->getId() : $this->getOrderingPerson() )
                 ));
     }
-
-    public function is_present_by($column, $value, $asObject = TRUE) {
-        if ($asObject) {
-            $row = $this->cart_model->as_object()->get_by($column, $value);
-        } else {
-            $row = $this->cart_model->as_array()->get_by($column, $value);
-        }
-
-        return $row;
-    }
     
+    /**
+     * Selects cart from database according to specified ID
+     * @param int $cartId
+     *  ID of cart being selected
+     * @return null|Cart_model
+     *  Either NULL if such a cart does not exist or single cart model instance
+     */
     public function get_cart_by_id( $cartId ) {
         $result = $this->cart_model->get( $cartId );
 
@@ -147,12 +152,15 @@ class Cart_model extends MY_Model {
         $cart_instance->setId($result->crt_id);
 
         return $cart_instance;
-    }    
-
-    public function get_cart_by_owner_id($owner_id, $asObject = TRUE) {
-        return $this->is_present_by('u_ordering_person_id', $owner_id, $asObject);
     }
 
+    /**
+     * Selects cart from database according to specified user's ID
+     * @param int $owner_id
+     *  ID of owner of a cart
+     * @return null|Cart_model
+     *  Either NULL if such a cart does not exist or single cart model instance
+     */    
     public function get_open_cart_by_owner_id($owner_id) {
 
         $result = $this->cart_model->get_by(array('crt_ordering_person_id' => $owner_id, 'crt_status' => self::CART_STATUS_OPEN));
@@ -168,6 +176,14 @@ class Cart_model extends MY_Model {
         return $cart_instance;
     }
 
+    /**
+     * Removes ordered product from a cart
+     * 
+     * @param Ordered_product_model $orderedProduct
+     *  Ordered product being removed  
+     * @throws Exception
+     *  Exception thrown if database deletion fails
+     */
     public function remove_ordered_product($orderedProduct) {
 
         $ordered_product_id = ( $orderedProduct instanceof Ordered_product_model ? $orderedProduct->getId() : $orderedProduct );
@@ -187,6 +203,13 @@ class Cart_model extends MY_Model {
         $this->recalculate_sum();
     }
 
+    /**
+     * Performs recalculation over the present ordered products in a database.
+     * @return double
+     *  Freshly calculated sum of all products in a cart.
+     * @throws EmptyCartException
+     *  Thrown if the cart is empty and there is nothing to calculate.
+     */
     public function recalculate_sum() {
         $finalSum = 0.0;
 
@@ -209,48 +232,88 @@ class Cart_model extends MY_Model {
     }
 
     /*     * ********* setters *********** */
+    /**
+     * Setter for ID
+     * @param int $newId
+     * New cart ID
+     */
     public function setId($newId) {
         $this->id = $newId;
     }
-
+    /**
+     * Setter for sum
+     * @param double $newSum
+     * New cart sum
+     */    
     public function setSum($newSum) {
         $this->sum = $newSum;
     }
-
+    /**
+     * Setter for status
+     * @param string $newStatus
+     * New cart status
+     */
     public function setStatus($newStatus) {
         $this->status = $newStatus;
     }
-
+    /**
+     * Setter for order
+     * @param int $newOrder
+     * New cart referenced order
+     */
     public function setOrder($newOrder) {
         $this->assignedOrder = $newOrder;
     }
-
+    /**
+     * Setter for ordering person
+     * @param int $newOrderingPerson
+     * New cart referenced ordering user
+     */
     public function setOrderingPerson($newOrderingPerson) {
         $this->ordering_person = $newOrderingPerson;
     }
 
     /*     * ********* getters *********** */
-
+    /**
+     * Getter for cart ID
+     * @return int
+     *  ID of a cart
+     */
     public function getId() {
         return $this->id;
     }
-
+    /**
+     * Getter for cart sum
+     * @return double
+     *  Sum of a cart
+     */
     public function getSum() {
         return $this->sum;
     }
-
+    /**
+     * Getter for cart status
+     * @return string
+     *  Status of a cart
+     */
     public function getStatus() {
         return $this->status;
     }
-
+    /**
+     * Getter for a cart order
+     * @return int
+     *  ID of a cart order
+     */
     public function getOrder() {
         return $this->assignedOrder;
     }
-
+    /**
+     * Getter for cart's ordering person
+     * @return int
+     *  ID of a cart's ordering person
+     */
     public function getOrderingPerson() {
         return $this->ordering_person;
     }
-
 }
 
 /* End of file cart_model.php */

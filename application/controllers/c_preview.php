@@ -3,15 +3,32 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-
 require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
 
+/**
+ * Controller class for handling product preview screen outprint.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_preview extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Renders preview page for specific product defined by it's ID.
+     * In case of preview page, it is not necessary to retrieve multiple vector or raster data per product, because all necessary graphic data includes single photo representing the product.
+     * Photo URL of the product is products's model attribute.
+     * 
+     * @param int $prodId
+     *  ID of the product model
+     */
     public function show($prodId) {
         $template_data = array();
 
@@ -75,6 +92,11 @@ class C_preview extends MY_Controller {
         $this->load->view('v_preview', $data);
     }
 
+    /**
+     * Adds product specified by its ID to the cart.
+     * @param int $productId
+     *  ID of the product to be added into a cart
+     */
     public function add_to_cart($productId) {
 
         log_message('debug', 'ATTEMPT: Adding product with pd_id = ' . $productId . ' to cart.');
@@ -184,5 +206,5 @@ class C_preview extends MY_Controller {
 
 }
 
-/* End of file preview.php */
-/* Location: ./application/controllers/preview.php */
+/* End of file c_preview.php */
+/* Location: ./application/controllers/c_preview.php */

@@ -4,13 +4,25 @@ if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
 require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
-
+/**
+ * Class implementing all additional actions over the system specified for admin (provider).
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_admin extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Renders basic administration menu
+     */
     public function index() {
 
         if (!$this->authentify_provider()) {
@@ -27,6 +39,9 @@ class C_admin extends MY_Controller {
         $this->load->view('v_admin');
     }
 
+    /**
+     * Renders page as a menu for products administration.
+     */
     public function products_admin() {
 
         if (!$this->authentify_provider()) {
@@ -43,6 +58,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_products');
     }
 
+    /**
+     * Renders page for adding new product.
+     */
     public function new_product_admin_index() {
 
         if (!$this->authentify_provider()) {
@@ -73,6 +91,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_new_product_index', $data);
     }
 
+    /**
+     * Allows admin to add new product into the system.
+     */
     public function new_product_admin_add() {
 
         if (!$this->authentify_provider()) {
@@ -335,6 +356,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_new_product_index', $data);
     }
 
+    /**
+     * Allows admin to qualify the product.
+     */
     public function qualify_product_admin() {
 
         if (!$this->authentify_provider()) {
@@ -419,6 +443,11 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_proposed_products', $data);
     }
 
+    /**
+     * Allows admin to change product status.
+     * @param int $productId
+     *  ID of the product whose status is about to change
+     */
     public function change_product_status($productId) {
 
         if (!isset($productId) || is_null($productId) || !is_numeric($productId)) {
@@ -475,6 +504,9 @@ class C_admin extends MY_Controller {
         }
     }
 
+    /**
+     * Allows admin to set component status.
+     */
     public function qualify_component_admin() {
 
         if (!$this->authentify_provider()) {
@@ -542,6 +574,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_proposed_components', $data);
     }
 
+    /**
+     * Renders page for admin menu in order to handle components
+     */
     public function components_admin() {
 
         if (!$this->authentify_provider()) {
@@ -559,6 +594,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_components', $data);
     }
 
+    /**
+     * Renders page for adding new component
+     */
     public function new_component_admin_index() {
 
         if (!$this->authentify_provider()) {
@@ -591,6 +629,11 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_new_component_index', $data);
     }
 
+    /**
+     * Selects categories and passes them in simple array.
+     * @return array
+     *  Categories in a simple form of representation
+     */
     private function _prepare_categories() {
 
         $all_categories = $this->category_model->get_all_categories();
@@ -608,6 +651,9 @@ class C_admin extends MY_Controller {
         }
     }
 
+    /**
+     * Allows administrator to add new component into the system.
+     */
     public function new_component_admin_add() {
 
         if (!$this->authentify_provider()) {
@@ -743,43 +789,7 @@ class C_admin extends MY_Controller {
                     $this->load->view('admin/v_admin_new_component_index', $data);
                     return;
                 }
-
-//                $pov_presence = $this->input->post('npf_is_point_of_view_present');
-//                if ($pov_presence === 'new_pov') {
-//                    // load product's pov
-//                    $product_pov = $this->input->post('npf_point_of_view_name');
-//                } else if ($pov_presence === 'old_pov') {
-//                    $product_pov = $this->input->post('npf_present_povs');
-//                    ;
-//                } else {
-//                    log_message('error', 'Input type radio value neither new_pov neither old_pov! How come!!!');
-//                    log_message('error', 'POV creation in database failed! Rolling the transaction back!');
-//                    $this->db->trans_rollback();
-//                    $this->load->view('templates/header', $template_data);
-//                    $this->load->view('admin/v_admin_new_product_index', $data);
-//                    return;
-//                }
-//
-//                $new_supported_point_of_view = new Supported_point_of_view_model();
-//                $new_supported_point_of_view->instantiate($product_pov, $new_product_id);
-//                $new_supported_point_of_view_id = $new_supported_point_of_view->save();
-//                if ($new_supported_point_of_view_id <= 0) {
-//                    // add error message
-//                    $str = $this->db->last_query();
-//                    log_message('error', 'Last query: ' . $str);
-//
-//                    $data['error'] = 'POV creation in database failed!';
-//                    $data['successful'] = NULL;
-//                    log_message('error', 'Point of view creation in database failed! Rolling the transaction back!');
-//                    $this->db->trans_rollback();
-//
-//                    $this->load->view('templates/header', $template_data);
-//                    $this->load->view('admin/v_admin_new_product_index', $data);
-//                    return;
-//                } else {
-//                    log_message('debug', 'Point of view creation successful');
-//                }
-//                
+                
                 // create sb_component_raster_representation
                 $new_component_raster_model = new Component_raster_model();
                 $photoUrl = get_components_upload_path($this->config) . $upload_photo_data['file_name'];
@@ -867,6 +877,9 @@ class C_admin extends MY_Controller {
         }
     }
 
+    /**
+     * Renders category administration web page for purposes of administrator.
+     */
     public function categories_admin_index() {
 
         if (!$this->authentify_provider()) {
@@ -908,6 +921,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_categories', $data);
     }
 
+    /**
+     * Allows admin to add new category to the system.
+     */
     public function add_category() {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -949,6 +965,11 @@ class C_admin extends MY_Controller {
         redirect('c_admin/categories_admin_index');
     }
 
+    /**
+     * Allows admin to remove category specified by its ID.
+     * @param int $categoryId
+     *  ID of the category to be removed
+     */
     public function remove_category($categoryId) {
         if (!isset($categoryId) || is_null($categoryId) || !is_numeric($categoryId)) {
             log_message('debug', 'Param for c_admin/remove_category not initialized, redirecting to admin page!');
@@ -972,6 +993,9 @@ class C_admin extends MY_Controller {
         redirect('c_admin/categories_admin_index');
     }
 
+    /**
+     * Renders admin page for final products.
+     */
     public function final_products_admin() {
 
         if (!$this->authentify_provider()) {
@@ -990,6 +1014,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_final_products', $data);
     }
 
+    /**
+     * Renders "about us" administration page
+     */
     public function about_us() {
 
         if (!$this->authentify_provider()) {
@@ -1011,6 +1038,9 @@ class C_admin extends MY_Controller {
         $data['isFirstTimeRendered'] = FALSE;
     }
 
+    /**
+     * Allows admin to update "about us" data.
+     */
     public function update_about_us() {
 
         // field name, error message, validation rules
@@ -1061,6 +1091,9 @@ class C_admin extends MY_Controller {
         }
     }
 
+    /**
+     * Renders rules administration page.
+     */
     public function rules() {
 
         if (!$this->authentify_provider()) {
@@ -1080,6 +1113,11 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_rules', $data);
     }
 
+    /**
+     * Allows adminstrator to update company rules.
+     * @return int
+     *  -1 if there is no company in a database, 0 of the rules have not changed and 1 if updating rules has succeded
+     */
     public function update_rules() {
         if ($this->input->post('ajax') == '4') {
 
@@ -1114,6 +1152,11 @@ class C_admin extends MY_Controller {
         }
     }
 
+    /**
+     * Renders admin menu for user administration.
+     * @param int $singleUserId
+     *  ID of user to be shown. If not specified, all users are shown
+     */
     public function users_admin($singleUserId = NULL) {
 
         if (!$this->authentify_provider()) {
@@ -1167,6 +1210,12 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_users', $data);
     }
 
+    /**
+     * Allows admin to change user privilege.
+     * It means this function allows admin to define which user is producent, graphic and so on.
+     * @param type $user_id
+     *  ID of a user whose user type is about to be changed
+     */
     public function change_privilege($user_id) {
 
         if (!isset($user_id) || is_null($user_id) || !is_numeric($user_id)) {
@@ -1193,6 +1242,9 @@ class C_admin extends MY_Controller {
         redirect('/c_admin/users_admin', 'refresh');
     }
 
+    /**
+     * Prints order menu for admin interface.
+     */
     public function orders_admin() {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -1210,6 +1262,11 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_orders', $data);
     }
 
+    /**
+     * Shows specific orders according to the specified type.
+     * @param string $order_type
+     *  Order type
+     */
     public function order_admin($order_type) {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -1267,6 +1324,11 @@ class C_admin extends MY_Controller {
         $this->load->view($view_to_load, $data);
     }
 
+    /**
+     * Renders web page presenting order specified by ID in a detail.
+     * @param int $orderId
+     *  ID of the order to be shown
+     */
     public function any_order_detail_index($orderId) {
 
         if (!$this->authentify_provider()) {
@@ -1376,6 +1438,11 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/orders/v_admin_order_detail', $data);
     }
 
+    /**
+     * Shows component photo specified by component ID
+     * @param int $componentId
+     *  ID of the component whose photo is about to be shown
+     */    
     public function component_photo_index($componentId) {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -1401,6 +1468,11 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_component_detail', $data);
     }
 
+    /**
+     * Shows product photo specified by product ID
+     * @param int $productId
+     *  ID of the product whose photo is about to be shown
+     */
     public function product_photo_index($productId) {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -1424,6 +1496,10 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_product_detail', $data);
     }
 
+    /**
+     * Changes status of the order.
+     * Order ID and final status are parsed from URI dynamically.
+     */
     public function change_order_status() {
 
         if (!$this->authentify_provider()) {
@@ -1462,7 +1538,11 @@ class C_admin extends MY_Controller {
         redirect('c_admin/orders_admin', 'refresh');
     }
 
-    
+    /**
+     * Changes status of the component
+     * @param type $componentId
+     *  ID of the component whose status is about to be changed
+     */
     public function change_component_status( $componentId ) {
 
         if (!$this->authentify_provider()) {
@@ -1503,6 +1583,9 @@ class C_admin extends MY_Controller {
         redirect('/c_admin/qualify_component_admin', 'refresh');
     }    
     
+    /**
+     * Renders edit profile screen for user of graphic type.
+     */    
     public function profile() {
         if (!$this->authentify_provider()) {
             $this->redirectToHomePage();
@@ -1524,6 +1607,9 @@ class C_admin extends MY_Controller {
         $this->load->view('admin/v_admin_profile', $data);
     }    
     
+    /**
+     * Edit_profile() method serves for editing profile data provided in registration process in case of admin user.
+     */    
     public function edit_profile() {
 
         if (!$this->authentify_provider()) {

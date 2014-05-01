@@ -102,7 +102,7 @@ class Possible_size_for_product_model extends MY_Model {
      * 
      * @param int $psfpId
      *  ID of possible size for product
-     * @return null|\Possible_size_for_product_model
+     * @return null|Possible_size_for_product_model
      *  Either null if such a possible size for product does not exist or single possible size for product object
      */
     public function get_possible_size_for_product_by_id($psfpId) {
@@ -125,7 +125,7 @@ class Possible_size_for_product_model extends MY_Model {
      * 
      * @param int $product
      *  ID of product
-     * @return null|\Possible_size_for_product_model
+     * @return null|Possible_size_for_product_model
      *  Either null if such a possible size for product does not exist or single possible size for product object
      */
     public function get_all_possible_sizes_by_product($product) {

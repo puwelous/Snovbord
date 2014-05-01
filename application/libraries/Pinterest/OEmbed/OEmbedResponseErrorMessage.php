@@ -16,7 +16,7 @@ class OEmbedResponseErrorMessage extends OEmbedAbstractResponseMessage{
     
     /**
      * Data held by the object.
-     * @var array
+     * @var array $response_error_message_data
      *  Representation of data as an array.
      */    
     private $response_error_message_data = array();

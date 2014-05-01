@@ -2,13 +2,27 @@
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
-
+/**
+ * Controller class for handling contact screen outprint.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_contact extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Renders contact page.
+     * Reads company data from database. 
+     * If there are no database information then entries are taken from configuration file.
+     */
     public function index() {
         
         //login or logout in menu

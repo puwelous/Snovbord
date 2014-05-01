@@ -2,9 +2,18 @@
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
-
+/**
+ * Controller class for handling welcome screen outprint.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_welcome extends MY_Controller {
 
+    /**
+     * Renders welcome page.
+     */
     public function index() {
 
         $template_data = array();

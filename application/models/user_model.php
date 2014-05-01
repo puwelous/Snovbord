@@ -167,7 +167,7 @@ class User_model extends MY_Model {
                             'usr_phone_number' => $this->phoneNumber,
                             'usr_gender' => $this->gender,
                             'usr_password' => $this->password,
-                            'usr_address_id' => ( $this->address instanceof Address_model ? $this->address->getAddressId() : $this->address ),
+                            'usr_address_id' => ( $this->address instanceof Address_model ? $this->address->getId() : $this->address ),
                             'usr_user_type_id' => ( $this->userType instanceof User_type_model ? $this->userType->getUserTypeId() : $this->userType )
                 ));
     }
@@ -187,7 +187,7 @@ class User_model extends MY_Model {
                     'usr_phone_number' => $this->phoneNumber,
                     'usr_gender' => $this->gender,
                     'usr_password' => $this->password,
-                    'usr_address_id' => ( $this->address instanceof Address_model ? $this->address->getAddressId() : $this->address ),
+                    'usr_address_id' => ( $this->address instanceof Address_model ? $this->address->getId() : $this->address ),
                     'usr_user_type_id' => ( $this->userType instanceof User_type_model ? $this->userType->getUserTypeId() : $this->userType )
                 ));
     }
@@ -209,7 +209,7 @@ class User_model extends MY_Model {
      * Selects single user from database according to his/her ID
      * @param int $userId
      *  ID of user
-     * @return null|\User_model
+     * @return null|User_model
      *  Either NULL if such a user does not exist or single user object
      */
     public function get_user_by_id($userId) {
@@ -234,7 +234,7 @@ class User_model extends MY_Model {
      *  Either email or nick
      * @param type $password
      *  User's password
-     * @return \User_model|null
+     * @return User_model|null
      *  Either selected(found) user or NULL if such a user does not exist
      */
     public function get_by_email_or_nick_and_password($email_or_nick, $password) {
@@ -265,7 +265,7 @@ class User_model extends MY_Model {
      * Selects user according to passed nick
      * @param string $nick
      *  User's nick
-     * @return null|\User_model
+     * @return null|User_model
      *  Either null if such a user does not exist or single user object
      */
     public function get_user_by_nick($nick) {
@@ -289,7 +289,7 @@ class User_model extends MY_Model {
      *  Column name to choose user by
      * @param string $value
      *  Value of queried column
-     * @return null|\User_model
+     * @return null|User_model
      *  Either null if such a user does not exist or single user object
      */
     public function is_present_by($column, $value) {
@@ -310,7 +310,7 @@ class User_model extends MY_Model {
     /**
      * Selects all users from database.
      * 
-     * @return null|\User_model
+     * @return null|User_model
      *  Either NULL if there are no users in database or array of user model objects
      */
     public function get_all_users() {

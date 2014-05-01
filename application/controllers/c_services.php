@@ -3,29 +3,79 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-// include helping library
 require_once( APPPATH . '/libraries/Pinterest/OEmbed/COEmbedBasicErrorResponseGeneratorImpl.php');
 require_once( APPPATH . '/libraries/Pinterest/OEmbed/OEmbedResponseMessage.php');
-
 require_once( APPPATH . '/libraries/Pinterest/CPinterestImpl.php');
 
-
+/**
+ * Controller class for handling Pinterest service calls.
+ * 
+ * URL scheme - accepted url in our case is:
+ * http://www.puwel.sk/products/* 
+ *
+ * And API endpoint: 
+ * http://www.puwel.sk/services/eombed/
+ * For localhost: 
+ * http://localhost:8888/Snovbord/index.php/c_services/oembed?url=http%3A//puwel.sk/products/1/ 
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_services extends MY_Controller {
 
+    /**
+     * Accepted URL schema.
+     * Only queries that refer to this URL are allowed to be processed.
+     * All others are rejected.
+     */
     const ALLOWED_URL_SCHEMA = 'http://puwel.sk/products/';
+    
+    /**
+     * URI segment to reach preview of a products.
+     * This constant is used in processing Pinterest query later on.
+     * It is removed from the URL in a query.
+     */
     const URI_SEGMENT_TO_PRODUCTS_PREVIEW = '/preview/show/';
+    
+    /**
+     * Cache age.
+     */
     const CACHE_AGE = 21600;
+    
+    /**
+     * Provider name.
+     * In our case name of a provider.
+     * Used in Pinterest response generation.
+     */
     const PP_PROVIDER_NAME = 'Snovbord';
+    
+    /**
+     * Store name.
+     * In our case name of a store name.
+     * Used in Pinterest response generation.
+     */
     const PP_STORE_NAME = 'SnovbordStore';
+    
+    /**
+     * Common category for all products.
+     */
     const PP_CATEGORY = 'products';
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
-    // URL scheme - accepted url in our case is:http://www.puwel.sk/products/*
-    // and API endpoint:http://www.puwel.sk/services/eombed/
-    //http://localhost:8888/Snovbord/index.php/c_services/oembed?url=http%3A//puwel.sk/products/1/
+    /**
+     * Common method for handling our Pinterest queries.
+     * Used as a service controller refered in Pinterest API documentation.
+     * 
+     * @return object
+     *  Encoded JSON object according to Pinterest and oEmbed library and their API specification.
+     */
     public function oembed() {
 
         // load OEmbed library
@@ -149,6 +199,19 @@ class C_services extends MY_Controller {
         $this->output->set_output($encoded_response);
     }
 
+    /**
+     * Prepares the data according to specifications.
+     * Takes product instance as an input argument and generates Pinterest and oEmbed API compliant JSON response.
+     *  
+     * @param Product_model $product_instance
+     *  Single instance of product model
+     * @return OEmbedResponseMessage
+     *  Formed OEmbedResponseMessage object
+     * @throws CInvalidRequiredOEmbedKeyException
+     *  Thrown if any of oEmbed keys used as required does not belong to expected category
+     * @throws CInvalidRequiredPinKeyException
+     *  Thrown if any of Pinterest keys used as required does not belong to expected category
+     */
     private function _prepare_data($product_instance) {
 
         $responseMessage = new OEmbedResponseMessage(array());
@@ -230,15 +293,11 @@ class C_services extends MY_Controller {
                 $responseMessage, array(
             //"quantity" => 1,
             "category" => self::PP_CATEGORY
-                //"tags" => array("powporn", "hoodie"),
                 //"materials" => "cotton"
                 ));
-
-       // $responseObject = new OEmbedResponseMessage($rsp);
         
         return $responseMessage;
     }
-
 }
 
 /* End of file c_services.php */

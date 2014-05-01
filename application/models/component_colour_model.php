@@ -125,7 +125,7 @@ class Component_colour_model extends MY_Model {
      * Selects all component colours from database according to passed component ID
      * @param int $component
      *  ID of a component
-     * @return null|\Component_colour_model
+     * @return null|Component_colour_model
      *  NULL if there are no colours for specified component or array of all component colours
      */
     public function get_component_colours_by_component( $component ) {

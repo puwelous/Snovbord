@@ -4,13 +4,25 @@ if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
 require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
-
+/**
+ * Controller class for handling graphic user system actions.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_graphic extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Renders menu for user of graphic type.
+     */
     public function index() {
 
         if (!$this->authentify_graphic()) {
@@ -27,6 +39,10 @@ class C_graphic extends MY_Controller {
         $this->load->view('v_graphic');
     }
 
+    /**
+     * Renders components information in a form of simple table.
+     * Allows to check creator of the component, visual representation of the component and basic information is included, too.
+     */
     public function components_graphic() {
 
         if (!$this->authentify_graphic()) {
@@ -85,6 +101,11 @@ class C_graphic extends MY_Controller {
         $this->load->view('graphic/v_graphic_components', $data);
     }
 
+    /**
+     * Controller method responsible for changing component picture.
+     * @param int $componentId
+     *  ID of the component whose picture is going to be changed
+     */
     public function change_component_picture($componentId) {
         if (!$this->authentify_graphic()) {
             $this->redirectToHomePage();
@@ -125,9 +146,10 @@ class C_graphic extends MY_Controller {
     }
 
     /**
-     * Do not generalize! Download button!
-     * @param type $componentId
-     * @return type
+     * Renders graphic user specific screen for component raster photo propagation.
+     * Photo is supposed to be used for additional modifications.
+     * @param int $componentId
+     *  ID of the component whose photo should be presented
      */
     public function component_photo_index($componentId) {
         if (!$this->authentify_graphic()) {
@@ -154,6 +176,9 @@ class C_graphic extends MY_Controller {
         $this->load->view('graphic/v_graphic_component_detail', $data);
     }
 
+    /**
+     * Renders edit profile screen for user of graphic type.
+     */
     public function profile() {
         if (!$this->authentify_graphic()) {
             $this->redirectToHomePage();
@@ -175,6 +200,9 @@ class C_graphic extends MY_Controller {
         $this->load->view('graphic/v_graphic_profile', $data);
     }
 
+    /**
+     * Edit_profile() method serves for editing profile data provided in registration process in case of graphic user.
+     */
     public function edit_profile() {
 
         if (!$this->authentify_graphic()) {
@@ -281,5 +309,5 @@ class C_graphic extends MY_Controller {
 
 }
 
-/* End of file c_admin.php */
-    /* Location: ./application/controllers/c_admin.php */
+/* End of file c_graphic.php */
+    /* Location: ./application/controllers/c_graphic.php */

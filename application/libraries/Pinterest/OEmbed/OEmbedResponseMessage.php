@@ -16,7 +16,7 @@ class OEmbedResponseMessage extends OEmbedAbstractResponseMessage{
     
     /**
      * Held data.
-     * @var array
+     * @var array $response_message_data
      *  Representation of data as an array.
      */
     private $response_message_data = array();

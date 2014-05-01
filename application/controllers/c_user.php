@@ -2,20 +2,30 @@
 
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
-
+/**
+ * Controller class for handling basic user actions like:
+ * - login
+ * - logout
+ * - check user presence in database by his/her nick
+ * - check user presence in database by his/her email
+ * - password reset
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_user extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
-//    public function index() {
-//        
-//	$this->load->view('templates/header');
-//	$this->load->view('registration');
-//	$this->load->view('templates/footer');
-//    }
-
+    /**
+     * Creates a new user and sets up session data so that user does not need to perform login again.
+     */
     public function register() {
 
         // field name, error message, validation rules
@@ -139,6 +149,9 @@ class C_user extends MY_Controller {
         }
     }
 
+    /**
+     * Performs logout action. Clears all Snovbord user cookies and redirects him/her to Welcome page.
+     */
     public function logout() {
 
         $new_session_data = array(
@@ -155,7 +168,14 @@ class C_user extends MY_Controller {
         redirect('/c_welcome/index', 'refresh');
     }
 
-    function login() {
+    /**
+     * Performs user login.
+     * Provided by AJAX call.
+     * According to AJAX post value chooses the action.
+     * @return int
+     *  Either 0 if user login fails or 1 if user login is successful
+     */
+    public function login() {
         if ($this->input->post('ajax') == '1') {
 
             log_message('debug', $this->input->post('login_nick_or_email') . ' is trying to log in.');
@@ -195,7 +215,13 @@ class C_user extends MY_Controller {
         }
     }
 
-    function is_user_present() {
+    /**
+     * AJAX call method for retrieving information whether user is present in a database or not.
+     * User's presence is checked by user's nick or user's email.
+     * @return int
+     *  Returned 0 if user is not present, returned 1 if user is present in the system
+     */
+    public function is_user_present() {
         if ($this->input->post('ajax') == '2') {
 
             log_message('debug', 'Nick: ' . $this->input->post('login_nick') . ' checked for DB presence.');
@@ -229,6 +255,13 @@ class C_user extends MY_Controller {
         }
     }
 
+    /**
+     * Checks whether passed nick is already present in a database.
+     * @param string $nick
+     *  Nick whose presence is to be checked
+     * @return boolean
+     *  True if user's nick is present false if user's nick is not in a database yet.
+     */
     public function nick_check($nick) {
 
         $user_presence_result = $this->user_model->is_present_by(
@@ -247,6 +280,13 @@ class C_user extends MY_Controller {
         }
     }
 
+    /**
+     * Checks whether passed email is already present in a database.
+     * @param string $email
+     *  Email whose presence is to be checked
+     * @return boolean
+     *  True if user's email is present false if user's email is not in a database yet.
+     */    
     public function email_check($email) {
 
         $user_presence_result = $this->user_model->is_present_by(
@@ -264,6 +304,9 @@ class C_user extends MY_Controller {
         }
     }
 
+    /**
+     * Resets user password and sends an information email about new passoword with new password included.
+     */
     public function password_reset() {
 
         $email_addr_or_nick = $this->input->post('rpf_email_address_or_nick');
@@ -412,6 +455,13 @@ class C_user extends MY_Controller {
         $this->load->view('v_password_reset');
     }
 
+    /**
+     * Checks for nick or email of user
+     * @param string $nick_or_email
+     *  Nick or email to be checked
+     * @return boolean
+     *  False if neither nick neither email is in a database, true otherwise
+     */
     public function nick_or_email_check($nick_or_email) {
 
         if ($this->nick_check($nick_or_email) == TRUE && $this->email_check($nick_or_email) == TRUE) {

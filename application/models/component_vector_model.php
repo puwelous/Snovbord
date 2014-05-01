@@ -100,7 +100,7 @@ class Component_vector_model extends MY_Model {
      *  ID of referenced component
      * @param int $pov
      *  ID of referenced point of view
-     * @return null|\Component_vector_model
+     * @return null|Component_vector_model
      *  Either NULL if there are no component vector or array of all component vector found
      */
     public function get_component_vectors_by_component_and_point_of_view($component, $pov) {

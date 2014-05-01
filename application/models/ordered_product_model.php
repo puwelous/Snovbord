@@ -127,7 +127,7 @@ class Ordered_product_model extends MY_Model {
      * Selects single ordered product model from database according to passed ID
      * @param int $ordered_product_id
      *  ID of selected ordered product
-     * @return null|\Ordered_product_model
+     * @return null|Ordered_product_model
      *  Either NULL if such a ordered product does not exist or single ordered product object instance
      */
     public function get_ordered_product_by_id( $ordered_product_id ) {
@@ -150,7 +150,7 @@ class Ordered_product_model extends MY_Model {
      * Selects extended information about ordered products, their size and so on according to cart ID
      * @param int $cartId
      *  ID of a cart
-     * @return null|\Ordered_product_full_info
+     * @return null|Ordered_product_full_info
      *  Returns NULL if there is no such a cart or return Ordered_product_full_info object
      */
     public function get_ordered_product_full_info_by_cart_id($cartId) {
@@ -191,7 +191,7 @@ class Ordered_product_model extends MY_Model {
      *  Selects all ordered products + additional info which belong to specific cart defined by it's ID
      * @param int $cartId
      *  ID of a cart
-     * @return null|\Ordered_product_full_info
+     * @return null|Ordered_product_full_info
      *  Either NULL if there is no relevant info related to specified cart or array of Ordered_product_full_info objects
      */
     public function get_all_ordered_products_price_including_by_cart_id($cartId) {

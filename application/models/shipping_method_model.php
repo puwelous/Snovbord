@@ -89,7 +89,7 @@ class Shipping_method_model extends MY_Model {
      * 
      * @param type $shippingMethodId
      *  ID of a shipping method to be selected
-     * @return null|\Shipping_method_model
+     * @return null|Shipping_method_model
      *  Either null if such a shipping method does not exist or shipping method object
      */
     public function get_shipping_method_by_id( $shippingMethodId ){
@@ -109,7 +109,7 @@ class Shipping_method_model extends MY_Model {
     
     /**
      * Selects all shipping methods from database
-     * @return null|\Shipping_method_model
+     * @return null|Shipping_method_model
      *  NULL if there are no shipping methods or array of all shipping methods
      */
     public function get_all_shipping_methods(){

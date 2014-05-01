@@ -19,7 +19,7 @@ require_once('ICPayPalUserSettingsHolder.php');
 require_once('CPayPalUserSettingsHolderImpl.php');
 
 /**
- * Class imeplementing ICPinterest interface. It is responsible for:
+ * Class implementing ICPinterest interface. It is responsible for:
  * - embedding Pinterest required key/value pair into response,
  * - embedding Pinterest optional key/value pair into response,
  * - embedding any key/value pair into response.

@@ -5,12 +5,27 @@ if (!defined('BASEPATH'))
 
 require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
 
+/**
+ * Controller class for handling final products on common screen
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_products extends MY_Controller {
 
+    /**
+     * Basic constructor
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Index page.
+     * Selects accepted products and renders list of products.
+     * For each product representation takes the view which is the basic one.
+     */
     public function index() {
 
         $template_data = array();

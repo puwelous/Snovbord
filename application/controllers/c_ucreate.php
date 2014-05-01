@@ -3,15 +3,33 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-require_once( APPPATH . '/models/DataHolders/product_screen_representation.php'); //DELETE?
+require_once( APPPATH . '/models/DataHolders/product_screen_representation.php');
 require_once( APPPATH . '/models/DataHolders/ucreate_component_full_info.php');
 
+/**
+ * Controller class responsible for customization.
+ * 
+ * @author Pavol Daňo
+ * @version 1.0
+ * @file
+ */
 class C_ucreate extends MY_Controller {
 
+    /**
+     * Basic constructor.
+     */
     public function __construct() {
         parent::__construct();
     }
 
+    /**
+     * Controller responsible for rendering Ucreate page.
+     * Any user has to be authentified in order to gain acces.
+     * According to the ID of the product passed as an argument raster and vector representation is retrieved.
+     * If there is no product ID passed, any (random) product from database is taken for initializing customization process.
+     * @param int $prodId
+     *  ID of the product to be customized
+     */
     public function index($prodId = NULL) {
 
         if (!$this->authentify()) {
@@ -103,34 +121,39 @@ class C_ucreate extends MY_Controller {
         $this->load->view('v_ucreate', $data);
     }
 
+    /**
+     * Controller function providing manners for creating customized product and transforming it into final product.
+     * Called by AJAX.
+     * Data are taken as a raw PNG information that needs to be decoded before stored on a server side.
+     */
     public function create() {
         //log_message('debug', print_r($_POST, true));
 
         $productData = $this->input->post('product_data');
         // product id of edited product, not id of created one (comes later)
-        $product_id = $productData['product_id'];        
+        $product_id = $productData['product_id'];
         $product_name = $productData['name'];
-        $product_price =  $productData['price'];
+        $product_price = $productData['price'];
         $product_description = $productData['description'];
         $product_sex = $productData['sex'];
         $product_creator_nick = $productData['creator_nick'];
         $pictureData = $this->input->post('picture_data');
-        
+
         // try to save a PNG file
         $upload_path = get_product_upload_path($this->config);
 
-        $file_name = generate_product_file_name( $productData['creator_nick'], $productData['name']);
+        $file_name = generate_product_file_name($productData['creator_nick'], $productData['name']);
         $file_name .= '.png';
-        
+
         $full_file_name = $upload_path . $file_name;
 
-	$pictureData = str_replace('data:image/png;base64,', '', $pictureData);
-	$pictureData = str_replace(' ', '+', $pictureData);
-	$pictureData = base64_decode($pictureData);
+        $pictureData = str_replace('data:image/png;base64,', '', $pictureData);
+        $pictureData = str_replace(' ', '+', $pictureData);
+        $pictureData = base64_decode($pictureData);
 
-	$success = file_put_contents( $full_file_name , $pictureData );
-        
-        if ( !success ){
+        $success = file_put_contents($full_file_name, $pictureData);
+
+        if (!success) {
             $response['error'] = 'Could not create PNG file on a server side!';
             $response['msg'] = NULL;
             echo json_encode($response);
@@ -138,11 +161,11 @@ class C_ucreate extends MY_Controller {
         }
 
         // fetch product creator
-        $creator = $this->user_model->get_user_by_nick( $product_creator_nick );
-        $users_user_type = $this->user_type_model->get_user_type_by_id( $creator->getUserType() );
-        if( strtolower($users_user_type->getUserTypeName()) == 'admin' ){
+        $creator = $this->user_model->get_user_by_nick($product_creator_nick);
+        $users_user_type = $this->user_type_model->get_user_type_by_id($creator->getUserType());
+        if (strtolower($users_user_type->getUserTypeName()) == 'admin') {
             $acceptanceStatus = Product_model::PRODUCT_STATUS_ACCEPTED;
-        }else{
+        } else {
             $acceptanceStatus = Product_model::PRODUCT_STATUS_PROPOSED;
         }
 
@@ -152,7 +175,8 @@ class C_ucreate extends MY_Controller {
         // fetch basic product id
         $basic_product_id = $product->getBasicProduct();
 
-        $this->db->trans_begin(); {
+        $this->db->trans_begin();
+        {
             $new_product = new Product_model();
 
             $new_product->instantiate(
@@ -165,7 +189,7 @@ class C_ucreate extends MY_Controller {
                 $response['msg'] = 'Saving product into database failed!';
                 log_message('debug', 'Saving product into database failed!');
                 $this->db->trans_rollback();
-                unlink( $full_file_name );
+                unlink($full_file_name);
                 echo json_encode($response);
                 return;
             }
@@ -185,7 +209,7 @@ class C_ucreate extends MY_Controller {
                     $response['msg'] = 'Saving composition into database failed!';
                     log_message('debug', 'Saving composition into database failed!');
                     $this->db->trans_rollback();
-                    unlink( $full_file_name );
+                    unlink($full_file_name);
                     echo json_encode($response);
                     return;
                 }
@@ -196,7 +220,7 @@ class C_ucreate extends MY_Controller {
             $this->db->trans_rollback();
             $response['error'] = true;
             $response['msg'] = 'Transaction failed!';
-            unlink( $full_file_name );
+            unlink($full_file_name);
             echo json_encode($response);
             return;
         } else {

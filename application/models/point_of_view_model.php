@@ -19,8 +19,23 @@ class Point_of_view_model extends MY_Model {
      *  Primary key in database schema for current table
      */    
     protected $primary_key = 'pov_id';
+    /**
+     *
+     * @var int $id
+     *  Point of view ID
+     */
     private $id;
+    /**
+     *
+     * @var string $name
+     *  Point of view name
+     */
     private $name;
+    /**
+     *
+     * @var boolean $isBasic
+     *  Flag whether point of view is basic or not
+     */
     private $isBasic;
     
     /**
@@ -37,6 +52,14 @@ class Point_of_view_model extends MY_Model {
         parent::__construct();
     }
 
+    /**
+     * Constructor-like method for instantiating object of the class.
+     * 
+     * @param string $name
+     *  Name of point of view
+     * @param boolean $isBasic
+     *  Flag if the point of view is basic or not
+     */
     public function instantiate(
     $name, $isBasic) {
 
@@ -46,6 +69,7 @@ class Point_of_view_model extends MY_Model {
 
     /**
      * Inserts this object into a database. Database create operation
+     * 
      * @return object
      *  NULL or object as a result of insertion
      */     
@@ -57,6 +81,12 @@ class Point_of_view_model extends MY_Model {
                 ));
     }
 
+    /**
+     * Selects all discting point of view names from database
+     * 
+     * @return null|array
+     *  Either NULL if there are no point of view(s names) in database or array of strings with distinct point of view names
+     */
     public function get_pov_names_distinct() {
 
         $this->db->select('pov_name');
@@ -77,6 +107,11 @@ class Point_of_view_model extends MY_Model {
         }
     }
 
+    /**
+     * Selects basic point of view model according to the isBasic flag
+     * @return null|Point_of_view_model
+     * Either NULL if such a basic point of view does not exist or single basic point of view instance
+     */
     public function get_basic_pov(){
         $result = $this->point_of_view_model->get_by('pov_is_basic', TRUE);
         if ( !$result ) {
@@ -93,73 +128,41 @@ class Point_of_view_model extends MY_Model {
         }        
     }
 
-    public function get_rasters_urls_by_pov($pov, $url_column_alias = NULL) {
-
-        $pov_id = ( $pov instanceof Point_of_view_model ? $pov->getId() : $pov );
-        $url_column_alias = ( $url_column_alias != NULL ? mysql_escape_string($url_column_alias) : 'photo_url' );
-
-        $select_from_basic = 'SELECT bprr.bs_prdct_rstr_rep_photo_url as ' . $url_column_alias . ' FROM sb_basic_prod_raster_representation bprr WHERE bprr.bs_prdct_rstr_rep_basic_product_point_of_view_id =' . $pov_id . ' ';
-        $select_from_comp = 'SELECT crr.cmpnnt_rstr_rprsnttn_photo_url as ' . $url_column_alias . ' FROM sb_component_raster_representation crr WHERE crr.cmpnnt_rstr_rprsnttn_point_of_view_id =' . $pov_id . ' ';
-
-        $query = $this->db->query($select_from_basic . ' UNION ' . $select_from_comp . ';');
-
-        //$query = $this->db->get();
-
-        if ($query->num_rows() <= 0) {
-            return NULL;
-        }
-
-        return $query->result();
-    }
-
+//    public function get_rasters_urls_by_pov($pov, $url_column_alias = NULL) {
+//
+//        $pov_id = ( $pov instanceof Point_of_view_model ? $pov->getId() : $pov );
+//        $url_column_alias = ( $url_column_alias != NULL ? mysql_escape_string($url_column_alias) : 'photo_url' );
+//
+//        $select_from_basic = 'SELECT bprr.bs_prdct_rstr_rep_photo_url as ' . $url_column_alias . ' FROM sb_basic_prod_raster_representation bprr WHERE bprr.bs_prdct_rstr_rep_basic_product_point_of_view_id =' . $pov_id . ' ';
+//        $select_from_comp = 'SELECT crr.cmpnnt_rstr_rprsnttn_photo_url as ' . $url_column_alias . ' FROM sb_component_raster_representation crr WHERE crr.cmpnnt_rstr_rprsnttn_point_of_view_id =' . $pov_id . ' ';
+//
+//        $query = $this->db->query($select_from_basic . ' UNION ' . $select_from_comp . ';');
+//
+//        //$query = $this->db->get();
+//
+//        if ($query->num_rows() <= 0) {
+//            return NULL;
+//        }
+//
+//        return $query->result();
+//    }
+    /**
+     * Getter for point of view ID
+     * @return int
+     *  Point of view ID
+     */
     public function getId() {
         return $this->id;
     }
 
+    /**
+     * Setter for point of view ID
+     * @param int $newId
+     *  New point of view ID
+     */
     public function setId($newId) {
         $this->id = $newId;
     }
-
-//  
-//    public function getUserId() {
-//        return $this->userId;
-//    }
-//
-//    public function getNick() {
-//        return $this->nick;
-//    }
-//
-//    public function getEmailAddress() {
-//        return $this->emailAddress;
-//    }
-//
-//    public function getFirstName() {
-//        return $this->firstname;
-//    }
-//
-//    public function getLastName() {
-//        return $this->lastname;
-//    }
-//
-//    public function getGender() {
-//        return $this->gender;
-//    }
-//
-//    public function getPhoneNumber() {
-//        return $this->phoneNumber;
-//    }
-//
-//    public function getAddress() {
-//        return $this->address;
-//    }
-//
-//    public function getUserType() {
-//        return $this->userType;
-//    }
-//
-//    protected function setUserId($usrId) {
-//        $this->userId = $usrId;
-//    }
 }
 
 /* End of file point_of_view_model.php */

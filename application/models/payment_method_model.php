@@ -88,7 +88,7 @@ class Payment_method_model extends MY_Model {
      * 
      * @param int $paymentMethodId
      *  ID of a payment method to be selected
-     * @return null|\Payment_method_model
+     * @return null|Payment_method_model
      *  Either null if such a payment method does not exist or payment method object
      */
     public function get_payment_method_by_id( $paymentMethodId ){
@@ -108,7 +108,7 @@ class Payment_method_model extends MY_Model {
     
     /**
      * Selects all payment methods from database
-     * @return null|\Payment_method_model
+     * @return null|Payment_method_model
      *  NULL if there are no payment methods or array of all payment methods
      */
     public function get_all_payment_methods(){

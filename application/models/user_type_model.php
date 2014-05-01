@@ -78,7 +78,7 @@ class User_type_model extends MY_Model {
      * Selects a user type from database according to passed ID
      * @param int $userTypeId
      *  ID of a type of user
-     * @return null|\User_type_model
+     * @return null|User_type_model
      *  NULL if such a user type does not exist or single user type instance
      */
     public function get_user_type_by_id($userTypeId) {
@@ -99,7 +99,7 @@ class User_type_model extends MY_Model {
      * 
      * @param string $value
      *  Name of a user type
-     * @return null|\User_type_model
+     * @return null|User_type_model
      *  NULL if such a user type does not exist or single user type instance
      */
     public function get_by_user_type_name($value) {

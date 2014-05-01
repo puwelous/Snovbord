@@ -113,7 +113,7 @@ class Component_raster_model extends MY_Model {
      *  Component ID
      * @param int $pov
      *  Point of view ID
-     * @return null|\Component_raster_model
+     * @return null|Component_raster_model
      *  Either NULL if such a raster representation does not exist or selected single component raster representation
      */
     public function get_component_single_raster_by_component_and_point_of_view($component, $pov) {
